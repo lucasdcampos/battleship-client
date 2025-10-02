@@ -1,0 +1,27 @@
+.Nav_Container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: chocolate;
+}
+
+.Nav_Container ul {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  height: auto;
+  justify-content: center;
+}
+
+.Perfil_Icon_Container img {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: 300ms all ease-in-out;
+}
+
+.Perfil_Icon_Container img:hover {
+  opacity: 80%;
+}

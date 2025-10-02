@@ -1,0 +1,16 @@
+.Nav_Button_Container label {
+  cursor: pointer;
+  background-color: gray;
+  padding: 5px;
+  border-radius: 5px;
+  transition: 300ms all ease-in-out;
+}
+
+.Nav_Button_Container label:hover {
+  background-color: rgb(106, 106, 106);
+  color: black;
+}
+
+.Nav_Button_Container input {
+  display: none;
+}
