@@ -1,7 +1,7 @@
 .Nav_Button_Container label {
   cursor: pointer;
   background-color: gray;
-  padding: 5px;
+  padding: 10px 25px;
   border-radius: 5px;
   transition: 300ms all ease-in-out;
 }

@@ -1,0 +1,29 @@
+.ProgressBar_Container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ProgressBar_Background {
+  width: 250px;
+  height: 20px;
+  background-color: rgb(93, 93, 93);
+  border-radius: 15px;
+  position: relative;
+}
+
+.ProgressBar_Background div {
+  width: 200px;
+  height: 20px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 15px;
+}
+
+.ProgressBar_Background p {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  top: -2px;
+  font-size: 1rem;
+  font-weight: bolder;
+  color: rgb(0, 0, 0);
+}
