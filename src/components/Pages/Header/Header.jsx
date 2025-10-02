@@ -1,7 +1,7 @@
 import styles from "./Header.module.css";
 import Nav_Button from "./elements/Nav_Button";
 import { useState } from "react";
-import Perfil_Icon from "../../../assets/perfil_icon_off.png";
+import Perfil_Icon from "../../../assets/perfil_icon.png";
 
 function Header() {
   const [select, setSelect] = useState(null);
@@ -10,34 +10,34 @@ function Header() {
       <ul type="none">
         <li>
           <Nav_Button
-            id={"Page1"}
-            path={"/Page1"}
-            label="Page1"
+            id={"Play"}
+            path={"/Play"}
+            label="Play"
             select={select}
             setSelect={setSelect}
           />
         </li>
         <li>
           <Nav_Button
-            id={"Page2"}
-            path={"/Page2"}
-            label="Page2"
+            id={"Perfil"}
+            path={"/Perfil"}
+            label="Perfil"
             select={select}
             setSelect={setSelect}
           />
         </li>
         <li>
           <Nav_Button
-            id={"Page3"}
-            path={"/Page3"}
-            label="Page3"
+            id={"Store"}
+            path={"/Store"}
+            label="Store"
             select={select}
             setSelect={setSelect}
           />
         </li>
       </ul>
       <div className={styles.Perfil_Icon_Container}>
-        <img src={Perfil_Icon} alt="" />
+        <img src={Perfil_Icon} alt="User_Icon" />
       </div>
     </nav>
   );
