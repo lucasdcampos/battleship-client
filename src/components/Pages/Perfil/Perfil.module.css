@@ -5,7 +5,7 @@
   position: relative;
 }
 
-.Perfil_Main_Container Button {
+.Perfil_Main_Container .Perfil_Edit_Open {
   position: absolute;
   left: 30px;
   top: 60px;
@@ -23,7 +23,7 @@
   font-size: 16px;
 }
 
-.Perfil_Main_Container Button:hover {
+.Perfil_Main_Container .Perfil_Edit_Open:hover {
   background-color: rgb(106, 106, 106);
   color: black;
 }
@@ -52,4 +52,121 @@
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
+}
+
+.Perfil_Edit_Pop_UP {
+  background-color: gray;
+  position: absolute;
+  top: 47%;
+  left: calc(50% - 300px);
+  width: 600px;
+  height: 300px;
+  transition: 300ms all ease-in-out;
+  border-radius: 15px;
+}
+
+.Perfil_Edit_Right {
+  background-color: darkgray;
+  width: 70%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 15px;
+  padding: 30px;
+}
+
+.Perfil_Edit_Right button {
+  border: none;
+  width: 30px;
+  height: 30px;
+  position: relative;
+  cursor: pointer;
+  transition: 300ms all ease-in-out;
+  border-radius: 5px;
+}
+
+.Perfil_Edit_Right button:hover {
+  background-color: gray;
+}
+
+.Perfil_Edit_Right button::after,
+.Perfil_Edit_Right button::before {
+  content: "";
+  position: absolute;
+  width: 75%;
+  height: 3px;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.Perfil_Edit_Right button::after {
+  top: 30%;
+  right: 15%;
+  transform: rotate(-25deg);
+}
+
+.Perfil_Edit_Right button::before {
+  top: 60%;
+  right: 15%;
+  transform: rotate(25deg);
+}
+
+.Perfil_Edit_Right button:last-child {
+  transform: rotate(180deg);
+}
+
+.Perfil_Main_Container .Perfil_Edit_Close {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  border: none;
+  padding: 10px;
+  background-color: gray;
+  color: rgba(255, 255, 255, 0.87);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 300ms ease-in-out;
+  width: 30px;
+  height: 30px;
+  margin: 10px;
+}
+
+.Perfil_Main_Container .Perfil_Edit_Close:hover {
+  background-color: rgb(106, 106, 106);
+  color: black;
+}
+
+.Perfil_Edit_left {
+  background-color: gray;
+  width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+}
+
+.Perfil_Edit_left ul {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px;
+}
+
+.Perfil_Edit_left input {
+  display: none;
+}
+
+.Perfil_Edit_left label {
+  background-color: darkgray;
+  padding: 5px;
+  border-radius: 5px;
+  transition: 300ms all ease-in-out;
+  cursor: pointer;
+}
+
+.Perfil_Edit_left label:hover {
+  background-color: rgb(106, 106, 106);
+  color: black;
 }
