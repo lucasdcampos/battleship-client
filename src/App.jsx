@@ -4,6 +4,8 @@ import Page1 from "./components/Pages/Page1/Page1";
 import Page2 from "./components/Pages/Page2/Page2";
 import Page3 from "./components/Pages/Page3/Page3";
 
+// Navigate("/Page2")
+
 function App() {
   return (
     <>
@@ -16,7 +18,7 @@ function App() {
 
           <Route path="/Page2" element={<Page2 />} />
 
-          <Route path="/Pag3" element={<Page3 />} />
+          <Route path="/Page3" element={<Page3 />} />
         </Routes>
       </Router>
     </>
