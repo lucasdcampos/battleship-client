@@ -54,7 +54,6 @@ function Perfil() {
           : setIncrementIndex(incrementIndex + 1);
         break;
     }
-    console.log(incrementIndex);
   }
 
   function decIndex() {
