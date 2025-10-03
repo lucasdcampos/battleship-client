@@ -3,8 +3,20 @@ import Header from "./components/Pages/Header/Header";
 import Play from "./components/Pages/Play/Play";
 import Perfil from "./components/Pages/Perfil/Perfil";
 import Store from "./components/Pages/Store/Store";
+import Navbar from './components/Navbar/Navbar';
+
 
 function App() {
+  return (
+    <div>
+      <Navbar/>
+      {/* outras seções da página */}
+    </div>
+  );
+}
+
+
+/*function App() {
   return (
     <>
       <Router>
@@ -21,6 +33,6 @@ function App() {
       </Router>
     </>
   );
-}
+}*/
 
 export default App;
