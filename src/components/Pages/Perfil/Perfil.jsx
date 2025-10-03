@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./Perfil.module.css";
 import ProgressBar from "./elements/ProgressBar";
 import PerfilIcon from "./../../../assets/perfil_icon.png";
 import Perfil_Card from "./elements/Perfil_Card";
+import fire from "./../../../assets/fire-flame.gif";
+import water from "./../../../assets/200w.gif";
 
 function Perfil() {
   const [userName, setUserName] = useState("#user");
@@ -12,8 +14,57 @@ function Perfil() {
   const [vitorias, setVitorias] = useState(0);
   const [cards, setCards] = useState(0);
   const [skins, setSkins] = useState(0);
+  const icons = ["icon1", "icon2", "icon3"];
+  const backgrounds = [
+    "background1",
+    "background2",
+    "background3",
+    "background4",
+  ];
+  const effects = [water, fire];
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
+  const [activeTab, setActiveTab] = useState("icons");
+  const [incrementIndex, setIncrementIndex] = useState(0);
 
+  function getActiveList() {
+    switch (activeTab) {
+      case "icons":
+        return icons;
+      case "backgrounds":
+        return backgrounds;
+      case "effects":
+        return effects;
+    }
+  }
+  function incIndex() {
+    switch (activeTab) {
+      case "icons":
+        incrementIndex === icons.length - 1
+          ? setIncrementIndex(0)
+          : setIncrementIndex(incrementIndex + 1);
+        break;
+      case "backgrounds":
+        incrementIndex === backgrounds.length - 1
+          ? setIncrementIndex(0)
+          : setIncrementIndex(incrementIndex + 1);
+        break;
+      case "effects":
+        incrementIndex === effects.length - 1
+          ? setIncrementIndex(0)
+          : setIncrementIndex(incrementIndex + 1);
+        break;
+    }
+    console.log(incrementIndex);
+  }
+
+  function decIndex() {
+    incrementIndex > 0
+      ? setIncrementIndex(incrementIndex - 1)
+      : setIncrementIndex(getActiveList().length - 1);
+  }
+  useEffect(() => {
+    setIncrementIndex(0);
+  }, [activeTab]);
   return (
     <div className={styles.Perfil_Main_Container}>
       <div className={styles.Perfil_Container}>
@@ -34,27 +85,52 @@ function Perfil() {
         <div className={styles.Perfil_Edit_left}>
           <ul type="none">
             <li>
-              <input type="radio" name="perfilEditPopUP" id="icon" />
-              <label htmlFor="perfilEditPopUP">Ícones</label>
+              <button
+                onClick={() => setActiveTab("icons")}
+                style={
+                  activeTab === "icons"
+                    ? { border: "solid 3px orange" }
+                    : { border: "none" }
+                }
+              >
+                Ícones
+              </button>
             </li>
             <li>
-              <input type="radio" name="perfilEditPopUP" id="background" />
-              <label htmlFor="perfilEditPopUP">Backgrounds</label>
+              <button
+                onClick={() => setActiveTab("backgrounds")}
+                style={
+                  activeTab === "backgrounds"
+                    ? { border: "solid 3px orange" }
+                    : { border: "none" }
+                }
+              >
+                Backgrounds
+              </button>
             </li>
             <li>
-              <input type="radio" name="perfilEditPopUP" id="effect" />
-              <label htmlFor="perfilEditPopUP">Efeitos</label>
+              <button
+                onClick={() => setActiveTab("effects")}
+                style={
+                  activeTab === "effects"
+                    ? { border: "solid 3px orange" }
+                    : { border: "none" }
+                }
+              >
+                Efeitos
+              </button>
             </li>
             <li>
-              <input type="radio" name="perfilEditPopUP" id="colors" />
-              <label htmlFor="perfilEditPopUP">Cores</label>
+              <button onClick={() => setActiveTab("icons")}>Cores</button>
             </li>
           </ul>
         </div>
         <div className={styles.Perfil_Edit_Right}>
-          <button></button>
-          <div>area</div>
-          <button></button>
+          <button onClick={() => decIndex()}></button>
+          <div>
+            <img src={getActiveList()[incrementIndex]} alt="fault" />
+          </div>
+          <button onClick={() => incIndex()}></button>
         </div>
         <button
           className={styles.Perfil_Edit_Close}
