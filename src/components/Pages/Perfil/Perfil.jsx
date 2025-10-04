@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import styles from "./Perfil.module.css";
 import ProgressBar from "./elements/ProgressBar";
-import PerfilIcon from "./../../../assets/perfil_icon.png";
 import Perfil_Card from "./elements/Perfil_Card";
-import fire from "./../../../assets/fire-flame.gif";
-import water from "./../../../assets/200w.gif";
+import perfil_icon from "./../../../assets/icons/perfil_icon.png";
+// imports abaixo são apenas para simulação
+import fire from "./../../../assets/effects/fire-flame.gif";
+import water from "./../../../assets/effects/water.gif";
+import brasil from "./../../../assets/backgrounds/brasil.jpg";
+
+// Variavel modules abaixo serve apenas para importar os icones da pasta icons, mas futuramente será excluido pois os icones disponiveis do usuario virao do backend
+const modules = import.meta.glob(
+  "./../../../assets/icons/*.{png,jpg,jpeg,svg}",
+  {
+    eager: true,
+  }
+);
 
 function Perfil() {
+  // Abaixo estão todos os dados do usuário que virão por meio do backend. No momento os valores abaixo são simulação
   const [userName, setUserName] = useState("#user");
   const [lvl, setLvl] = useState(0);
   const [exp, setExp] = useState(0);
@@ -14,26 +25,35 @@ function Perfil() {
   const [vitorias, setVitorias] = useState(0);
   const [cards, setCards] = useState(0);
   const [skins, setSkins] = useState(0);
-  const icons = ["icon1", "icon2", "icon3"];
-  const backgrounds = [
-    "background1",
-    "background2",
-    "background3",
-    "background4",
-  ];
-  const effects = [water, fire];
+  const [icons, setIcons] = useState([]);
+  const [backgrounds, setBackgrounds] = useState([brasil]);
+  const [effects, setEffects] = useState([water, fire]);
+  // Abaixo as variáveis utilizadas nas funções
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
   const [activeTab, setActiveTab] = useState("icons");
   const [incrementIndex, setIncrementIndex] = useState(0);
+  const [item, setItem] = useState(0);
+  const [actualIcon, setActualIcon] = useState(perfil_icon);
+  const [actualBackground, setActualBackground] = useState(null);
+  const [actualEffect, setActualEffect] = useState(null);
+
+  // esse useeffect está sendo utilizado no mesmo contexto do modules lá em cima, será descartado futuramente
+  useEffect(() => {
+    const images = Object.values(modules).map((m) => m.default);
+    setIcons(images);
+  }, []);
 
   function getActiveList() {
     switch (activeTab) {
       case "icons":
         return icons;
+        break;
       case "backgrounds":
         return backgrounds;
+        break;
       case "effects":
         return effects;
+        break;
     }
   }
   function incIndex() {
@@ -61,13 +81,32 @@ function Perfil() {
       ? setIncrementIndex(incrementIndex - 1)
       : setIncrementIndex(getActiveList().length - 1);
   }
+
+  function sendModification() {
+    const selected = getActiveList()[incrementIndex];
+
+    switch (activeTab) {
+      case "icons":
+        setActualIcon(selected);
+        break;
+      case "backgrounds":
+        setActualBackground(selected);
+        break;
+      case "effects":
+        setActualEffect(selected);
+        break;
+    }
+
+    console.log("Selecionado:", selected);
+  }
+
   useEffect(() => {
     setIncrementIndex(0);
   }, [activeTab]);
   return (
     <div className={styles.Perfil_Main_Container}>
       <div className={styles.Perfil_Container}>
-        <img src={PerfilIcon} alt="User_Icon" />
+        <img src={actualIcon} alt="User_Icon" />
         <h1>{userName}</h1>
         <ProgressBar lvl={lvl} exp={exp} />
       </div>
@@ -136,6 +175,12 @@ function Perfil() {
           onClick={() => setPerfilEditPopUP("none")}
         >
           X
+        </button>
+        <button
+          className={styles.Button_Send}
+          onClick={() => sendModification()}
+        >
+          OK
         </button>
       </div>
       <button

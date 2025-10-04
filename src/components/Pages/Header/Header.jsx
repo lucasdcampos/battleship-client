@@ -1,7 +1,7 @@
 import styles from "./Header.module.css";
 import Nav_Button from "./elements/Nav_Button";
 import { useState } from "react";
-import Perfil_Icon from "../../../assets/perfil_icon.png";
+import Perfil_Icon from "../../../assets/icons/perfil_icon.png";
 
 function Header() {
   const [select, setSelect] = useState(null);
