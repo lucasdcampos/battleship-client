@@ -1,26 +1,35 @@
-.Nav_Container {
+.navbar {
   display: flex;
-  gap: 10px;
-  align-items: center;
   justify-content: space-between;
-  padding: 10px;
-}
-
-.Nav_Container ul {
-  display: flex;
-  gap: 10px;
   align-items: center;
-  height: auto;
-  justify-content: center;
+  background: linear-gradient(to bottom, #0478aa, #025f91);
+  padding: 12px 24px;
+  border: 1px solid #1680c2;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  font-family: sans-serif;
+  flex-wrap: wrap;
 }
 
-.Perfil_Icon_Container img {
+.navbarLeft {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.navbarRight {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.navbarRight img {
   width: 40px;
   height: 40px;
   cursor: pointer;
   transition: 300ms all ease-in-out;
 }
 
-.Perfil_Icon_Container img:hover {
+.navbarRight img:hover {
   opacity: 80%;
 }

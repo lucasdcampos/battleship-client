@@ -1,16 +1,23 @@
 .Nav_Button_Container label {
   cursor: pointer;
-  background-color: gray;
-  padding: 10px 25px;
-  border-radius: 5px;
-  transition: 300ms all ease-in-out;
+  background-color: transparent;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  transition: background 0.3s;
+  font-size: 1rem;
 }
 
 .Nav_Button_Container label:hover {
-  background-color: rgb(106, 106, 106);
-  color: black;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .Nav_Button_Container input {
   display: none;
+}
+
+.Nav_Button_Container input:checked + label {
+  background-color: #c46a00;
+  color: white;
 }
