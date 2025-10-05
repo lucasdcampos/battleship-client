@@ -3,6 +3,9 @@
   flex-direction: column;
   align-items: center;
   position: relative;
+  height: calc(100vh - 75px);
+  background-size: cover;
+  background-position: center;
 }
 
 .Perfil_Main_Container .Perfil_Edit_Open {
@@ -11,21 +14,20 @@
   top: 60px;
   border: none;
   padding: 10px 15px;
-  background-color: gray;
+  background-color: var(--tertiary-color);
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--font-color);
   border-radius: 5px;
   cursor: pointer;
-  transition: all 300ms ease-in-out;
+  transition: all 100ms ease-in-out;
   font-size: 16px;
 }
 
 .Perfil_Main_Container .Perfil_Edit_Open:hover {
-  background-color: rgb(106, 106, 106);
-  color: black;
+  opacity: 50%;
 }
 
 .Perfil_Container {
@@ -33,19 +35,36 @@
   flex-direction: column;
   align-items: center;
   padding: 60px;
+  position: relative;
 }
 
-.Perfil_Container img {
+.Perfil_Container .Perfil_Icon {
   width: 120px;
   height: 120px;
   cursor: pointer;
   transition: 300ms all ease-in-out;
-  border: solid 5px rgb(255, 123, 0);
+  border: solid 5px var(--tertiary-color);
   border-radius: 100%;
+  z-index: 1;
 }
 
-.Perfil_Container img:hover {
+.Perfil_Container .Perfil_Icon:hover {
   opacity: 80%;
+}
+
+.Effect_Container {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 100%;
+  top: 16%;
+}
+
+.Effect_Container img {
+  width: 100%;
+  bottom: 10px;
+  position: absolute;
+  border-radius: 100%;
 }
 
 .Perfil_Cards_Container {
@@ -55,7 +74,7 @@
 }
 
 .Perfil_Edit_Pop_UP {
-  background-color: gray;
+  background-color: var(--primary-color);
   position: absolute;
   top: 25%;
   left: 25%;
@@ -67,13 +86,21 @@
 }
 
 .Perfil_Edit_Right {
-  background-color: darkgray;
+  background-color: var(--secondary-color);
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   border-radius: 15px;
   padding: 30px;
+}
+
+.Perfil_Edit_Right table td,
+.Perfil_Edit_Right table th,
+.Perfil_Edit_Right table caption {
+  padding: 10px;
+  background-color: var(--primary-color);
+  text-align: center;
 }
 
 .Perfil_Edit_Right button {
@@ -87,7 +114,7 @@
 }
 
 .Perfil_Edit_Right button:hover {
-  background-color: gray;
+  background-color: var(--primary-color);
 }
 
 .Perfil_Edit_Right button::after,
@@ -96,7 +123,7 @@
   position: absolute;
   width: 75%;
   height: 3px;
-  background-color: white;
+  background-color: var(--font-color);
   border-radius: 5px;
 }
 
@@ -137,8 +164,8 @@
   top: 0px;
   border: none;
   padding: 10px;
-  background-color: gray;
-  color: rgba(255, 255, 255, 0.87);
+  background-color: var(--primary-color);
+  color: var(--font-color);
   border-radius: 5px;
   cursor: pointer;
   transition: all 300ms ease-in-out;
@@ -148,12 +175,12 @@
 }
 
 .Perfil_Main_Container .Perfil_Edit_Close:hover {
-  background-color: rgb(106, 106, 106);
-  color: black;
+  opacity: 50%;
+  border: solid 1px var(--tertiary-color);
 }
 
 .Perfil_Edit_left {
-  background-color: gray;
+  background-color: var(--primrary-color);
   width: 30%;
   display: flex;
   align-items: center;
@@ -175,19 +202,6 @@
   display: none;
 }
 
-.Perfil_Edit_left label {
-  background-color: darkgray;
-  padding: 5px;
-  border-radius: 5px;
-  transition: 300ms all ease-in-out;
-  cursor: pointer;
-}
-
-.Perfil_Edit_left label:hover {
-  background-color: rgb(106, 106, 106);
-  color: black;
-}
-
 .Perfil_Edit_left ul button {
   border: none;
   padding: 10px;
@@ -195,11 +209,11 @@
   width: 100%;
   cursor: pointer;
   transition: 300ms all ease-in-out;
+  background-color: var(--secondary-color);
 }
 
 .Perfil_Edit_left ul button:hover {
-  background-color: darkgray;
-  color: black;
+  opacity: 50%;
 }
 
 .Button_Send {

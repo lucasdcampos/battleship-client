@@ -2,9 +2,9 @@
   display: flex;
   width: 150px;
   height: 150px;
-  border: solid 5px rgb(255, 123, 0);
+  border: solid 5px var(--tertiary-color);
   border-radius: 15px;
-  background-color: darkgray;
+  background-color: var(--secondary-color);
   flex-direction: column;
   align-items: center;
   justify-content: center;
