@@ -1,0 +1,62 @@
+.card {
+  background-color: #3498db;
+  border-radius: 12px;
+  border: 3px solid #996515;
+  padding: 20px;
+  text-align: center;
+  width: 220px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.title {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+/* 💰 Novo estilo para o preço */
+.price {
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.button {
+  background-color: transparent;
+  border: 3px solid #996515;
+  border-radius: 12px;
+  padding: 8px 20px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.button:hover {
+  background-color: #996515;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #996515;
+}
+
+.icon {
+  margin-right: 6px;
+  font-size: 18px;
+}
