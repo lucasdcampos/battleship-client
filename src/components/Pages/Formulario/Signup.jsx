@@ -1,4 +1,4 @@
-import "./Forms.module.css";
+import styles from "./Forms.module.css";
 
 function SignupForm({ onSwitchForm }) {
   const handleSubmit = (e) => {
@@ -7,9 +7,9 @@ function SignupForm({ onSwitchForm }) {
   };
 
   return (
-    <div className="login-background">
-      <h2 className="form-title">Cadastre-se</h2>
-      <div className="login-container">
+    <div className={styles["login-background"]}>
+      <h2 className={styles["form-title"]}>Cadastre-se</h2>
+      <div className={styles["login-container"]}>
         <form onSubmit={handleSubmit}>
           <input type="text" placeholder="Nome de usuário" required />
           <input type="email" placeholder="E-mail" required />
@@ -17,12 +17,12 @@ function SignupForm({ onSwitchForm }) {
           <input type="password" placeholder="Confirmar senha" required />
           <button
             type="button"
-            className="text-link stacked-link"
+            className={`${styles["text-link"]} ${styles["stacked-link"]}`}
             onClick={onSwitchForm}
           >
             Já tem uma conta? Entrar
           </button>
-          <button type="submit" className="main-button">
+          <button type="submit" className={styles["main-button"]}>
             Criar
           </button>
         </form>
