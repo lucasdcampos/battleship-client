@@ -65,11 +65,16 @@ function Header() {
           style={{ display: loggoutPop ? "flex" : "none" }}
         >
           <div>
-            <img
-              src={Perfil_Icon}
-              alt="User_Icon"
-              onClick={() => perfilNav()}
-            />
+            <div className={styles.Perfil_Container}>
+              {/* <img
+                src={actualIcon}
+                alt="User_Icon"
+                className={styles.Perfil_Icon}
+              />
+              <div className={styles.Effect_Container}>
+                <img src={actualEffect} alt="" />
+              </div> */}
+            </div>
             <h1>#UserName</h1>
           </div>
           <h2>#email</h2>
