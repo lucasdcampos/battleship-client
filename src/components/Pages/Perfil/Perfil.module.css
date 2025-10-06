@@ -83,6 +83,7 @@
   height: 50vh;
   transition: 300ms all ease-in-out;
   border-radius: 15px;
+  z-index: 1;
 }
 
 .Perfil_Edit_Right {
