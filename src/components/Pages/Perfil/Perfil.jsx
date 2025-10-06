@@ -175,7 +175,12 @@ function Perfil() {
       style={{ backgroundImage: "url(" + actualBackground + ")" }}
     >
       <div className={styles.Perfil_Container}>
-        <img src={actualIcon} alt="User_Icon" className={styles.Perfil_Icon} />
+        <img
+          src={actualIcon}
+          alt="User_Icon"
+          className={styles.Perfil_Icon}
+          onClick={() => setPerfilEditPopUP("flex")}
+        />
         <h1>{userName}</h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
@@ -308,12 +313,6 @@ function Perfil() {
           OK
         </button>
       </div>
-      <button
-        className={styles.Perfil_Edit_Open}
-        onClick={() => setPerfilEditPopUP("flex")}
-      >
-        Editar Perfil
-      </button>
     </div>
   );
 }
