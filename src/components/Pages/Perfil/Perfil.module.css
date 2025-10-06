@@ -37,6 +37,7 @@
   align-items: center;
   padding: 30px;
   position: relative;
+  gap: 10px;
 }
 
 .Perfil_Container .Perfil_Icon {
@@ -58,7 +59,7 @@
   width: 150px;
   height: 150px;
   border-radius: 100%;
-  top: 16%;
+  top: 8%;
 }
 
 .Effect_Container img {
@@ -80,9 +81,7 @@
   background-color: var(--primary-color);
   position: absolute;
   top: 25%;
-  left: 25%;
-  width: 50%;
-  max-width: 800px;
+  left: 10%;
   height: 50vh;
   transition: 300ms all ease-in-out;
   border-radius: 15px;
