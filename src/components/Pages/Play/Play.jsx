@@ -2,7 +2,6 @@
 import Styles from "./Play.module.css";
 import Placar from "../../Placar/Placar";
 
-
 function Play() {
   // Embarcações Mockadas
   const suasEmbarcacoes = ["Porta-aviões", "Navio-tanque", "Contratorpedeiro", "Submarino"];
