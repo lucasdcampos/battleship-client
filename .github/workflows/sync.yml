@@ -1,0 +1,32 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Executa a cada 15 minutos
+  workflow_dispatch: # Permite iniciar manualmente pela aba Actions
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Fork
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0 
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Add Upstream Remote
+        run: git remote add upstream https://github.com/FATEC-IES300-BatalhaNaval/frontend.git
+
+      - name: Sync Fork
+        run: |
+          git fetch upstream
+          git checkout master
+          git merge upstream/master
+          git push origin master
