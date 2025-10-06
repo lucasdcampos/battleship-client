@@ -42,7 +42,6 @@ function Perfil() {
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
   const [activeTab, setActiveTab] = useState("icons");
   const [incrementIndex, setIncrementIndex] = useState(0);
-  const [item, setItem] = useState(0);
   const [actualIcon, setActualIcon] = useState(perfil_icon);
   const [actualBackground, setActualBackground] = useState(null);
   const [actualEffect, setActualEffect] = useState(null);
