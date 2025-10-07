@@ -1,26 +1,38 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/Pages/Header/Header";
 import Play from "./components/Pages/Play/Play";
 import Perfil from "./components/Pages/Perfil/Perfil";
 import Store from "./components/Pages/Store/Store";
 import Login from "./components/Pages/Login/Login";
-import ProtectedRoute from "./components/ProtectedRoute"; // ajuste o caminho conforme seu projeto
+import ProtectedRoute from "./components/ProtectedRoute";
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+
+  const hideHeaderOnPaths = ["/Login"];
+  const shouldShowHeader = !hideHeaderOnPaths.includes(location.pathname);
+
   return (
-    <Router>
-      <Header />
+    <>
+      {shouldShowHeader && <Header />}
+
       <Routes>
-        {/* Rota pública */}
         <Route path="/Login" element={<Login />} />
 
-        {/* Rotas protegidas: só acessíveis se o usuário estiver logado */}
         <Route element={<ProtectedRoute />}>
           <Route path="/Play" element={<Play />} />
           <Route path="/Perfil" element={<Perfil />} />
           <Route path="/Store" element={<Store />} />
         </Route>
       </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
