@@ -4,12 +4,23 @@ import navio1 from "../../../assets/navios/animacao_tela_de_login/navio1.png";
 import navio2 from "../../../assets/navios/animacao_tela_de_login/navio2.png";
 import navio3 from "../../../assets/navios/animacao_tela_de_login/navio3.png";
 import navio4 from "../../../assets/navios/animacao_tela_de_login/navio4.png";
+import { useAuth } from "../../../user/useAuth";
+import { useNavigate } from "react-router-dom";
+  
+function LoginForm() {
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
 
-function LoginForm({ onSwitchForm }) {
-  const handleSubmitLoginForm = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmitLoginForm = async (e) => {
     e.preventDefault();
-    console.log("Login submit");
+
+    await signIn({ email, password });
+    navigate("/Play");
   };
+
   const handleSubmitSignupForm = (e) => {
     e.preventDefault();
     console.log("Signup submit");
@@ -30,8 +41,22 @@ function LoginForm({ onSwitchForm }) {
           onSubmit={handleSubmitLoginForm}
           style={{ display: actualTab === "login" ? "flex" : "none" }}
         >
-          <input type="email" placeholder="E-mail" required />
-          <input type="password" placeholder="Senha" required />
+          <input
+            type="email"
+            placeholder="E-mail"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <input
+            type="password"
+            placeholder="Senha"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
           <button
             type="button"
             className={styles.text_link_stacked_link}
@@ -94,7 +119,7 @@ function LoginForm({ onSwitchForm }) {
           <button
             type="submit"
             className={styles.main_button}
-            onClick={() => handleSubmitRecoveryForm()}
+            onClick={() => {}}
           >
             Enviar
           </button>
