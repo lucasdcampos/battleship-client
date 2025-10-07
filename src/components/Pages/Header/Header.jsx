@@ -1,24 +1,16 @@
 import styles from "./Header.module.css";
 import Nav_Button from "./elements/Nav_Button";
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Perfil_Icon from "../../../assets/icons/perfil_icon.png";
+import { useAuth } from "../../../user/useAuth";
 
 function Header() {
   const [select, setSelect] = useState(null);
   const [loggoutPop, setLoggoutPop] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  function perfilNav() {
-    navigate("/Perfil");
-    setLoggoutPop(false);
-  }
+  const { user, signOut } = useAuth();
 
-  function loginNav() {
-    navigate("/Login");
-    setLoggoutPop(false);
-    setSelect(null);
-  }
 
   // Define o botão ativo com base na URL atual
   useEffect(() => {
@@ -66,19 +58,11 @@ function Header() {
         >
           <div>
             <div className={styles.Perfil_Container}>
-              {/* <img
-                src={actualIcon}
-                alt="User_Icon"
-                className={styles.Perfil_Icon}
-              />
-              <div className={styles.Effect_Container}>
-                <img src={actualEffect} alt="" />
-              </div> */}
             </div>
-            <h1>#UserName</h1>
+            <h1>{user?.username ? <span>{user.username}</span> : <span>johndoe</span>}</h1>
           </div>
-          <h2>#email</h2>
-          <button onClick={() => loginNav()}>Deslogar</button>
+          <h2>{user?.email ? <span>{user.email}</span> : <span>johndoe@example.com</span>}</h2>
+          <button onClick={() => signOut()}>Deslogar</button>
         </div>
       </div>
     </nav>

@@ -3,6 +3,7 @@ import styles from "./Perfil.module.css";
 import ProgressBar from "./elements/ProgressBar";
 import Perfil_Card from "./elements/Perfil_Card";
 import perfil_icon from "./../../../assets/icons/perfil_icon.png";
+import { useAuth } from "../../../user/useAuth";
 
 // Variavel modules abaixo serve apenas para importar icones, backgrounds e efeitos da pasta assets, mas futuramente será excluido pois os icones disponiveis do usuario virao do backend
 const module_icons = import.meta.glob(
@@ -28,7 +29,6 @@ const module_backgrounds = import.meta.glob(
 
 function Perfil() {
   // Abaixo estão todos os dados do usuário que virão por meio do backend. No momento os valores abaixo são simulação
-  const [userName, setUserName] = useState("#user");
   const [lvl, setLvl] = useState(0);
   const [exp, setExp] = useState(0);
   const [partidas, setPartidas] = useState(0);
@@ -54,6 +54,8 @@ function Perfil() {
   const [newTertiaryColor, setNewTertiaryColor] = useState(null);
   const [newFontColor, setNewFontColor] = useState(null);
 
+  const { user } = useAuth();
+  
   // esse useeffect está sendo utilizado no mesmo contexto do modules lá em cima, será descartado futuramente
   useEffect(() => {
     const mod_icons = Object.values(module_icons).map((m) => m.default);
@@ -78,13 +80,10 @@ function Perfil() {
     switch (activeTab) {
       case "icons":
         return icons;
-        break;
       case "backgrounds":
         return backgrounds;
-        break;
       case "effects":
         return effects;
-        break;
       default:
         return [];
     }
@@ -181,7 +180,7 @@ function Perfil() {
           className={styles.Perfil_Icon}
           onClick={() => setPerfilEditPopUP("flex")}
         />
-        <h1>{userName}</h1>
+        <h1>{user?.username ? <span>{user.username}</span> : <span>johndoe</span>}</h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
           <img src={actualEffect} alt="" />

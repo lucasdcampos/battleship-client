@@ -1,10 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
 
-const mockUser = {
-  username: 'johndoe',
-  avatarUrl: 'https://i.pravatar.cc/150?u=johndoe',
-};
-
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -12,24 +7,47 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('mockUser');
+    const stored = localStorage.getItem('user');
     if (stored) {
       setUser(JSON.parse(stored));
     }
     setLoading(false);
   }, []);
 
-  const signIn = async () => {
-    // Simula delay da API
+  const signIn = async (credentials) => {
+    setLoading(true);
+
+    try {
     await new Promise((r) => setTimeout(r, 500));
-    setUser(mockUser);
-    localStorage.setItem('mockUser', JSON.stringify(mockUser));
-    return mockUser;
+    
+    // TODO: Substituir pela chamada real ao backend
+    const response = {
+      ok: true,
+      data: {
+        id: 1,
+        email: credentials.email,
+        username: credentials.email.split('@')[0], // Exemplo de username
+        avatarUrl: "https://i.pravatar.cc/150?img=3", // Avatar de exemplo
+      }
+    }
+
+    if (!response.ok) {
+      throw new Error('Falha no login');
+    }
+
+    const userData = response.data;
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+
+    return userData;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = () => {
     setUser(null);
-    localStorage.removeItem('mockUser');
+    localStorage.removeItem('user');
   };
 
   return (
