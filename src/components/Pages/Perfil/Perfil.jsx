@@ -3,6 +3,7 @@ import styles from "./Perfil.module.css";
 import ProgressBar from "./elements/ProgressBar";
 import Perfil_Card from "./elements/Perfil_Card";
 import perfil_icon from "./../../../assets/icons/perfil_icon.png";
+import { useAuth } from "../../../user/useAuth";
 
 // Variavel modules abaixo serve apenas para importar icones, backgrounds e efeitos da pasta assets, mas futuramente será excluido pois os icones disponiveis do usuario virao do backend
 const module_icons = import.meta.glob(
@@ -28,7 +29,6 @@ const module_backgrounds = import.meta.glob(
 
 function Perfil() {
   // Abaixo estão todos os dados do usuário que virão por meio do backend. No momento os valores abaixo são simulação
-  const [userName, setUserName] = useState("#user");
   const [lvl, setLvl] = useState(0);
   const [exp, setExp] = useState(0);
   const [partidas, setPartidas] = useState(0);
@@ -42,10 +42,15 @@ function Perfil() {
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
   const [activeTab, setActiveTab] = useState("icons");
   const [incrementIndex, setIncrementIndex] = useState(0);
-  const [item, setItem] = useState(0);
-  const [actualIcon, setActualIcon] = useState(perfil_icon);
-  const [actualBackground, setActualBackground] = useState(null);
-  const [actualEffect, setActualEffect] = useState(null);
+  const [actualIcon, setActualIcon] = useState(
+    localStorage.getItem("userIcon") || perfil_icon
+  );
+  const [actualBackground, setActualBackground] = useState(
+    localStorage.getItem("userBackground") || null
+  );
+  const [actualEffect, setActualEffect] = useState(
+    localStorage.getItem("userEffect") || null
+  );
   const [actualPrimaryColor, setActualPrimaryColor] = useState(null);
   const [actualSecondaryColor, setActualSecondaryColor] = useState(null);
   const [actualTertiaryColor, setActualTertiaryColor] = useState(null);
@@ -54,6 +59,8 @@ function Perfil() {
   const [newSecondaryColor, setNewSecondaryColor] = useState(null);
   const [newTertiaryColor, setNewTertiaryColor] = useState(null);
   const [newFontColor, setNewFontColor] = useState(null);
+
+  const { user } = useAuth();
 
   // esse useeffect está sendo utilizado no mesmo contexto do modules lá em cima, será descartado futuramente
   useEffect(() => {
@@ -79,13 +86,10 @@ function Perfil() {
     switch (activeTab) {
       case "icons":
         return icons;
-        break;
       case "backgrounds":
         return backgrounds;
-        break;
       case "effects":
         return effects;
-        break;
       default:
         return [];
     }
@@ -122,12 +126,15 @@ function Perfil() {
     switch (activeTab) {
       case "icons":
         setActualIcon(selected);
+        localStorage.setItem("userIcon", selected);
         break;
       case "backgrounds":
         setActualBackground(selected);
+        localStorage.setItem("userBackground", selected);
         break;
       case "effects":
         setActualEffect(selected);
+        localStorage.setItem("userEffect", selected);
         break;
       case "colors":
         document.documentElement.style.setProperty(
@@ -176,8 +183,15 @@ function Perfil() {
       style={{ backgroundImage: "url(" + actualBackground + ")" }}
     >
       <div className={styles.Perfil_Container}>
-        <img src={actualIcon} alt="User_Icon" className={styles.Perfil_Icon} />
-        <h1>{userName}</h1>
+        <img
+          src={actualIcon}
+          alt="User_Icon"
+          className={styles.Perfil_Icon}
+          onClick={() => setPerfilEditPopUP("flex")}
+        />
+        <h1>
+          {user?.username ? <span>{user.username}</span> : <span>johndoe</span>}
+        </h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
           <img src={actualEffect} alt="" />
@@ -309,12 +323,6 @@ function Perfil() {
           OK
         </button>
       </div>
-      <button
-        className={styles.Perfil_Edit_Open}
-        onClick={() => setPerfilEditPopUP("flex")}
-      >
-        Editar Perfil
-      </button>
     </div>
   );
 }

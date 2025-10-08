@@ -1,0 +1,159 @@
+:root {
+  --accent: #b38556;
+  --accent-dark: #a07045;
+  --bg1: #0eaddd;
+  --bg2: #14d6e7;
+  --bg3: #011f51;
+}
+
+@keyframes IrPraDireita {
+  0% {
+    transform: translateX(-150px); /* começa fora da tela à esquerda */
+  }
+  100% {
+    transform: translate(100vw); /* atravessa até sair da tela à direita */
+  }
+}
+
+@keyframes IrPraEsquerda {
+  0% {
+    transform: translateX(100vw); /* começa fora da tela à esquerda */
+  }
+  100% {
+    transform: translate(-100vw); /* atravessa até sair da tela à direita */
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+
+.login_background {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(
+    to bottom,
+    var(--bg1),
+    var(--bg2) 30%,
+    var(--bg3)
+  );
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.navio1,
+.navio2,
+.navio3,
+.navio4 {
+  position: absolute;
+  width: 150px;
+}
+
+.navio1 {
+  top: 0%;
+  left: 0;
+  animation: IrPraDireita 15s linear infinite;
+}
+
+.navio2 {
+  top: 25%;
+  animation: IrPraEsquerda 12s linear infinite;
+  right: 0;
+}
+.navio3 {
+  top: 50%;
+  left: 0;
+  animation: IrPraDireita 10s linear infinite;
+}
+.navio4 {
+  top: 75%;
+  right: 0;
+  animation: IrPraEsquerda 18s linear infinite;
+}
+
+.form_title {
+  color: white;
+  font-size: 36px;
+  margin-bottom: 30px;
+  font-weight: 600;
+  text-align: center;
+  z-index: 2;
+}
+
+.login_container {
+  background-color: #e6e6e6;
+  color: #996307;
+  border: 4px solid;
+  border-radius: 15px;
+  padding: 40px 50px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  width: 400px;
+  max-width: 90%;
+  text-align: center;
+  z-index: 2;
+}
+
+.login_container form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.login_container input {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background-color: var(--accent);
+  color: white;
+  font-size: 14px;
+}
+
+.login_container input::placeholder {
+  color: #f5e8d9;
+}
+
+.main_button {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background-color: var(--accent);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 14px;
+}
+
+.main_button:hover {
+  background-color: var(--accent-dark);
+}
+
+.text_link {
+  background: none;
+  border: none;
+  color: #996307;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.text_link:hover {
+  color: #ad8744;
+  text-decoration: underline;
+}

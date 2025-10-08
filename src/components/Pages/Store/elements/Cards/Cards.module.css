@@ -1,7 +1,7 @@
 .card {
-  background-color: #3498db;
+  background-color: var(--secondary-color);
   border-radius: 12px;
-  border: 3px solid #996515;
+  border: 3px solid var(--tertiary-color);
   padding: 20px;
   text-align: center;
   width: 220px;
@@ -21,7 +21,7 @@
 }
 
 .title {
-  color: white;
+  color: var(--font-color);
   font-weight: 600;
   font-size: 18px;
   margin-bottom: 6px;
@@ -29,7 +29,7 @@
 
 /* 💰 Novo estilo para o preço */
 .price {
-  color: white;
+  color: var(--font-color);
   font-size: 15px;
   font-weight: 500;
   margin-bottom: 15px;
@@ -37,10 +37,10 @@
 
 .button {
   background-color: transparent;
-  border: 3px solid #996515;
+  border: 3px solid var(--tertiary-color);
   border-radius: 12px;
   padding: 8px 20px;
-  color: white;
+  color: var(--font-color);
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
@@ -51,9 +51,9 @@
 }
 
 .button:hover {
-  background-color: #996515;
+  background-color: var(--tertiary-color);
   transform: scale(1.05);
-  box-shadow: 0 0 10px #996515;
+  box-shadow: 0 0 10px var(--tertiary-color);
 }
 
 .icon {
