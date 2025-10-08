@@ -38,7 +38,7 @@
 .loggoutPopUP {
   position: absolute;
   right: 0%;
-  top: 74px;
+  top: 90px;
   z-index: 2;
   background-color: #025f91;
   width: 250px;
@@ -72,4 +72,41 @@
 .loggoutPopUP img {
   width: 80px;
   height: 80px;
+}
+
+.Perfil_Container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 10px;
+}
+
+.Perfil_Container .Perfil_Icon {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: 300ms all ease-in-out;
+  border: solid 5px var(--tertiary-color);
+  border-radius: 100%;
+  z-index: 1;
+}
+
+.Perfil_Container .Perfil_Icon:hover {
+  opacity: 80%;
+}
+
+.Effect_Container {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 100%;
+  top: -10%;
+}
+
+.Effect_Container img {
+  position: absolute;
+  border-radius: 100%;
+  width: 100%;
+  height: 100%;
 }
