@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import styles from "./Play.module.css";
 import Board from "../../Board/Board";
 import Ships from "../../Ships/Ships";
+import EmojiBox from "../../EmojiBox/EmojiBox";
 
 function Play() {
   const boardRef = useRef(null);
@@ -44,12 +45,18 @@ function Play() {
     setIsPlacementConfirmed(true);
   };
 
+  const handleEmojiSelect = (emoji) => {
+    // Lógica para enviar o emoji para os jogadores
+    // Por exemplo, usando WebSockets para notificar o outro jogador.
+    console.log(`Emoji selecionado: ${emoji.id}. Animação: ${emoji.animated}`);
+  };
+
   return (
     <div className={styles.playContainer}>
       <div className={styles.boardsContainer}>
         {/* Tabuleiro do Jogador */}
         <div className={styles.boardWrapper}>
-          <Board ref={boardRef}><Ships ref={shipsRef} boardRef={boardRef} /></Board>
+          <Board ref={boardRef}><Ships ref={shipsRef} boardRef={boardRef} isLocked={isPlacementConfirmed} /></Board>
           {!isPlacementConfirmed && (
             <div className={styles.buttonContainer}>
               <button className={styles.randomizeButton} onClick={handleRandomizeClick}>
@@ -66,6 +73,9 @@ function Play() {
           <Board onCellClick={handleCellClick} shots={shots} />
         </div>
       </div>
+      {isPlacementConfirmed && (
+        <EmojiBox onEmojiSelect={handleEmojiSelect} />
+      )}
     </div>
   );
 }

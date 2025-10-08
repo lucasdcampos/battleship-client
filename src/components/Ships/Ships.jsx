@@ -16,7 +16,7 @@ const initialShips = [
 
 const CELL_SIZE = 31.81;
 
-const Ships = forwardRef(({ boardRef }, ref) => {
+const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
     const [ships, setShips] = useState(initialShips);
     const [draggingShip, setDraggingShip] = useState(null);
     const [selectedShipId, setSelectedShipId] = useState(null);
@@ -63,6 +63,8 @@ const Ships = forwardRef(({ boardRef }, ref) => {
         return !collision;
     };
     const handleMouseDown = (e, shipId) => {
+        if (isLocked) return;
+
         if (e.button !== 0) return; // Apenas botão esquerdo
 
         const ship = ships.find(s => s.id === shipId);
@@ -83,6 +85,8 @@ const Ships = forwardRef(({ boardRef }, ref) => {
     };
 
     const handleMouseMove = useCallback((e) => {
+        if (isLocked) return;
+
         if (!draggingShip) return;
 
         setShips(prevShips =>
@@ -100,6 +104,8 @@ const Ships = forwardRef(({ boardRef }, ref) => {
     }, [draggingShip, dragOffset]);
 
     const handleMouseUp = useCallback(() => {
+        if (isLocked) return;
+
         if (!draggingShip) return;
 
         setShips(prevShips =>
@@ -171,9 +177,11 @@ const Ships = forwardRef(({ boardRef }, ref) => {
         );
 
         setDraggingShip(null);
-    }, [draggingShip, boardRef, originalPosition]);
+    }, [draggingShip, boardRef, originalPosition, isLocked]);
 
     const handleContextMenu = (e, shipId) => {
+        if (isLocked) return;
+
         e.preventDefault();
         const ship = ships.find(s => s.id === shipId);
         if (!ship || !ship.isPlaced) return;
@@ -189,6 +197,8 @@ const Ships = forwardRef(({ boardRef }, ref) => {
     };
 
     const handleKeyDown = useCallback((e) => {
+        if (isLocked) return;
+
         if (!selectedShipId) return;
 
         const ship = ships.find(s => s.id === selectedShipId);
@@ -233,7 +243,7 @@ const Ships = forwardRef(({ boardRef }, ref) => {
                 setShips(prevShips => prevShips.map(s => s.id === selectedShipId ? rotatedShip : s));
             }
         }
-    }, [selectedShipId, ships, boardRef, isPositionValid]);
+    }, [selectedShipId, ships, boardRef, isPositionValid, isLocked]);
 
     const placeShipsRandomly = useCallback(() => {
         if (!boardRef.current) return; // Aguarda a referência do tabuleiro estar pronta
@@ -333,8 +343,9 @@ const Ships = forwardRef(({ boardRef }, ref) => {
                     id={ship.id}
                     className={`
                         ${styles.ship}
-                        ${ship.isDragging ? styles.dragging : ''}
-                        ${ship.id === selectedShipId ? styles.selected : ''}
+                        ${ship.isDragging && !isLocked ? styles.dragging : ''}
+                        ${ship.id === selectedShipId && !isLocked ? styles.selected : ''}
+                        ${isLocked ? styles.locked : ''}
                     `}
                     style={{
                         top: ship.top,
