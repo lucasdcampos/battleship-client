@@ -1,0 +1,110 @@
+.board{
+    background-color: gray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 360px;
+    height: 360px;
+    border-radius: 10px;
+    border-style: solid;
+    border-color: darkgoldenrod;
+    border-width: 10px;
+    flex: 0 0 calc(20% - 10px);
+}
+
+.board-background{
+    width: 350px;
+    height: 350px;
+    background-image: url(/src/assets/board-backgrounds/default-background-alt.png);
+    background-repeat: no-repeat;
+    background-size:cover;
+    background-position: center;
+    border-radius: 10px;
+}
+
+.board-table {
+    /* Define o elemento como um contêiner Grid */
+    display: grid;
+    border-radius: 10px;
+    position: relative; /* Torna este o contexto para o posicionamento absoluto do navio */
+    background-color: rgba(0,0,0,0.25);
+
+    
+    /* Cria 11 colunas, cada uma com 1 fração (1fr) do espaço disponível */
+    grid-template-columns: repeat(11, 31.81px);
+    
+    /* Cria 11 linhas, cada uma com 40 pixels de altura */
+    /* Você pode usar '1fr' aqui também, mas definir um tamanho fixo (ou 'minmax')
+       ajuda a garantir que seja um quadrado ou um tamanho definido. */
+    grid-template-rows: repeat(11, 31.81px);
+    
+    /* Remove o espaçamento entre as células (grid-gap) */
+    gap: 0;
+}
+
+.cell {
+    width: 31.81px; /* Garante que a célula seja quadrada, combinando com a altura de 40px */
+    height: 31.81px;
+    border-style: solid;
+    border-width: 0.2px;
+        
+    /* Opcional: Centraliza o conteúdo, caso você insira algo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+}
+
+.miss {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: bold;
+    font-size: 36px;
+    line-height: 24px;
+}
+
+.hit {
+    color: red;
+    font-weight: bold;
+    font-size: 36px;
+    line-height: 24px;
+    /* A cor do '•' fica vermelha, mas a explosão vai dominar */
+}
+
+.explosion {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: orange;
+    border-radius: 50%;
+    animation: explode 0.5s ease-out forwards;
+}
+
+@keyframes explode {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    50% {
+        background-color: red;
+    }
+    100% {
+        transform: scale(5);
+        opacity: 0;
+    }
+}
+
+.left-top {
+    border-top-left-radius: 10px;
+}
+
+.right-top {
+    border-top-right-radius: 10px;
+}
+
+.left-bottom {
+    border-bottom-left-radius: 10px;
+}
+
+.right-bottom {
+    border-bottom-right-radius: 10px;
+}
