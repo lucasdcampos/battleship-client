@@ -42,9 +42,15 @@ function Perfil() {
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
   const [activeTab, setActiveTab] = useState("icons");
   const [incrementIndex, setIncrementIndex] = useState(0);
-  const [actualIcon, setActualIcon] = useState(perfil_icon);
-  const [actualBackground, setActualBackground] = useState(null);
-  const [actualEffect, setActualEffect] = useState(null);
+  const [actualIcon, setActualIcon] = useState(
+    localStorage.getItem("userIcon") || perfil_icon
+  );
+  const [actualBackground, setActualBackground] = useState(
+    localStorage.getItem("userBackground") || null
+  );
+  const [actualEffect, setActualEffect] = useState(
+    localStorage.getItem("userEffect") || null
+  );
   const [actualPrimaryColor, setActualPrimaryColor] = useState(null);
   const [actualSecondaryColor, setActualSecondaryColor] = useState(null);
   const [actualTertiaryColor, setActualTertiaryColor] = useState(null);
@@ -55,7 +61,7 @@ function Perfil() {
   const [newFontColor, setNewFontColor] = useState(null);
 
   const { user } = useAuth();
-  
+
   // esse useeffect está sendo utilizado no mesmo contexto do modules lá em cima, será descartado futuramente
   useEffect(() => {
     const mod_icons = Object.values(module_icons).map((m) => m.default);
@@ -120,12 +126,15 @@ function Perfil() {
     switch (activeTab) {
       case "icons":
         setActualIcon(selected);
+        localStorage.setItem("userIcon", selected);
         break;
       case "backgrounds":
         setActualBackground(selected);
+        localStorage.setItem("userBackground", selected);
         break;
       case "effects":
         setActualEffect(selected);
+        localStorage.setItem("userEffect", selected);
         break;
       case "colors":
         document.documentElement.style.setProperty(
@@ -180,7 +189,9 @@ function Perfil() {
           className={styles.Perfil_Icon}
           onClick={() => setPerfilEditPopUP("flex")}
         />
-        <h1>{user?.username ? <span>{user.username}</span> : <span>johndoe</span>}</h1>
+        <h1>
+          {user?.username ? <span>{user.username}</span> : <span>johndoe</span>}
+        </h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
           <img src={actualEffect} alt="" />

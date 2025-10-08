@@ -11,7 +11,6 @@ function Header() {
   const location = useLocation();
   const { user, signOut } = useAuth();
 
-
   // Define o botão ativo com base na URL atual
   useEffect(() => {
     const path = location.pathname;
@@ -47,21 +46,50 @@ function Header() {
       </div>
 
       <div className={styles.navbarRight}>
-        <img
-          src={Perfil_Icon}
-          alt="User_Icon"
+        <div
+          className={styles.Perfil_Container}
           onClick={() => setLoggoutPop(!loggoutPop)}
-        />
+        >
+          <img
+            src={localStorage.getItem("userIcon")}
+            alt="User_Icon"
+            className={styles.Perfil_Icon}
+            onClick={() => setPerfilEditPopUP("flex")}
+          />
+          <div className={styles.Effect_Container}>
+            <img src={localStorage.getItem("userEffect")} alt="" />
+          </div>
+        </div>
         <div
           className={styles.loggoutPopUP}
           style={{ display: loggoutPop ? "flex" : "none" }}
         >
           <div>
-            <div className={styles.Perfil_Container}>
+            <div
+              className={styles.Perfil_Container}
+              onClick={() => setLoggoutPop(!loggoutPop)}
+            >
+              <img
+                src={localStorage.getItem("userIcon")}
+                alt="User_Icon"
+                className={styles.Perfil_Icon}
+                onClick={() => setPerfilEditPopUP("flex")}
+              />
+              <div className={styles.Effect_Container}>
+                <img src={localStorage.getItem("userEffect")} alt="" />
+              </div>
             </div>
-            <h1>{user?.username ? <span>{user.username}</span> : <span>johndoe</span>}</h1>
+            <h1>
+              {user?.username ? (
+                <span>{user.username}</span>
+              ) : (
+                <span>#username</span>
+              )}
+            </h1>
           </div>
-          <h2>{user?.email ? <span>{user.email}</span> : <span>johndoe@example.com</span>}</h2>
+          <h2>
+            {user?.email ? <span>{user.email}</span> : <span>#e-mail</span>}
+          </h2>
           <button onClick={() => signOut()}>Deslogar</button>
         </div>
       </div>
