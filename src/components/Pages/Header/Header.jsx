@@ -1,7 +1,7 @@
 import styles from "./Header.module.css";
 import Nav_Button from "./elements/Nav_Button";
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Perfil_Icon from "../../../assets/icons/perfil_icon.png";
 import { useAuth } from "../../../user/useAuth";
 
@@ -18,6 +18,8 @@ function Header() {
     else if (path.includes("Store")) setSelect("Store");
     else if (path.includes("Perfil")) setSelect("Perfil");
   }, [location]);
+
+  const navigate = useNavigate();
 
   return (
     <nav className={styles.navbar}>
@@ -73,11 +75,8 @@ function Header() {
                 src={localStorage.getItem("userIcon")}
                 alt="User_Icon"
                 className={styles.Perfil_Icon}
-                onClick={() => setPerfilEditPopUP("flex")}
+                onClick={() => navigate("/Perfil")}
               />
-              <div className={styles.Effect_Container}>
-                <img src={localStorage.getItem("userEffect")} alt="" />
-              </div>
             </div>
             <h1>
               {user?.username ? (
