@@ -1,0 +1,17 @@
+.animatedEmoji {
+    position: absolute;
+    /* Centraliza a animação na tela */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px; /* Tamanho da animação */
+    height: 150px;
+    z-index: 100; /* Garante que fique sobre os outros elementos */
+    pointer-events: none; /* Impede que a imagem bloqueie cliques */
+    animation: fadeOut 3s forwards;
+}
+
+@keyframes fadeOut {
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}

@@ -3,11 +3,13 @@ import styles from "./Play.module.css";
 import Board from "../../Board/Board";
 import Ships from "../../Ships/Ships";
 import EmojiBox from "../../EmojiBox/EmojiBox";
+import EmojiAnimation from "../../EmojiBox/EmojiAnimation";
 
 function Play() {
   const boardRef = useRef(null);
   const shipsRef = useRef(null);
   const [shots, setShots] = useState([]); // Estado para armazenar os tiros
+  const [activeEmoji, setActiveEmoji] = useState(null);
   const [isPlacementConfirmed, setIsPlacementConfirmed] = useState(false);
 
   const handleRandomizeClick = () => {
@@ -46,9 +48,14 @@ function Play() {
   };
 
   const handleEmojiSelect = (emoji) => {
-    // Lógica para enviar o emoji para os jogadores
-    // Por exemplo, usando WebSockets para notificar o outro jogador.
+    // Define o emoji ativo para acionar a animação
+    setActiveEmoji(emoji);
     console.log(`Emoji selecionado: ${emoji.id}. Animação: ${emoji.animated}`);
+  };
+
+  const handleAnimationEnd = () => {
+    // Limpa o emoji ativo quando a animação termina
+    setActiveEmoji(null);
   };
 
   return (
@@ -74,7 +81,7 @@ function Play() {
         </div>
       </div>
       {isPlacementConfirmed && (
-        <EmojiBox onEmojiSelect={handleEmojiSelect} />
+        <><EmojiAnimation emoji={activeEmoji} onAnimationEnd={handleAnimationEnd} /><EmojiBox onEmojiSelect={handleEmojiSelect} /></>
       )}
     </div>
   );
