@@ -1,0 +1,28 @@
+.ship {
+    position: absolute;
+    width: calc(31.81px * var(--ship-size));
+    height: 31.81px;
+    box-sizing: border-box;
+    cursor: grab;
+    z-index: 10;
+    transition: transform 0.2s ease-in-out;
+    transform-origin: 15.9px 15.9px; /* Metade de CELL_SIZE (31.81px) */
+}
+
+.dragging {
+    cursor: grabbing;
+    z-index: 20;
+    transition: none; /* Remove a transição durante o arrastar para um movimento mais fluido */
+}
+
+.selected {
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.7);
+    border-radius: 4px;
+}
+
+.shipImage {
+    width: 100%;
+    height: 100%; /* Garante que a imagem ocupe a altura do contêiner */
+    display: block;
+    pointer-events: none; /* Impede que a imagem interfira nos eventos do mouse da div pai */
+}

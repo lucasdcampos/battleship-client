@@ -6,11 +6,11 @@ import React, {
   useImperativeHandle,
 } from "react";
 import styles from "./Ships.module.css";
-import ship5Img from "../../assets/navios/animacao_tela_de_login/navio1.png";
-import ship4Img from "../../assets/navios/animacao_tela_de_login/navio1.png";
-import ship3Img from "../../assets/navios/animacao_tela_de_login/navio1.png";
-import ship2Img from "../../assets/navios/animacao_tela_de_login/navio1.png";
-import ship1Img from "../../assets/navios/animacao_tela_de_login/navio1.png";
+import ship5Img from "../../assets/ships/porta-avioes/default.png";
+import ship4Img from "../../assets/ships/encouracado/default.png";
+import ship3Img from "../../assets/ships/submarino/default.png";
+import ship2Img from "../../assets/ships/destroier/default.png";
+import ship1Img from "../../assets/ships/destroier/default.png";
 
 const initialShips = [
   {
@@ -77,7 +77,7 @@ const initialShips = [
 
 const CELL_SIZE = 31.81;
 
-const Ships = forwardRef(({ boardRef }, ref) => {
+const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
   const [ships, setShips] = useState(initialShips);
   const [draggingShip, setDraggingShip] = useState(null);
   const [selectedShipId, setSelectedShipId] = useState(null);
@@ -127,6 +127,8 @@ const Ships = forwardRef(({ boardRef }, ref) => {
     return !collision;
   };
   const handleMouseDown = (e, shipId) => {
+    if (isLocked) return;
+
     if (e.button !== 0) return; // Apenas botão esquerdo
 
     const ship = ships.find((s) => s.id === shipId);
@@ -148,6 +150,8 @@ const Ships = forwardRef(({ boardRef }, ref) => {
 
   const handleMouseMove = useCallback(
     (e) => {
+      if (isLocked) return;
+
       if (!draggingShip) return;
 
       setShips((prevShips) =>
@@ -163,10 +167,12 @@ const Ships = forwardRef(({ boardRef }, ref) => {
         )
       );
     },
-    [draggingShip, dragOffset]
+    [draggingShip, dragOffset, isLocked]
   );
 
   const handleMouseUp = useCallback(() => {
+    if (isLocked) return;
+
     if (!draggingShip) return;
 
     setShips((prevShips) =>
@@ -257,10 +263,13 @@ const Ships = forwardRef(({ boardRef }, ref) => {
     );
 
     setDraggingShip(null);
-  }, [draggingShip, boardRef, originalPosition]);
+  }, [draggingShip, boardRef, originalPosition, isLocked]);
 
   const handleContextMenu = (e, shipId) => {
+    if (isLocked) return;
+
     e.preventDefault();
+
     const ship = ships.find((s) => s.id === shipId);
     if (!ship || !ship.isPlaced) return;
 
@@ -276,6 +285,8 @@ const Ships = forwardRef(({ boardRef }, ref) => {
 
   const handleKeyDown = useCallback(
     (e) => {
+      if (isLocked) return;
+
       if (!selectedShipId) return;
 
       const ship = ships.find((s) => s.id === selectedShipId);
@@ -334,6 +345,8 @@ const Ships = forwardRef(({ boardRef }, ref) => {
   );
 
   const placeShipsRandomly = useCallback(() => {
+    if (isLocked) return;
+
     if (!boardRef.current) return; // Aguarda a referência do tabuleiro estar pronta
 
     const placedShips = [];
@@ -384,7 +397,7 @@ const Ships = forwardRef(({ boardRef }, ref) => {
       return ship; // Retorna o navio original se não encontrar posição
     });
     setShips(newShips);
-  }, [boardRef]);
+  }, [boardRef, isLocked]);
 
   useImperativeHandle(ref, () => ({
     randomize: placeShipsRandomly,
@@ -446,11 +459,11 @@ const Ships = forwardRef(({ boardRef }, ref) => {
         <div
           key={ship.id}
           id={ship.id}
-          className={`
-                        ${styles.ship}
-                        ${ship.isDragging ? styles.dragging : ""}
-                        ${ship.id === selectedShipId ? styles.selected : ""}
-                    `}
+          className={`${styles.ship} ${
+            ship.isDragging && !isLocked ? styles.dragging : ""
+          } ${ship.id === selectedShipId && !isLocked ? styles.selected : ""} ${
+            isLocked ? styles.locked : ""
+          }`}
           style={{
             top: ship.top,
             left: ship.left,

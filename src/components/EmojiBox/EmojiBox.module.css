@@ -1,0 +1,36 @@
+.emojiBoxContainer {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    border: 2px solid darkgoldenrod;
+    width: 360px; /* Mesma largura do tabuleiro */
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+}
+
+.emojiButton {
+    background: #036d9e;
+    border: 2px solid #996515;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.emojiButton:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px #996515;
+}
+
+.emojiIcon {
+    width: 35px;
+    height: 35px;
+}
