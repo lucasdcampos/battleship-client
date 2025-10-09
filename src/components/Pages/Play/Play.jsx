@@ -2,11 +2,14 @@ import { useRef, useState } from "react";
 import styles from "./Play.module.css";
 import Board from "../../Board/Board";
 import Ships from "../../Ships/Ships";
+import EmojiBox from "../../EmojiBox/EmojiBox";
+import EmojiAnimation from "../../EmojiBox/EmojiAnimation";
 
 function Play() {
   const boardRef = useRef(null);
   const shipsRef = useRef(null);
   const [shots, setShots] = useState([]); // Estado para armazenar os tiros
+  const [activeEmoji, setActiveEmoji] = useState(null);
   const [isPlacementConfirmed, setIsPlacementConfirmed] = useState(false);
 
   const handleRandomizeClick = () => {
@@ -44,12 +47,23 @@ function Play() {
     setIsPlacementConfirmed(true);
   };
 
+  const handleEmojiSelect = (emoji) => {
+    // Define o emoji ativo para acionar a animação
+    setActiveEmoji(emoji);
+    console.log(`Emoji selecionado: ${emoji.id}. Animação: ${emoji.animated}`);
+  };
+
+  const handleAnimationEnd = () => {
+    // Limpa o emoji ativo quando a animação termina
+    setActiveEmoji(null);
+  };
+
   return (
     <div className={styles.playContainer}>
       <div className={styles.boardsContainer}>
         {/* Tabuleiro do Jogador */}
         <div className={styles.boardWrapper}>
-          <Board ref={boardRef}><Ships ref={shipsRef} boardRef={boardRef} /></Board>
+          <Board ref={boardRef}><Ships ref={shipsRef} boardRef={boardRef} isLocked={isPlacementConfirmed} /></Board>
           {!isPlacementConfirmed && (
             <div className={styles.buttonContainer}>
               <button className={styles.randomizeButton} onClick={handleRandomizeClick}>
@@ -66,6 +80,9 @@ function Play() {
           <Board onCellClick={handleCellClick} shots={shots} />
         </div>
       </div>
+      {isPlacementConfirmed && (
+        <><EmojiAnimation emoji={activeEmoji} onAnimationEnd={handleAnimationEnd} /><EmojiBox onEmojiSelect={handleEmojiSelect} /></>
+      )}
     </div>
   );
 }
