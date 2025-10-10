@@ -48,7 +48,8 @@ const Board = forwardRef(({ children, onCellClick, shots = [] }, ref) => {
   
     return(
         <div className={styles.board}>
-            <div className={styles["board-background"]}>                <div className={styles["board-table"]} ref={ref}>
+            <div className={styles["board-background"]}>
+                <div className={styles["board-table"]} ref={ref}>
                     {[...Array(121)].map((_, i) => {
                         const x = (i % 11) - 1;
                         const y = Math.floor(i / 11) - 1;
@@ -57,15 +58,18 @@ const Board = forwardRef(({ children, onCellClick, shots = [] }, ref) => {
                         return (
                             <div key={i} className={getCellClassName(i, shot)} onClick={() => handleCellClick(i)}>
                                 {getCellContent(i, shot)} 
-                                {shot && shot.isHit && (
-                                    <div className={styles.explosion}></div>
+                                {shot && (
+                                    shot.isHit 
+                                        ? <div className={styles.explosion}></div> 
+                                        : <div className={styles.splash}></div>
                                 )}
                             </div>
                         );
                     })}
                 </div>
             </div>
-            {children}        </div>
+            {children}
+        </div>
     )
 });
 
