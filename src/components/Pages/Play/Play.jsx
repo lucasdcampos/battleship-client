@@ -105,7 +105,7 @@ function Play() {
           {/* Tabuleiro Inimigo (Réplica) */}
           <div className={styles.boardWrapper}>
             <Board ref={enemyBoardRef} onCellClick={handleCellClick} shots={shots}>
-              <Ships ref={enemyShipsRef} boardRef={enemyBoardRef} isLocked={true} isHidden={false} />
+              <Ships ref={enemyShipsRef} boardRef={enemyBoardRef} isLocked={true} isHidden={true} />
             </Board>
           </div>
         </div>
