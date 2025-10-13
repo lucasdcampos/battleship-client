@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "./Perfil.module.css";
 import ProgressBar from "./elements/ProgressBar";
 import Perfil_Card from "./elements/Perfil_Card";
-import perfil_icon from "./../../../assets/icons/perfil_icon.png";
+import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
 
 // Variavel modules abaixo serve apenas para importar icones, backgrounds e efeitos da pasta assets, mas futuramente será excluido pois os icones disponiveis do usuario virao do backend
@@ -38,23 +38,17 @@ function Perfil() {
   const [icons, setIcons] = useState([]);
   const [backgrounds, setBackgrounds] = useState([]);
   const [effects, setEffects] = useState([]);
-  // Abaixo as variáveis utilizadas nas funções
-  const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
-  const [activeTab, setActiveTab] = useState("icons");
-  const [incrementIndex, setIncrementIndex] = useState(0);
-  const [actualIcon, setActualIcon] = useState(
-    localStorage.getItem("userIcon") || perfil_icon
-  );
-  const [actualBackground, setActualBackground] = useState(
-    localStorage.getItem("userBackground") || null
-  );
-  const [actualEffect, setActualEffect] = useState(
-    localStorage.getItem("userEffect") || null
-  );
+  const [actualIcon, setActualIcon] = useState(perfil_icon);
+  const [actualBackground, setActualBackground] = useState(null);
+  const [actualEffect, setActualEffect] = useState(null);
   const [actualPrimaryColor, setActualPrimaryColor] = useState(null);
   const [actualSecondaryColor, setActualSecondaryColor] = useState(null);
   const [actualTertiaryColor, setActualTertiaryColor] = useState(null);
   const [actualFontColor, setActualFontColor] = useState(null);
+  // Abaixo as variáveis utilizadas nas funções
+  const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
+  const [activeTab, setActiveTab] = useState("icons");
+  const [incrementIndex, setIncrementIndex] = useState(0);
   const [newPrimaryColor, setNewPrimaryColor] = useState(null);
   const [newSecondaryColor, setNewSecondaryColor] = useState(null);
   const [newTertiaryColor, setNewTertiaryColor] = useState(null);
@@ -190,7 +184,7 @@ function Perfil() {
           onClick={() => setPerfilEditPopUP("flex")}
         />
         <h1>
-          {user?.username ? <span>{user.username}</span> : <span>johndoe</span>}
+          {user?.username ? <span>{user.username}</span> : <span>#user</span>}
         </h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>

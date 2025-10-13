@@ -2,7 +2,7 @@ import styles from "./Header.module.css";
 import Nav_Button from "./elements/Nav_Button";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Perfil_Icon from "../../../assets/icons/perfil_icon.png";
+import Perfil_Icon from "../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
 
 function Header() {
