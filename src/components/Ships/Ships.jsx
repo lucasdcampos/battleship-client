@@ -6,11 +6,11 @@ import React, {
   useImperativeHandle,
 } from "react";
 import styles from "./Ships.module.css";
-import ship5Img from "../../assets/ships/porta-avioes/default.png";
-import ship4Img from "../../assets/ships/encouracado/default.png";
-import ship3Img from "../../assets/ships/submarino/default.png";
-import ship2Img from "../../assets/ships/destroier/default.png";
-import ship1Img from "../../assets/ships/destroier/default.png";
+import ship5Img from "../../assets/cosmetic/ships/porta-avioes/H00001.png";
+import ship4Img from "../../assets/cosmetic/ships/encouracado/G00001.png";
+import ship3Img from "../../assets/cosmetic/ships/submarino/I00001.png";
+import ship2Img from "../../assets/cosmetic/ships/destroier/F00001.png";
+import ship1Img from "../../assets/cosmetic/ships/destroier/F00002.png";
 
 const initialShips = [
   {
