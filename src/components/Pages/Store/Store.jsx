@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import Card from "./elements/Cards/Cards";
 import styles from "./Store.module.css";
-import navio from "../../../assets/navios/animacao_tela_de_login/navio1.png";
-import icone from "../../../assets/icons/00001.png";
-import background from "../../../assets/backgrounds/brasil.jpg";
-import card from "../../../assets/cards/card1.png";
-import efeito from "../../../assets/effects/water.gif";
-import fc from "../../../assets/fc.png";
+import navio from "../../../assets/development/loginShips/navio1.png";
+import icone from "../../../assets/cosmetic/icons/E00001.png";
+import background from "../../../assets/cosmetic/backgrounds/A00001.png";
+import card from "../../../assets/cosmetic/cards/C00001.png";
+import efeito from "../../../assets/cosmetic/effects/D00001.gif";
+import fc from "../../../assets/development/fc.png";
 
 export default function Store() {
   const sell_icons = [

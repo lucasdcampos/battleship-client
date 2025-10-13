@@ -1,5 +1,5 @@
 import React from "react";
-import fc from "../../../../../assets/fc.png";
+import fc from "../../../../../assets/development/fc.png";
 
 import styles from "./Cards.module.css";
 
