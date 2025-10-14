@@ -5,28 +5,6 @@ import Perfil_Card from "./elements/Perfil_Card";
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
 
-// Variavel modules abaixo serve apenas para importar icones, backgrounds e efeitos da pasta assets, mas futuramente será excluido pois os icones disponiveis do usuario virao do backend
-const module_icons = import.meta.glob(
-  "./../../../assets/icons/*.{png,jpg,jpeg,svg}",
-  {
-    eager: true,
-  }
-);
-
-const module_effects = import.meta.glob(
-  "./../../../assets/effects/*.{png,jpg,jpeg,svg,gif}",
-  {
-    eager: true,
-  }
-);
-
-const module_backgrounds = import.meta.glob(
-  "./../../../assets/backgrounds/*.{png,jpg,jpeg,svg,gif}",
-  {
-    eager: true,
-  }
-);
-
 function Perfil() {
   // Abaixo estão todos os dados do usuário que virão por meio do backend. No momento os valores abaixo são simulação
   const [lvl, setLvl] = useState(0);
@@ -56,16 +34,26 @@ function Perfil() {
 
   const { user } = useAuth();
 
-  // esse useeffect está sendo utilizado no mesmo contexto do modules lá em cima, será descartado futuramente
   useEffect(() => {
-    const mod_icons = Object.values(module_icons).map((m) => m.default);
-    setIcons(mod_icons);
-    const mod_effects = Object.values(module_effects).map((m) => m.default);
-    setEffects(mod_effects);
-    const mod_backgrounds = Object.values(module_backgrounds).map(
-      (m) => m.default
-    );
-    setBackgrounds(mod_backgrounds);
+    // Estatísticas
+    setLvl(user.statistic.lvl);
+    setExp(user.statistic.exp);
+    setPartidas(user.statistic.gamesPlayed);
+    setVitorias(user.statistic.gamesWon);
+    // Inventário disponível
+    setCards(user.availableCosmetic.availableCards.length);
+    setSkins(user.availableShipSkins);
+    setIcons(user.availableCosmetic.availableIcons);
+    setBackgrounds(user.availableCosmetic.availableBackgrounds);
+    setEffects(user.availableCosmetic.availableEffects);
+    // Últimos cosméticos e configurações de cores setados
+    setActualIcon(user.currentCosmetic.currentIcon);
+    setActualBackground(user.currentCosmetic.currentBackground);
+    setActualEffect(user.currentCosmetic.currentEffect);
+    setActualPrimaryColor(user.currentCosmetic.currentPrimaryColor);
+    setActualSecondaryColor(user.currentCosmetic.currentSecondaryColor);
+    setActualTertiaryColor(user.currentCosmetic.currentTertiaryColor);
+    setActualFontColor(user.currentCosmetic.currentFontColor);
   }, []);
 
   useEffect(() => {
@@ -75,6 +63,15 @@ function Perfil() {
     setActualTertiaryColor(root.getPropertyValue("--tertiary-color").trim());
     setActualFontColor(root.getPropertyValue("--font-color").trim());
   }, [actualPrimaryColor, actualSecondaryColor, actualTertiaryColor]);
+
+  function totalShipSkins() {
+    return (
+      user.availableShipSkins.destroyer.length +
+      user.availableShipSkins.battleship.length +
+      user.availableShipSkins.aircraftCarrier.length +
+      user.availableShipSkins.submarine.length
+    );
+  }
 
   function getActiveList() {
     switch (activeTab) {
@@ -174,28 +171,47 @@ function Perfil() {
   return (
     <div
       className={styles.Perfil_Main_Container}
-      style={{ backgroundImage: "url(" + actualBackground + ")" }}
+      style={{
+        backgroundImage: `url(/src/assets/cosmetic/backgrounds/${actualBackground}.png)`,
+      }}
     >
       <div className={styles.Perfil_Container}>
         <img
-          src={actualIcon}
+          src={
+            new URL(
+              `/src/assets/cosmetic/icons/${actualIcon}.png`,
+              import.meta.url
+            ).href
+          }
           alt="User_Icon"
           className={styles.Perfil_Icon}
           onClick={() => setPerfilEditPopUP("flex")}
         />
         <h1>
-          {user?.username ? <span>{user.username}</span> : <span>#user</span>}
+          {user?.basicData.username ? (
+            <span>{user.basicData.username}</span>
+          ) : (
+            <span>#user</span>
+          )}
         </h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
-          <img src={actualEffect} alt="" />
+          <img
+            src={
+              new URL(
+                `/src/assets/cosmetic/effects/${actualEffect}.gif`,
+                import.meta.url
+              ).href
+            }
+            alt=""
+          />
         </div>
       </div>
       <div className={styles.Perfil_Cards_Container}>
         <Perfil_Card num={partidas} title={"Partidas"} />
         <Perfil_Card num={vitorias} title={"Vitórias"} />
         <Perfil_Card num={cards} title={"Cards"} />
-        <Perfil_Card num={skins} title={"Skins"} />
+        <Perfil_Card num={totalShipSkins()} title={"Skins"} />
       </div>
       <div
         className={styles.Perfil_Edit_Pop_UP}
