@@ -9,14 +9,9 @@ function Header() {
   const [select, setSelect] = useState(null);
   const [loggoutPop, setLoggoutPop] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading, isAuthenticated } = useAuth();
   const [actualIcon, setActualIcon] = useState(Perfil_Icon);
   const [actualEffect, setActualEffect] = useState(null);
-
-  // useEffect(() => {
-  //   setActualIcon(user.currentCosmetic.currentIcon);
-  //   setActualEffect(user.currentCosmetic.currentEffect);
-  // }, []);
 
   // Define o botão ativo com base na URL atual
   useEffect(() => {
@@ -24,11 +19,22 @@ function Header() {
     if (path.includes("Play")) setSelect("Play");
     else if (path.includes("Store")) setSelect("Store");
     else if (path.includes("Perfil")) setSelect("Perfil");
+    else if (path.includes("Login")) setSelect(null);
+    else setSelect(null);
   }, [location]);
+
+  useEffect(() => {
+    if (!loading && user) {
+      setActualIcon(user.data.currentCosmetic.currentIcon);
+      setActualEffect(user.data.currentCosmetic.currentEffect);
+    } else if (!loading && !user) {
+      setActualIcon("E00001");
+      setActualEffect(null);
+    }
+  }, [loading, user]);
 
   const navigate = useNavigate();
 
-  console.log(user);
   return (
     <nav className={styles.navbar}>
       <div className={styles.navbarLeft}>
@@ -92,22 +98,31 @@ function Header() {
               onClick={() => setLoggoutPop(!loggoutPop)}
             >
               <img
-                src={localStorage.getItem("userIcon")}
+                src={
+                  new URL(
+                    `/src/assets/cosmetic/icons/${actualIcon}.png`,
+                    import.meta.url
+                  ).href
+                }
                 alt="User_Icon"
                 className={styles.Perfil_Icon}
                 onClick={() => navigate("/Perfil")}
               />
             </div>
             <h1>
-              {user?.username ? (
-                <span>{user.username}</span>
+              {user?.data.basicData.username ? (
+                <span>{user.data.basicData.username}</span>
               ) : (
                 <span>#username</span>
               )}
             </h1>
           </div>
           <h2>
-            {user?.email ? <span>{user.email}</span> : <span>#e-mail</span>}
+            {user?.data.basicData.email ? (
+              <span>{user.data.basicData.email}</span>
+            ) : (
+              <span>#e-mail</span>
+            )}
           </h2>
           <button onClick={() => signOut()}>Deslogar</button>
         </div>

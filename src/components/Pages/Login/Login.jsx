@@ -8,24 +8,25 @@ import { useAuth } from "../../../user/useAuth";
 import { useNavigate } from "react-router-dom";
 
 function LoginForm() {
-  const { signIn } = useAuth();
-  const navigate = useNavigate();
-
+  // Variáveis
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const handleSubmitLoginForm = async (e) => {
-    e.preventDefault();
-
-    await signIn({ email, password });
-    navigate("/Perfil");
-  };
-
-  const handleSubmitSignupForm = (e) => {
-    e.preventDefault();
-    console.log("Signup submit");
-  };
   const [actualTab, setActualTab] = useState("login");
+  const navigate = useNavigate();
+  const { signIn, signOut } = useAuth();
+
+  // Funções
+  async function handleSubmitLoginForm(e) {
+    e.preventDefault();
+
+    await signIn(email, password);
+    navigate("/Perfil");
+  }
+
+  async function handleSubmitSignupForm(e) {
+    e.preventDefault();
+    signOut();
+  }
 
   return (
     <div className={styles.login_background}>
