@@ -1,0 +1,80 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "basicData": {
+        "email": "tioben@example.com",
+        "username": "tioben",
+        "fatecCoins": 9999
+      },
+      "currentCosmetic": {
+        "currentIcon": "E00002",
+        "currentBackground": "A00002",
+        "currentEffect": "D00001",
+        "currentPrimaryColor": "#242424",
+        "currentSecondaryColor": "gray",
+        "currentTertiaryColor": "orange",
+        "currentFontColor": "white",
+        "currentDestroyer": "F00001",
+        "currentBattleship": "G00001",
+        "currentAircraftCarrier": "H00001",
+        "currentSubmarine": "I00001",
+        "currentCards": [
+          "C00001",
+          "C00002",
+          "C00003"
+        ]
+      },
+      "availableCosmetic": {
+        "availableIcons": [
+          "E00001",
+          "E00002"
+        ],
+        "availableBackgrounds": [
+          "A00001",
+          "A00002"
+        ],
+        "availableEffects": [
+          "D00001",
+          "D00002"
+        ],
+        "availableCards": [
+          "C00001",
+          "C00002",
+          "C00003",
+          "C00004",
+          "C00005",
+          "C00006"
+        ]
+      },
+      "availableShipSkins": {
+        "destroyer": [
+          "F00001",
+          "F00002",
+          "F00003"
+        ],
+        "battleship": [
+          "G00001",
+          "G00002",
+          "G00003"
+        ],
+        "submarine": [
+          "I00001",
+          "I00002",
+          "I00003"
+        ],
+        "aircraftCarrier": [
+          "H00001",
+          "H00002",
+          "H00003"
+        ]
+      },
+      "statistic": {
+        "gamesPlayed": 125,
+        "gamesWon": 75,
+        "lvl": 12,
+        "exp": 700
+      }
+    }
+  ]
+}
