@@ -18,11 +18,11 @@ export function AuthProvider({ children }) {
     setLoading(true);
 
     try {
+      // Fazer uma requisição com base no login e senha enviado em Login.jsx
+      // abaixo um modelo de resposta
       await new Promise((r) => setTimeout(r, 500));
-
-      // TODO: Substituir pela chamada real ao backend
       const response = {
-        status: true,
+        status: 200,
         data: {
           basicData: {
             id: 1,
@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
             fatecCoins: 9999,
           },
           currentCosmetic: {
-            currentIcon: "E00001",
+            currentIcon: "E00002",
             currentBackground: "A00001",
             currentEffect: "D00001",
             currentPrimaryColor: "#242424",
@@ -56,18 +56,18 @@ export function AuthProvider({ children }) {
               "C00005",
               "C00006",
             ],
-            availableShipSkins: {
-              destroyer: ["F00001", "F00002", "F00003"],
-              battleship: ["G00001", "G00002", "G00003"],
-              submarine: ["I00001", "I00002", "I00003"],
-              aircraftCarrier: ["H00001", "H00002", "H00003"],
-            },
-            statistic: {
-              gamesPlayed: 120,
-              gamesWon: 75,
-              level: 12,
-              exp: 700,
-            },
+          },
+          availableShipSkins: {
+            destroyer: ["F00001", "F00002", "F00003"],
+            battleship: ["G00001", "G00002", "G00003"],
+            submarine: ["I00001", "I00002", "I00003"],
+            aircraftCarrier: ["H00001", "H00002", "H00003"],
+          },
+          statistic: {
+            gamesPlayed: 125,
+            gamesWon: 75,
+            lvl: 12,
+            exp: 700,
           },
         },
       };
