@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Perfil_Icon from "../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
+import { getUser } from "../../../../backandSimulation/userService";
 
 function Header() {
   const [select, setSelect] = useState(null);
   const [loggoutPop, setLoggoutPop] = useState(false);
   const location = useLocation();
-  const { user, signOut, loading, isAuthenticated } = useAuth();
+  const { user, signOut, loading, isAuthenticated, userAtt } = useAuth();
   const [actualIcon, setActualIcon] = useState(Perfil_Icon);
   const [actualEffect, setActualEffect] = useState(null);
 
@@ -25,13 +26,17 @@ function Header() {
 
   useEffect(() => {
     if (!loading && user) {
-      setActualIcon(user.data.currentCosmetic.currentIcon);
-      setActualEffect(user.data.currentCosmetic.currentEffect);
+      getUser(user.data.basicData.id).then((data) => {
+        setActualIcon(data.currentCosmetic.currentIcon);
+      });
+      getUser(user.data.basicData.id).then((data) => {
+        setActualEffect(data.currentCosmetic.currentEffect);
+      });
     } else if (!loading && !user) {
       setActualIcon("E00001");
       setActualEffect(null);
     }
-  }, [loading, user]);
+  }, [loading, user, userAtt]);
 
   const navigate = useNavigate();
 
