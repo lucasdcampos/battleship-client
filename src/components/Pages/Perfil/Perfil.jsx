@@ -36,24 +36,24 @@ function Perfil() {
 
   useEffect(() => {
     // Estatísticas
-    setLvl(user.statistic.lvl);
-    setExp(user.statistic.exp);
-    setPartidas(user.statistic.gamesPlayed);
-    setVitorias(user.statistic.gamesWon);
+    setLvl(user.data.statistic.lvl);
+    setExp(user.data.statistic.exp);
+    setPartidas(user.data.statistic.gamesPlayed);
+    setVitorias(user.data.statistic.gamesWon);
     // Inventário disponível
-    setCards(user.availableCosmetic.availableCards.length);
-    setSkins(user.availableShipSkins);
-    setIcons(user.availableCosmetic.availableIcons);
-    setBackgrounds(user.availableCosmetic.availableBackgrounds);
-    setEffects(user.availableCosmetic.availableEffects);
+    setCards(user.data.availableCosmetic.availableCards.length);
+    setSkins(user.data.availableShipSkins);
+    setIcons(user.data.availableCosmetic.availableIcons);
+    setBackgrounds(user.data.availableCosmetic.availableBackgrounds);
+    setEffects(user.data.availableCosmetic.availableEffects);
     // Últimos cosméticos e configurações de cores setados
-    setActualIcon(user.currentCosmetic.currentIcon);
-    setActualBackground(user.currentCosmetic.currentBackground);
-    setActualEffect(user.currentCosmetic.currentEffect);
-    setActualPrimaryColor(user.currentCosmetic.currentPrimaryColor);
-    setActualSecondaryColor(user.currentCosmetic.currentSecondaryColor);
-    setActualTertiaryColor(user.currentCosmetic.currentTertiaryColor);
-    setActualFontColor(user.currentCosmetic.currentFontColor);
+    setActualIcon(user.data.currentCosmetic.currentIcon);
+    setActualBackground(user.data.currentCosmetic.currentBackground);
+    setActualEffect(user.data.currentCosmetic.currentEffect);
+    setActualPrimaryColor(user.data.currentCosmetic.currentPrimaryColor);
+    setActualSecondaryColor(user.data.currentCosmetic.currentSecondaryColor);
+    setActualTertiaryColor(user.data.currentCosmetic.currentTertiaryColor);
+    setActualFontColor(user.data.currentCosmetic.currentFontColor);
   }, []);
 
   useEffect(() => {
@@ -66,10 +66,10 @@ function Perfil() {
 
   function totalShipSkins() {
     return (
-      user.availableShipSkins.destroyer.length +
-      user.availableShipSkins.battleship.length +
-      user.availableShipSkins.aircraftCarrier.length +
-      user.availableShipSkins.submarine.length
+      user.data.availableShipSkins.destroyer.length +
+      user.data.availableShipSkins.battleship.length +
+      user.data.availableShipSkins.aircraftCarrier.length +
+      user.data.availableShipSkins.submarine.length
     );
   }
 
@@ -188,8 +188,8 @@ function Perfil() {
           onClick={() => setPerfilEditPopUP("flex")}
         />
         <h1>
-          {user?.basicData.username ? (
-            <span>{user.basicData.username}</span>
+          {user?.data.basicData.username ? (
+            <span>{user.data.basicData.username}</span>
           ) : (
             <span>#user</span>
           )}

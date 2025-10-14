@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import Header from "./components/Pages/Header/Header";
 import Play from "./components/Pages/Play/Play";
 import Perfil from "./components/Pages/Perfil/Perfil";
@@ -15,15 +20,15 @@ function AppContent() {
   return (
     <>
       {shouldShowHeader && <Header />}
-
       <Routes>
         <Route path="/Login" element={<Login />} />
-
         <Route element={<ProtectedRoute />}>
           <Route path="/Play" element={<Play />} />
           <Route path="/Perfil" element={<Perfil />} />
           <Route path="/Store" element={<Store />} />
         </Route>
+        {/* 404 not found */}
+        <Route path="*" element={<div>404 - Página Não Encontrada</div>} />
       </Routes>
     </>
   );
