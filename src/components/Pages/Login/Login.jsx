@@ -18,7 +18,7 @@ function LoginForm() {
     e.preventDefault();
 
     await signIn({ email, password });
-    navigate("/Play");
+    navigate("/Perfil");
   };
 
   const handleSubmitSignupForm = (e) => {

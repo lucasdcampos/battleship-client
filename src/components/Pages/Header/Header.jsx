@@ -10,6 +10,13 @@ function Header() {
   const [loggoutPop, setLoggoutPop] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const [actualIcon, setActualIcon] = useState(Perfil_Icon);
+  const [actualEffect, setActualEffect] = useState(null);
+
+  // useEffect(() => {
+  //   setActualIcon(user.currentCosmetic.currentIcon);
+  //   setActualEffect(user.currentCosmetic.currentEffect);
+  // }, []);
 
   // Define o botão ativo com base na URL atual
   useEffect(() => {
@@ -21,6 +28,7 @@ function Header() {
 
   const navigate = useNavigate();
 
+  console.log(user);
   return (
     <nav className={styles.navbar}>
       <div className={styles.navbarLeft}>
@@ -53,13 +61,25 @@ function Header() {
           onClick={() => setLoggoutPop(!loggoutPop)}
         >
           <img
-            src={localStorage.getItem("userIcon")}
+            src={
+              new URL(
+                `/src/assets/cosmetic/icons/${actualIcon}.png`,
+                import.meta.url
+              ).href
+            }
             alt="User_Icon"
             className={styles.Perfil_Icon}
-            onClick={() => setPerfilEditPopUP("flex")}
           />
           <div className={styles.Effect_Container}>
-            <img src={localStorage.getItem("userEffect")} alt="" />
+            <img
+              src={
+                new URL(
+                  `/src/assets/cosmetic/effects/${actualEffect}.gif`,
+                  import.meta.url
+                ).href
+              }
+              alt=""
+            />
           </div>
         </div>
         <div
