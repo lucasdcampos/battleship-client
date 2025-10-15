@@ -24,6 +24,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
   {
     id: "ship4",
@@ -36,6 +37,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
   {
     id: "ship3",
@@ -48,6 +50,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
   {
     id: "ship2",
@@ -60,6 +63,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
   {
     id: "ship1",
@@ -72,12 +76,13 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
 ];
 
 const CELL_SIZE = 31.81;
 
-const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
+const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref) => {
   const [ships, setShips] = useState(initialShips);
   const [draggingShip, setDraggingShip] = useState(null);
   const [selectedShipId, setSelectedShipId] = useState(null);
@@ -198,13 +203,16 @@ const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
           const shipPixelWidth = shipCellsWidth * CELL_SIZE;
           const shipPixelHeight = shipCellsHeight * CELL_SIZE;
 
-          // Verifica se o navio está totalmente dentro da área jogável (10x10 grid)
-          // A área jogável começa em (boardRect.left + CELL_SIZE, boardRect.top + CELL_SIZE)
+          // Define a área jogável (grid 10x10), que começa após os cabeçalhos
+          const playableAreaLeft = boardRect.left + CELL_SIZE;
+          const playableAreaTop = boardRect.top + CELL_SIZE;
           const playableAreaRight = boardRect.left + 11 * CELL_SIZE;
           const playableAreaBottom = boardRect.top + 11 * CELL_SIZE;
+
+          // Verifica se o navio está totalmente dentro da área jogável
           const isWithinBounds =
-            shipLeft >= boardRect.left &&
-            shipTop >= boardRect.top &&
+            shipLeft >= playableAreaLeft &&
+            shipTop >= playableAreaTop &&
             shipLeft + shipPixelWidth <= playableAreaRight &&
             shipTop + shipPixelHeight <= playableAreaBottom;
 
@@ -232,18 +240,9 @@ const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
 
             if (!collision) {
               const snappedLeft =
-                snappedGridX * CELL_SIZE + boardRect.left + CELL_SIZE;
-              const snappedTop =
-                snappedGridY * CELL_SIZE + boardRect.top + CELL_SIZE;
-              return {
-                ...s,
-                isDragging: false,
-                top: snappedTop,
-                left: snappedLeft,
-                isPlaced: true,
-                gridX: snappedGridX,
-                gridY: snappedGridY,
-              };
+                snappedGridX * CELL_SIZE + CELL_SIZE;
+              const snappedTop = snappedGridY * CELL_SIZE + CELL_SIZE;
+              return { ...s, isDragging: false, top: snappedTop, left: snappedLeft, isPlaced: true, gridX: snappedGridX, gridY: snappedGridY };
             }
           }
 
@@ -311,17 +310,9 @@ const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
           setShips((prevShips) =>
             prevShips.map((s) => {
               if (s.id === selectedShipId) {
-                const boardRect = boardRef.current.getBoundingClientRect();
-                const newLeft =
-                  newGridX * CELL_SIZE + boardRect.left + CELL_SIZE;
-                const newTop = newGridY * CELL_SIZE + boardRect.top + CELL_SIZE;
-                return {
-                  ...s,
-                  gridX: newGridX,
-                  gridY: newGridY,
-                  top: newTop,
-                  left: newLeft,
-                };
+                const newLeft = (newGridX * CELL_SIZE) + CELL_SIZE;
+                const newTop = (newGridY * CELL_SIZE) + CELL_SIZE;
+                return { ...s, gridX: newGridX, gridY: newGridY, top: newTop, left: newLeft };
               }
               return s;
             })
@@ -345,12 +336,11 @@ const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
   );
 
   const placeShipsRandomly = useCallback(() => {
-    if (isLocked) return;
+    if (isLocked && !ref.current) return; // Previne execução automática em navios inimigos sem ref
 
     if (!boardRef.current) return; // Aguarda a referência do tabuleiro estar pronta
 
     const placedShips = [];
-    const boardRect = boardRef.current.getBoundingClientRect();
 
     const newShips = initialShips.map((ship) => {
       let tempShip;
@@ -386,8 +376,8 @@ const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
           validPositionFound = true;
           const finalShip = {
             ...tempShip,
-            top: randomGridY * CELL_SIZE + boardRect.top + CELL_SIZE,
-            left: randomGridX * CELL_SIZE + boardRect.left + CELL_SIZE,
+            top: randomGridY * CELL_SIZE + CELL_SIZE,
+            left: randomGridX * CELL_SIZE + CELL_SIZE,
             isPlaced: true,
           };
           placedShips.push(finalShip);
@@ -422,8 +412,10 @@ const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
 
   // Posiciona os navios aleatoriamente no tabuleiro ao carregar
   useEffect(() => {
-    placeShipsRandomly();
-  }, [placeShipsRandomly]); // Executa quando o boardRef estiver disponível
+    if (!isLocked) {
+      placeShipsRandomly();
+    }
+  }, [placeShipsRandomly, isLocked]); // Executa quando o boardRef estiver disponível
 
   useEffect(() => {
     if (draggingShip) {
@@ -453,17 +445,17 @@ const Ships = forwardRef(({ boardRef, isLocked = false }, ref) => {
     boardRef,
   ]);
 
+  if (isHidden) return null;
+
   return (
     <div className={styles.ships}>
       {ships.map((ship) => (
         <div
           key={ship.id}
           id={ship.id}
-          className={`${styles.ship} ${
-            ship.isDragging && !isLocked ? styles.dragging : ""
-          } ${ship.id === selectedShipId && !isLocked ? styles.selected : ""} ${
-            isLocked ? styles.locked : ""
-          }`}
+          className={`${styles.ship} ${ship.isDragging && !isLocked ? styles.dragging : ""} ${
+            ship.id === selectedShipId && !isLocked ? styles.selected : ""
+          } ${isLocked ? styles.locked : ""}`}
           style={{
             top: ship.top,
             left: ship.left,

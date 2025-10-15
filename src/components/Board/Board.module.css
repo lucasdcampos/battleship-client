@@ -10,6 +10,7 @@
     border-color: darkgoldenrod;
     border-width: 10px;
     flex: 0 0 calc(20% - 10px);
+    position: relative; /* Garante que os filhos com position:absolute sejam relativos a este contêiner */
 }
 
 .board-background{
@@ -79,14 +80,15 @@
   width: 100%; /* Ocupa toda a célula */
   height: 100%; /* Ocupa toda a célula */
   /* Substitua pelo caminho correto do seu GIF, se necessário */
-  background-image: url('/src/assets/effects/explosion.gif');
+  background-image: url('/src/assets/effects/fire.gif');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  scale: 2.0; /* Aumenta o tamanho da explosão */;
+  scale: 5.0; /* Aumenta o tamanho da explosão */;
   /* Força o GIF a reiniciar e depois desaparecer */
-  animation: disappear 1.0s forwards;
+  /*animation: disappear 1.0s forwards;*/
   pointer-events: none; /* Garante que o GIF não interfira com cliques futuros */
+  z-index: 15;
 }
 
 @keyframes disappear {
