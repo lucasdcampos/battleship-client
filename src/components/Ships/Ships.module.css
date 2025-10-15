@@ -26,3 +26,8 @@
     display: block;
     pointer-events: none; /* Impede que a imagem interfira nos eventos do mouse da div pai */
 }
+
+.locked {
+    cursor: default;
+    pointer-events: none;
+}

@@ -1,16 +1,35 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import styles from "./Play.module.css";
 import Board from "../../Board/Board";
 import Ships from "../../Ships/Ships";
 import EmojiBox from "../../EmojiBox/EmojiBox";
 import EmojiAnimation from "../../EmojiBox/EmojiAnimation";
+import Placar from "../../Placar/Placar";
 
 function Play() {
   const boardRef = useRef(null);
   const shipsRef = useRef(null);
+  const enemyBoardRef = useRef(null);
+  const enemyShipsRef = useRef(null);
   const [shots, setShots] = useState([]); // Estado para armazenar os tiros
   const [activeEmoji, setActiveEmoji] = useState(null);
   const [isPlacementConfirmed, setIsPlacementConfirmed] = useState(false);
+
+  // Dados de exemplo para os placares
+  const playerShips = [
+    "Porta-Aviões",
+    "Encouraçado",
+    "Submarino",
+    "Destroier",
+    "Destroier",
+  ];
+  const enemyShips = [
+    "Porta-Aviões",
+    "Encouraçado",
+    "Submarino",
+    "Destroier",
+    "Destroier",
+  ];
 
   const handleRandomizeClick = () => {
     if (shipsRef.current) {
@@ -28,7 +47,7 @@ function Play() {
       return;
     }
 
-    const shipPositions = shipsRef.current.getShipPositions();
+    const shipPositions = enemyShipsRef.current.getShipPositions();
     const isHit = shipPositions.some(pos => pos.x === x && pos.y === y);
 
     if (isHit) {
@@ -42,10 +61,16 @@ function Play() {
   };
 
   const handleConfirmClick = () => {
-    // TODO: Adicionar lógica para travar os navios e iniciar o jogo.
     console.log("Posicionamento confirmado!");
     setIsPlacementConfirmed(true);
   };
+
+  useEffect(() => {
+    // Posiciona os navios inimigos aleatoriamente quando o jogador confirma sua posição
+    if (isPlacementConfirmed && enemyShipsRef.current) {
+      enemyShipsRef.current.randomize();
+    }
+  }, [isPlacementConfirmed]);
 
   const handleEmojiSelect = (emoji) => {
     // Define o emoji ativo para acionar a animação
@@ -60,29 +85,35 @@ function Play() {
 
   return (
     <div className={styles.playContainer}>
-      <div className={styles.boardsContainer}>
-        {/* Tabuleiro do Jogador */}
-        <div className={styles.boardWrapper}>
-          <Board ref={boardRef}><Ships ref={shipsRef} boardRef={boardRef} isLocked={isPlacementConfirmed} /></Board>
-          {!isPlacementConfirmed && (
-            <div className={styles.buttonContainer}>
-              <button className={styles.randomizeButton} onClick={handleRandomizeClick}>
-                Reposicionar Navios
-              </button>
-              <button className={styles.confirmButton} onClick={handleConfirmClick}>
-                Confirmar Posicionamento
-              </button>
-            </div>
-          )}
+      <Placar titulo="Seu Placar" embarcacoes={playerShips} />
+      <div className={styles.mainGameArea}>
+        <div className={styles.boardsContainer}>
+          {/* Tabuleiro do Jogador */}
+          <div className={styles.boardWrapper}>
+            <Board ref={boardRef}><Ships ref={shipsRef} boardRef={boardRef} isLocked={isPlacementConfirmed} /></Board>
+            {!isPlacementConfirmed && (
+              <div className={styles.buttonContainer}>
+                <button className={styles.randomizeButton} onClick={handleRandomizeClick}>
+                  Reposicionar Navios
+                </button>
+                <button className={styles.confirmButton} onClick={handleConfirmClick}>
+                  Confirmar Posicionamento
+                </button>
+              </div>
+            )}
+          </div>
+          {/* Tabuleiro Inimigo (Réplica) */}
+          <div className={styles.boardWrapper}>
+            <Board ref={enemyBoardRef} onCellClick={handleCellClick} shots={shots}>
+              <Ships ref={enemyShipsRef} boardRef={enemyBoardRef} isLocked={true} isHidden={true} />
+            </Board>
+          </div>
         </div>
-        {/* Tabuleiro Inimigo (Réplica) */}
-        <div className={styles.boardWrapper}>
-          <Board onCellClick={handleCellClick} shots={shots} />
-        </div>
+        {isPlacementConfirmed && (
+          <><EmojiAnimation emoji={activeEmoji} onAnimationEnd={handleAnimationEnd} /><EmojiBox onEmojiSelect={handleEmojiSelect} /></>
+        )}
       </div>
-      {isPlacementConfirmed && (
-        <><EmojiAnimation emoji={activeEmoji} onAnimationEnd={handleAnimationEnd} /><EmojiBox onEmojiSelect={handleEmojiSelect} /></>
-      )}
+      <Placar titulo="Placar Inimigo" embarcacoes={enemyShips} />
     </div>
   );
 }
