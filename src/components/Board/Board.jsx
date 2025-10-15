@@ -56,10 +56,12 @@ const Board = forwardRef(({ children, onCellClick, shots = [] }, ref) => {
 
                         return (
                             <div key={i} className={getCellClassName(i, shot)} onClick={() => handleCellClick(i)}>
-                                {getCellContent(i, shot)} 
-                                {shot && shot.isHit && (
+                                {getCellContent(i, shot)}
+                                {shot && shot.isSinkingShot ? (
+                                    <div className={styles.sinkingExplosion}></div>
+                                ) : shot && shot.isHit ? (
                                     <div className={styles.explosion}></div>
-                                )}
+                                ) : null}
                             </div>
                         );
                     })}

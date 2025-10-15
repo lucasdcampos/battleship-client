@@ -55,6 +55,7 @@
     align-items: center;
     font-size: 10px;
     position: relative; /* Garante que a explosão fique contida na célula */
+    z-index: 2; /* Garante que a célula e seu conteúdo fiquem sobre os navios */
     user-select: none; /* Impede a seleção do texto dentro da célula */
 }
 
@@ -80,15 +81,29 @@
   width: 100%; /* Ocupa toda a célula */
   height: 100%; /* Ocupa toda a célula */
   /* Substitua pelo caminho correto do seu GIF, se necessário */
-  background-image: url('/src/assets/effects/fire.gif');
+  background-image: url('/src/assets/effects/explosion.gif');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  scale: 5.0; /* Aumenta o tamanho da explosão */;
+  scale: 2.0; /* Aumenta o tamanho da explosão */;
   /* Força o GIF a reiniciar e depois desaparecer */
   /*animation: disappear 1.0s forwards;*/
   pointer-events: none; /* Garante que o GIF não interfira com cliques futuros */
-  z-index: 15;
+}
+
+.sinkingExplosion {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Substitua pelo caminho do seu novo GIF de afundamento */
+  background-image: url('/src/assets/effects/sinking-explosion.gif');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  scale: 2.5; /* Pode ser maior para um efeito mais dramático */
+  pointer-events: none;
 }
 
 @keyframes disappear {

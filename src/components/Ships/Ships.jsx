@@ -25,6 +25,7 @@ const initialShips = [
     gridX: null,
     gridY: null,
     alive: true,
+    isHidden: false,
   },
   {
     id: "ship4",
