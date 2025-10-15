@@ -23,6 +23,7 @@
 .boardWrapper {
     display: flex;
     flex-direction: column;
+    position: relative; /* Necessário para o posicionamento absoluto da camada */
     gap: 20px;
 }
 

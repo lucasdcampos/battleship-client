@@ -24,6 +24,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
   {
     id: "ship4",
@@ -36,6 +37,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
   {
     id: "ship3",
@@ -48,6 +50,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
   {
     id: "ship2",
@@ -60,6 +63,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
   {
     id: "ship1",
@@ -72,6 +76,7 @@ const initialShips = [
     isPlaced: false,
     gridX: null,
     gridY: null,
+    alive: true,
   },
 ];
 
@@ -235,8 +240,8 @@ const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref)
 
             if (!collision) {
               const snappedLeft =
-                snappedGridX * CELL_SIZE + boardRect.left + CELL_SIZE;
-              const snappedTop = snappedGridY * CELL_SIZE + boardRect.top + CELL_SIZE;
+                snappedGridX * CELL_SIZE + CELL_SIZE;
+              const snappedTop = snappedGridY * CELL_SIZE + CELL_SIZE;
               return { ...s, isDragging: false, top: snappedTop, left: snappedLeft, isPlaced: true, gridX: snappedGridX, gridY: snappedGridY };
             }
           }
@@ -305,10 +310,8 @@ const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref)
           setShips((prevShips) =>
             prevShips.map((s) => {
               if (s.id === selectedShipId) {
-                const boardRect = boardRef.current.getBoundingClientRect();
-                const newLeft =
-                  newGridX * CELL_SIZE + boardRect.left + CELL_SIZE;
-                const newTop = newGridY * CELL_SIZE + boardRect.top + CELL_SIZE;
+                const newLeft = (newGridX * CELL_SIZE) + CELL_SIZE;
+                const newTop = (newGridY * CELL_SIZE) + CELL_SIZE;
                 return { ...s, gridX: newGridX, gridY: newGridY, top: newTop, left: newLeft };
               }
               return s;
@@ -338,7 +341,6 @@ const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref)
     if (!boardRef.current) return; // Aguarda a referência do tabuleiro estar pronta
 
     const placedShips = [];
-    const boardRect = boardRef.current.getBoundingClientRect();
 
     const newShips = initialShips.map((ship) => {
       let tempShip;
@@ -374,8 +376,8 @@ const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref)
           validPositionFound = true;
           const finalShip = {
             ...tempShip,
-            top: randomGridY * CELL_SIZE + boardRect.top + CELL_SIZE,
-            left: randomGridX * CELL_SIZE + boardRect.left + CELL_SIZE,
+            top: randomGridY * CELL_SIZE + CELL_SIZE,
+            left: randomGridX * CELL_SIZE + CELL_SIZE,
             isPlaced: true,
           };
           placedShips.push(finalShip);
