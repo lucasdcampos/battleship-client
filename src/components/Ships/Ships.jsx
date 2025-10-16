@@ -166,10 +166,8 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
     const rect = shipElement.getBoundingClientRect();
 
     setDraggingShip(shipId);
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
+    // Define um offset fixo para que o navio fique a 15px do cursor
+    setDragOffset({ x: 15, y: 15 });
     setOriginalPosition({ top: ship.top, left: ship.left });
 
     e.preventDefault();
