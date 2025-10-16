@@ -55,8 +55,18 @@
     align-items: center;
     font-size: 10px;
     position: relative; /* Garante que a explosão fique contida na célula */
-    z-index: 2; /* Garante que a célula e seu conteúdo fiquem sobre os navios */
+    z-index: 1; /* Garante que a célula e seu conteúdo fiquem sobre os navios */
     user-select: none; /* Impede a seleção do texto dentro da célula */
+}
+
+.shipPart {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    z-index: 1; /* Fica abaixo dos tiros e explosões */
+    pointer-events: none; /* Não interfere com cliques */
+    image-rendering: pixelated; /* Melhora a aparência das imagens dos navios */
 }
 
 .miss {
@@ -89,6 +99,7 @@
   /* Força o GIF a reiniciar e depois desaparecer */
   /*animation: disappear 1.0s forwards;*/
   pointer-events: none; /* Garante que o GIF não interfira com cliques futuros */
+  z-index: 10;
 }
 
 .sinkingExplosion {
