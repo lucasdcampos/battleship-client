@@ -12,6 +12,14 @@
   box-sizing: border-box;
   overflow: hidden;
   text-align: center;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 10; /* Garante que a carta ampliada fique sobre as outras */
 }
 
 .cardImage {

@@ -78,7 +78,7 @@ function Play() {
 
   return (
     <div className={styles.playContainer}>
-      <Placar titulo="Seu Placar" ships={playerShipsState} />
+      {isPlacementConfirmed && <Placar titulo="Seu Placar" ships={playerShipsState} />}
       <div className={styles.mainGameArea}>
         <div className={styles.boardsContainer}>
           {/* Tabuleiro do Jogador */}
@@ -111,7 +111,7 @@ function Play() {
           </>
         )}
       </div>
-      <Placar titulo="Placar Inimigo" ships={enemyShipsState} />
+      {isPlacementConfirmed && <Placar titulo="Placar Inimigo" ships={enemyShipsState} />}
     </div>
   );
 }
