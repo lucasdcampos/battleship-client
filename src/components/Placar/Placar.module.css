@@ -1,18 +1,19 @@
-.placar-painel {
+
+.placar {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   background: #1565c0; /* azul */
-  border: 2px solid #8B5A2B; /* marrom */
+  border: 2px solid #8b5a2b; /* marrom */
   box-sizing: border-box;
   padding: 32px 16px;
   width: 250px;
   height: fit-content;
 }
 
-.placar-titulo {
-  color: #FFD600; /* amarelo */
+.placar h2 {
+  color: #ffd600; /* amarelo */
   text-align: center;
   margin-bottom: 32px;
   font-size: 1.5rem;
@@ -21,25 +22,29 @@
   text-shadow: 1px 1px 4px #0008;
 }
 
-.placar-lista {
+.listaEmbarcacoes {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 0;
+  list-style-type: none;
 }
 
-.placar-embarcacao {
-  background: #8B5A2B; /* marrom */
+.embarcacao {
+  background: #8b5a2b; /* marrom */
   color: #fff;
   padding: 12px 20px;
   border-radius: 8px;
   font-size: 1.1rem;
   font-weight: 500;
   box-shadow: 0 2px 8px #0002;
+  transition: all 0.2s ease-in-out;
 }
 
-.placar-vazio {
-  color: #fff;
+.sunk {
+  text-decoration: line-through;
+  background: #613f1d;
+  color: #aaa;
   opacity: 0.7;
-  text-align: center;
 }

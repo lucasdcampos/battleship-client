@@ -16,6 +16,7 @@ const initialShips = [
   {
     id: "ship5",
     size: 5,
+    name: "Porta-Aviões",
     img: ship5Img,
     top: 0,
     left: 0,
@@ -25,10 +26,14 @@ const initialShips = [
     gridX: null,
     gridY: null,
     alive: true,
+    isHidden: false,
+    hits: [], // Array para rastrear as coordenadas dos acertos
+    isSunk: false, // Novo estado para controlar se o navio afundou
   },
   {
     id: "ship4",
     size: 4,
+    name: "Encouraçado",
     img: ship4Img,
     top: 40,
     left: 0,
@@ -38,10 +43,14 @@ const initialShips = [
     gridX: null,
     gridY: null,
     alive: true,
+    isHidden: false,
+    hits: [],
+    isSunk: false,
   },
   {
     id: "ship3",
     size: 3,
+    name: "Submarino",
     img: ship3Img,
     top: 80,
     left: 0,
@@ -51,10 +60,14 @@ const initialShips = [
     gridX: null,
     gridY: null,
     alive: true,
+    isHidden: false,
+    hits: [],
+    isSunk: false,
   },
   {
     id: "ship2",
     size: 2,
+    name: "Destroier",
     img: ship2Img,
     top: 120,
     left: 0,
@@ -64,10 +77,14 @@ const initialShips = [
     gridX: null,
     gridY: null,
     alive: true,
+    isHidden: false,
+    hits: [],
+    isSunk: false,
   },
   {
     id: "ship1",
     size: 2,
+    name: "Destroier",
     img: ship1Img,
     top: 160,
     left: 0,
@@ -77,13 +94,18 @@ const initialShips = [
     gridX: null,
     gridY: null,
     alive: true,
+    isHidden: false,
+    hits: [],
+    isSunk: false,
   },
 ];
 
 const CELL_SIZE = 31.81;
 
-const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref) => {
-  const [ships, setShips] = useState(initialShips);
+const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }, ref) => {
+  const [ships, setShips] = useState(
+    initialShips.map((ship) => ({ ...ship, isHidden: areShipsHidden }))
+  );
   const [draggingShip, setDraggingShip] = useState(null);
   const [selectedShipId, setSelectedShipId] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -183,7 +205,7 @@ const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref)
     setShips((prevShips) =>
       prevShips.map((s) => {
         if (s.id === draggingShip) {
-          // Lógica de "snap-to-grid"
+          // Lógica de '''snap-to-grid'''
           const boardElement = boardRef.current;
           if (!boardElement) {
             return { ...s, isDragging: false }; // Não faz snap se o tabuleiro não for encontrado
@@ -336,65 +358,66 @@ const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref)
   );
 
   const placeShipsRandomly = useCallback(() => {
-    if (isLocked && !ref.current) return; // Previne execução automática em navios inimigos sem ref
+    if (!boardRef.current) return;
 
-    if (!boardRef.current) return; // Aguarda a referência do tabuleiro estar pronta
+    setShips((currentShips) => {
+      const placedShips = [];
+      const newShips = currentShips.map((ship) => {
+        let tempShip;
+        let validPositionFound = false;
+        let attempts = 0;
 
-    const placedShips = [];
+        while (!validPositionFound && attempts < 100) {
+          attempts++;
 
-    const newShips = initialShips.map((ship) => {
-      let tempShip;
-      let validPositionFound = false;
-      let attempts = 0;
+          const randomRotation = Math.random() < 0.5 ? 0 : 90;
+          const shipCellsWidth = randomRotation === 0 ? ship.size : 1;
+          const shipCellsHeight = randomRotation === 0 ? 1 : ship.size;
 
-      while (!validPositionFound && attempts < 100) {
-        // Limite de tentativas para evitar loop infinito
-        attempts++;
+          const maxX = 10 - shipCellsWidth;
+          const maxY = 10 - shipCellsHeight;
 
-        const randomRotation = Math.random() < 0.5 ? 0 : 90;
-        const shipCellsWidth = randomRotation === 0 ? ship.size : 1;
-        const shipCellsHeight = randomRotation === 0 ? 1 : ship.size;
+          const randomGridX = Math.floor(Math.random() * (maxX + 1));
+          const randomGridY = Math.floor(Math.random() * (maxY + 1));
 
-        const maxX = 10 - shipCellsWidth;
-        const maxY = 10 - shipCellsHeight;
-
-        const randomGridX = Math.floor(Math.random() * (maxX + 1));
-        const randomGridY = Math.floor(Math.random() * (maxY + 1));
-
-        tempShip = {
-          ...ship,
-          rotation: randomRotation,
-          gridX: randomGridX,
-          gridY: randomGridY,
-        };
-
-        const collision = placedShips.some((placed) =>
-          isOverlapping(tempShip, placed)
-        );
-
-        if (!collision) {
-          validPositionFound = true;
-          const finalShip = {
-            ...tempShip,
-            top: randomGridY * CELL_SIZE + CELL_SIZE,
-            left: randomGridX * CELL_SIZE + CELL_SIZE,
-            isPlaced: true,
+          tempShip = {
+            ...ship,
+            rotation: randomRotation,
+            gridX: randomGridX,
+            gridY: randomGridY,
           };
-          placedShips.push(finalShip);
-          return finalShip;
+
+          const collision = placedShips.some((placed) =>
+            isOverlapping(tempShip, placed)
+          );
+
+          if (!collision) {
+            validPositionFound = true;
+            const finalShip = {
+              ...tempShip,
+              top: randomGridY * CELL_SIZE + CELL_SIZE,
+              left: randomGridX * CELL_SIZE + CELL_SIZE,
+              isPlaced: true,
+              isHidden: ship.isHidden, // Mantém a propriedade isHidden
+            };
+            placedShips.push(finalShip);
+            return finalShip;
+          }
         }
-      }
-      return ship; // Retorna o navio original se não encontrar posição
+        return ship; // Retorna o navio original se não encontrar posição
+      });
+      return newShips;
     });
-    setShips(newShips);
-  }, [boardRef, isLocked]);
+  }, [boardRef]);
 
   useImperativeHandle(ref, () => ({
     randomize: placeShipsRandomly,
     getShipPositions: () => {
-      const positions = [];
+      // Retorna posições e informações dos navios
+      const positions = {};
       ships.forEach((ship) => {
         if (ship.isPlaced) {
+          positions[ship.id] = { ...ship, cells: [] };
           for (let i = 0; i < ship.size; i++) {
             if (ship.rotation === 0) {
               // Horizontal
@@ -407,6 +430,49 @@ const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref)
         }
       });
       return positions;
+    },
+    getShips: () => ships, // Expõe o estado atual dos navios
+    registerHit: (x, y) => {
+      let hitShipId = null;
+      const newShips = ships.map(ship => {
+        const isPartOfShip = ship.isPlaced && Array.from({ length: ship.size }).some((_, i) =>
+          ship.rotation === 0
+            ? ship.gridX + i === x && ship.gridY === y
+            : ship.gridX === x && ship.gridY + i === y
+        );
+
+        if (isPartOfShip) {
+          hitShipId = ship.id;
+          const newHits = [...ship.hits, { x, y }];
+          const isSunk = newHits.length === ship.size;
+          return { ...ship, hits: newHits, isSunk: isSunk };
+        }
+        return ship;
+      });
+      setShips(newShips);
+      return hitShipId; // Retorna o ID do navio atingido
+    },
+    revealShip: (x, y) => {
+      setShips((prevShips) =>
+        prevShips.map((ship) => {
+          const isPartOfShip = () => {
+            if (!ship.isPlaced) return false;
+            for (let i = 0; i < ship.size; i++) {
+              if (ship.rotation === 0) {
+                if (ship.gridX + i === x && ship.gridY === y) return true;
+              } else {
+                if (ship.gridX === x && ship.gridY + i === y) return true;
+              }
+            }
+            return false;
+          };
+
+          if (isPartOfShip()) {
+            return { ...ship, isHidden: false };
+          }
+          return ship;
+        })
+      );
     },
   }));
 
@@ -445,33 +511,36 @@ const Ships = forwardRef(({ boardRef, isLocked = false, isHidden = false }, ref)
     boardRef,
   ]);
 
-  if (isHidden) return null;
-
   return (
     <div className={styles.ships}>
-      {ships.map((ship) => (
-        <div
-          key={ship.id}
-          id={ship.id}
-          className={`${styles.ship} ${ship.isDragging && !isLocked ? styles.dragging : ""} ${
-            ship.id === selectedShipId && !isLocked ? styles.selected : ""
-          } ${isLocked ? styles.locked : ""}`}
-          style={{
-            top: ship.top,
-            left: ship.left,
-            "--ship-size": ship.size,
-            transform: `rotate(${ship.rotation}deg)`,
-          }}
-          onMouseDown={(e) => handleMouseDown(e, ship.id)}
-          onContextMenu={(e) => handleContextMenu(e, ship.id)}
-        >
-          <img
-            src={ship.img}
-            alt={`Ship ${ship.size}`}
-            className={styles.shipImage}
-          />
-        </div>
-      ))}
+      {ships.map(
+        (ship) =>
+          (!ship.isHidden || ship.isSunk) && ( // Mostra o navio se não estiver escondido OU se estiver afundado
+            <div
+              key={ship.id}
+              id={ship.id}
+              className={`${styles.ship} ${
+                ship.isDragging && !isLocked ? styles.dragging : ""
+              } ${
+                ship.id === selectedShipId && !isLocked ? styles.selected : ""
+              } ${isLocked ? styles.locked : ""}`}
+              style={{
+                top: ship.top,
+                left: ship.left,
+                "--ship-size": ship.size,
+                transform: `rotate(${ship.rotation}deg)`,
+              }}
+              onMouseDown={(e) => handleMouseDown(e, ship.id)}
+              onContextMenu={(e) => handleContextMenu(e, ship.id)}
+            >
+              <img
+                src={ship.img}
+                alt={`Ship ${ship.size}`}
+                className={styles.shipImage}
+              />
+            </div>
+          )
+      )}
     </div>
   );
 });
