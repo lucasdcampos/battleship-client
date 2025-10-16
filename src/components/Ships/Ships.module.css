@@ -31,3 +31,16 @@
     cursor: default;
     pointer-events: none;
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sunk {
+  animation: fadeIn 1.0s ease-in;
+}

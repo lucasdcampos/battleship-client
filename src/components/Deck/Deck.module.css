@@ -1,0 +1,28 @@
+.deckContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 28px;
+  background: #1565c0; /* azul */
+  border: 2px solid #8b5a2b; /* marrom */
+  border-radius: 10px;
+  margin-top: -10px;
+}
+
+.cardSlot {
+  width: 96px;
+  height: 132px;
+  border: 2px dashed #8b5a2b;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff5;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.cardSlot:has(> div) {
+  background-color: transparent;
+  border-style: solid;
+}

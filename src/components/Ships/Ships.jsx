@@ -521,7 +521,7 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
               id={ship.id}
               className={`${styles.ship} ${
                 ship.isDragging && !isLocked ? styles.dragging : ""
-              } ${
+              } ${ship.isSunk ? styles.sunk : ""} ${
                 ship.id === selectedShipId && !isLocked ? styles.selected : ""
               } ${isLocked ? styles.locked : ""}`}
               style={{
