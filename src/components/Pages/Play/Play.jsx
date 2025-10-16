@@ -14,22 +14,8 @@ function Play() {
   const [shots, setShots] = useState([]); // Estado para armazenar os tiros
   const [activeEmoji, setActiveEmoji] = useState(null);
   const [isPlacementConfirmed, setIsPlacementConfirmed] = useState(false);
-
-  // Dados de exemplo para os placares
-  const playerShips = [
-    "Porta-Aviões",
-    "Encouraçado",
-    "Submarino",
-    "Destroier",
-    "Destroier",
-  ];
-  const enemyShips = [
-    "Porta-Aviões",
-    "Encouraçado",
-    "Submarino",
-    "Destroier",
-    "Destroier",
-  ];
+  const [playerShipsState, setPlayerShipsState] = useState([]);
+  const [enemyShipsState, setEnemyShipsState] = useState([]);
 
   const handleRandomizeClick = () => {
     if (shipsRef.current) {
@@ -47,17 +33,19 @@ function Play() {
       return;
     }
 
-    const shipPositions = enemyShipsRef.current.getShipPositions();
-    const isHit = shipPositions.some(pos => pos.x === x && pos.y === y);
+    // Registra o tiro no componente Ships e obtém o ID do navio atingido
+    const hitShipId = enemyShipsRef.current.registerHit(x, y);
 
-    if (isHit) {
+    if (!!hitShipId) {
       alert(`Acertou em ${coordinate}!`);
     } else {
       alert(`Errou em ${coordinate}!`);
     }
 
     // Adiciona o novo tiro ao estado
-    setShots([...shots, { x, y, isHit }]);
+    setShots([...shots, { x, y, isHit: !!hitShipId }]);
+    // Atualiza o estado dos navios inimigos para o placar
+    setEnemyShipsState(enemyShipsRef.current.getShips());
   };
 
   const handleConfirmClick = () => {
@@ -68,7 +56,11 @@ function Play() {
   useEffect(() => {
     // Posiciona os navios inimigos aleatoriamente quando o jogador confirma sua posição
     if (isPlacementConfirmed && enemyShipsRef.current) {
-      enemyShipsRef.current.randomize();
+      setTimeout(() => { // Pequeno delay para garantir que o estado de lock foi propagado
+        enemyShipsRef.current.randomize();
+        setPlayerShipsState(shipsRef.current.getShips());
+        setEnemyShipsState(enemyShipsRef.current.getShips());
+      }, 100);
     }
   }, [isPlacementConfirmed]);
 
@@ -85,7 +77,7 @@ function Play() {
 
   return (
     <div className={styles.playContainer}>
-      <Placar titulo="Seu Placar" embarcacoes={playerShips} />
+      <Placar titulo="Seu Placar" ships={playerShipsState} />
       <div className={styles.mainGameArea}>
         <div className={styles.boardsContainer}>
           {/* Tabuleiro do Jogador */}
@@ -104,8 +96,8 @@ function Play() {
           </div>
           {/* Tabuleiro Inimigo (Réplica) */}
           <div className={styles.boardWrapper}>
-            <Board ref={enemyBoardRef} onCellClick={handleCellClick} shots={shots}>
-              <Ships ref={enemyShipsRef} boardRef={enemyBoardRef} isLocked={true} isHidden={true} />
+            <Board ref={enemyBoardRef} onCellClick={handleCellClick} shots={shots} >
+              <Ships ref={enemyShipsRef} boardRef={enemyBoardRef} isLocked={true} areShipsHidden={true} />
             </Board>
           </div>
         </div>
@@ -113,7 +105,7 @@ function Play() {
           <><EmojiAnimation emoji={activeEmoji} onAnimationEnd={handleAnimationEnd} /><EmojiBox onEmojiSelect={handleEmojiSelect} /></>
         )}
       </div>
-      <Placar titulo="Placar Inimigo" embarcacoes={enemyShips} />
+      <Placar titulo="Placar Inimigo" ships={enemyShipsState} />
     </div>
   );
 }

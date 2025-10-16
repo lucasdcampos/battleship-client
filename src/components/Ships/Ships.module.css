@@ -4,7 +4,7 @@
     height: 31.81px;
     box-sizing: border-box;
     cursor: grab;
-    z-index: 10;
+    z-index: 3;
     transition: transform 0.2s ease-in-out;
     transform-origin: 15.9px 15.9px; /* Metade de CELL_SIZE (31.81px) */
 }

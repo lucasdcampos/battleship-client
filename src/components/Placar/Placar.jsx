@@ -1,20 +1,21 @@
-import "./Placar.css";
+import styles from "./Placar.module.css";
 
-export default function Placar({ titulo, embarcacoes }) {
-    return ( 
-        <div className="placar-painel">
-            <h2 className="placar-titulo">{titulo}</h2>
-            <div className="placar-lista">
-                {embarcacoes && embarcacoes.length > 0 ? (
-                    embarcacoes.map((nome, idx) => (
-                        <div className="placar-embarcacao" key={idx}>
-                            {nome}
-                        </div>
-                    ))
-                ) : (
-                    <div className="placar-vazio">Nenhuma embarcação</div>
-                )}
-            </div>
-        </div>
-    );
+function Placar({ titulo, ships = [] }) {
+  return (
+    <div className={styles.placar}>
+      <h2>{titulo}</h2>
+      <ul className={styles.listaEmbarcacoes}>
+        {ships.map((ship) => (
+          <li
+            key={ship.id}
+            className={`${styles.embarcacao} ${ship.isSunk ? styles.sunk : ""}`}
+          >
+            {ship.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
+
+export default Placar;

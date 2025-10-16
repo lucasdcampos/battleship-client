@@ -52,14 +52,31 @@ const Board = forwardRef(({ children, onCellClick, shots = [] }, ref) => {
                     {[...Array(121)].map((_, i) => {
                         const x = (i % 11) - 1;
                         const y = Math.floor(i / 11) - 1;
-                        const shot = shots.find(s => s.x === x && s.y === y);
+                        let shot = shots.find(s => s.x === x && s.y === y);
+
+                        // Verifica se a célula está ocupada por um navio afundado
+                        if (children && children.props && children.props.ref && children.props.ref.current) {
+                            const ships = children.props.ref.current.getShips();
+                            const isOccupiedBySunkShip = ships.some(ship => {
+                                if (!ship.isSunk) return false;
+                                return Array.from({ length: ship.size }).some((_, partIndex) => {
+                                    const partX = ship.rotation === 0 ? ship.gridX + partIndex : ship.gridX;
+                                    const partY = ship.rotation === 0 ? ship.gridY : ship.gridY + partIndex;
+                                    return partX === x && partY === y;
+                                });
+                            });
+
+                            if (isOccupiedBySunkShip) {
+                                shot = null; // Remove o tiro para não renderizar o efeito
+                            }
+                        }
 
                         return (
                             <div key={i} className={getCellClassName(i, shot)} onClick={() => handleCellClick(i)}>
-                                {getCellContent(i, shot)} 
-                                {shot && shot.isHit && (
+                                {getCellContent(i, shot)}
+                                {shot && shot.isHit ? (
                                     <div className={styles.explosion}></div>
-                                )}
+                                ) : null}
                             </div>
                         );
                     })}
