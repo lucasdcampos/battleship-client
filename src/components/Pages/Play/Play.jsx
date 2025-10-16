@@ -5,6 +5,7 @@ import Ships from "../../Ships/Ships";
 import EmojiBox from "../../EmojiBox/EmojiBox";
 import EmojiAnimation from "../../EmojiBox/EmojiAnimation";
 import Placar from "../../Placar/Placar";
+import Deck from "../../Deck/Deck";
 
 function Play() {
   const boardRef = useRef(null);
@@ -102,7 +103,12 @@ function Play() {
           </div>
         </div>
         {isPlacementConfirmed && (
-          <><EmojiAnimation emoji={activeEmoji} onAnimationEnd={handleAnimationEnd} /><EmojiBox onEmojiSelect={handleEmojiSelect} /></>
+          <>
+            <EmojiAnimation
+              emoji={activeEmoji}
+              onAnimationEnd={handleAnimationEnd}
+            /><EmojiBox onEmojiSelect={handleEmojiSelect} /><Deck />
+          </>
         )}
       </div>
       <Placar titulo="Placar Inimigo" ships={enemyShipsState} />
