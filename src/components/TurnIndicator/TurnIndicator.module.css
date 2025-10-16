@@ -1,0 +1,15 @@
+.turnIndicator {
+  background: #1565c0; /* azul */
+  border: 2px solid #8b5a2b; /* marrom */
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 200px;
+}
+
+.turnIndicator h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
