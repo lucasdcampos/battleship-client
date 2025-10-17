@@ -3,13 +3,11 @@
     {
       "id": "1",
       "basicData": {
-        "email": "tioben@example.com",
-        "username": "tioben",
-        "fatecCoins": 9999
+        "fatecCoins": null
       },
       "currentCosmetic": {
         "currentIcon": "E00002",
-        "currentBackground": "A00002",
+        "currentBackground": "A00001",
         "currentEffect": "D00001",
         "currentPrimaryColor": "#242424",
         "currentSecondaryColor": "gray",
@@ -74,6 +72,163 @@
         "gamesWon": 75,
         "lvl": 12,
         "exp": 700
+      },
+      "market": {
+        "sell_icons": [
+          {
+            "titulo": "Icon 2",
+            "preco": "2",
+            "imagem": "E00002"
+          },
+          {
+            "titulo": "Icon 3",
+            "preco": "2",
+            "imagem": "E00003"
+          },
+          {
+            "titulo": "Icon 4",
+            "preco": "2",
+            "imagem": "E00004"
+          }
+        ],
+        "sell_effects": [
+          {
+            "titulo": "Effect 1",
+            "preco": "2",
+            "imagem": "D00001"
+          },
+          {
+            "titulo": "Effect 2",
+            "preco": "2",
+            "imagem": "D00002"
+          },
+          {
+            "titulo": "Effect 3",
+            "preco": "2",
+            "imagem": "D00003"
+          },
+          {
+            "titulo": "Effect 4",
+            "preco": "2",
+            "imagem": "D00004"
+          }
+        ],
+        "sell_backgrounds": [
+          {
+            "titulo": "Background 1",
+            "preco": "2",
+            "imagem": "A00001"
+          },
+          {
+            "titulo": "Background 2",
+            "preco": "2",
+            "imagem": "A00002"
+          },
+          {
+            "titulo": "Background 3",
+            "preco": "2",
+            "imagem": "A00003"
+          },
+          {
+            "titulo": "Background 4",
+            "preco": "2",
+            "imagem": "A00004"
+          },
+          {
+            "titulo": "Background 5",
+            "preco": "2",
+            "imagem": "A00005"
+          }
+        ],
+        "sell_cards": [
+          {
+            "titulo": "Teleguiado",
+            "preco": "0",
+            "imagem": "C00002"
+          },
+          {
+            "titulo": "Hit-Kill",
+            "preco": "0",
+            "imagem": "C00003"
+          },
+          {
+            "titulo": "Ressureição",
+            "preco": "0",
+            "imagem": "C00004"
+          },
+          {
+            "titulo": "Fantasma",
+            "preco": "0",
+            "imagem": "C00005"
+          },
+          {
+            "titulo": "Escudo",
+            "preco": "0",
+            "imagem": "C00006"
+          }
+        ],
+        "sell_ships": [
+          {
+            "titulo": "Aircraft Carrier 1",
+            "preco": "2",
+            "imagem": "H00002"
+          },
+          {
+            "titulo": "Aircraft Carrier 2",
+            "preco": "2",
+            "imagem": "H00003"
+          },
+          {
+            "titulo": "Aircraft Carrier 3",
+            "preco": "2",
+            "imagem": "H00004"
+          },
+          {
+            "titulo": "Battleship 1",
+            "preco": "2",
+            "imagem": "G00002"
+          },
+          {
+            "titulo": "Battleship 2",
+            "preco": "2",
+            "imagem": "G00003"
+          },
+          {
+            "titulo": "Battleship 3",
+            "preco": "2",
+            "imagem": "G00004"
+          },
+          {
+            "titulo": "Destroyer 1",
+            "preco": "2",
+            "imagem": "F00002"
+          },
+          {
+            "titulo": "Destroyer 2",
+            "preco": "2",
+            "imagem": "F00003"
+          },
+          {
+            "titulo": "Destroyer 3",
+            "preco": "2",
+            "imagem": "F00004"
+          },
+          {
+            "titulo": "Submarine 1",
+            "preco": "2",
+            "imagem": "I00002"
+          },
+          {
+            "titulo": "Submarine 2",
+            "preco": "2",
+            "imagem": "I00003"
+          },
+          {
+            "titulo": "Submarine 3",
+            "preco": "2",
+            "imagem": "I00004"
+          }
+        ]
       }
     }
   ]
