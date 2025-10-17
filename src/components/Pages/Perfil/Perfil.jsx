@@ -43,7 +43,7 @@ function Perfil() {
   const { user, setUserAtt } = useAuth();
 
   useEffect(() => {
-    getUser(user.data.basicData.id).then((data) => {
+    getUser(1).then((data) => {
       // Estatísticas
       setLvl(data.statistic.lvl);
       setExp(data.statistic.exp);

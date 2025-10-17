@@ -82,11 +82,6 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     checkUserToken();
-    // const stored = localStorage.getItem("user");
-    // if (stored) {
-    //   setUser(JSON.parse(stored));
-    // }
-    // setLoading(false);
   }, []);
 
   const signIn = async (email, password) => {
