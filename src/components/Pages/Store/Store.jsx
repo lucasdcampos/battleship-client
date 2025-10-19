@@ -70,14 +70,20 @@ export default function Store() {
     ).href;
   }
 
-  function handleBuy(fatecCoins, productPrice) {
+  function handleBuy(fatecCoins, productPrice, userID) {
     if (fatecCoins < productPrice) {
-      // alert("sem saldo fi, ta duro dorme!");
+      alert("sem saldo fi, ta duro dorme!");
     } else {
       try {
-        const newValue = fatecCoins - productPrice;
-        const dataToUpgrade = { basicData: { fatecCoins: newValue } };
-        updateUser(1, dataToUpgrade);
+        getUser(1).then((data) => {
+          const newCoinsValue = fatecCoins - productPrice;
+          const coinsUpdate = { basicData: { fatecCoins: newCoinsValue } };
+          updateUser(userID, coinsUpdate);
+          const complete =
+            "available" + actualTab[0].toUpperCase() + actualTab.slice(1);
+          const newProductsAvaible = data.availableCosmetic[complete];
+          console.log(newProductsAvaible);
+        });
       } catch {
         alert("erro ao comprar!");
       }
@@ -89,7 +95,7 @@ export default function Store() {
     loadUserCoins();
   }, []);
 
-  console.log(Fatec_coins);
+  handleBuy();
 
   return (
     <div className={styles.container}>
@@ -167,7 +173,7 @@ export default function Store() {
               titulo={card.titulo}
               preco={card.preco}
               imagem={getImagePath(card.imagem)}
-              onComprar={handleBuy(Fatec_coins, card.preco)}
+              // onComprar={handleBuy(1, Fatec_coins, card.preco)}
             />
           ))}
       </div>
