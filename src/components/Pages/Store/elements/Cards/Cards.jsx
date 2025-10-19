@@ -14,7 +14,12 @@ export default function Card({ titulo, preco, imagem, onComprar }) {
         {preco} <img src={fc} alt="" style={{ width: "15px" }} />
       </p>
 
-      <button className={styles.button} onClick={onComprar}>
+      <button
+        className={styles.button}
+        onClick={() => {
+          onComprar;
+        }}
+      >
         <span className={styles.icon}>🛒</span> Comprar
       </button>
     </div>
