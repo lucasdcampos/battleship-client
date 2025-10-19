@@ -3,11 +3,11 @@
     {
       "id": "1",
       "basicData": {
-        "fatecCoins": null
+        "fatecCoins": 9921
       },
       "currentCosmetic": {
         "currentIcon": "E00002",
-        "currentBackground": "A00001",
+        "currentBackground": "A00002",
         "currentEffect": "D00001",
         "currentPrimaryColor": "#242424",
         "currentSecondaryColor": "gray",

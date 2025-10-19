@@ -138,46 +138,6 @@ function Perfil() {
       : setIncrementIndex(getActiveList().length - 1);
   }
 
-  // function sendModification() {
-  //   const selected = getActiveList()[incrementIndex];
-
-  //   switch (activeTab) {
-  //     case "icons":
-  //       setActualIcon(selected);
-  //       localStorage.setItem("userIcon", selected);
-  //       break;
-  //     case "backgrounds":
-  //       setActualBackground(selected);
-  //       localStorage.setItem("userBackground", selected);
-  //       break;
-  //     case "effects":
-  //       setActualEffect(selected);
-  //       localStorage.setItem("userEffect", selected);
-  //       break;
-  //     case "colors":
-  //       document.documentElement.style.setProperty(
-  //         "--primary-color",
-  //         newPrimaryColor
-  //       );
-  //       document.documentElement.style.setProperty(
-  //         "--secondary-color",
-  //         newSecondaryColor
-  //       );
-  //       document.documentElement.style.setProperty(
-  //         "--tertiary-color",
-  //         newTertiaryColor
-  //       );
-  //       document.documentElement.style.setProperty(
-  //         "--font-color",
-  //         newFontColor
-  //       );
-  //       setActualPrimaryColor(newPrimaryColor);
-  //       setActualSecondaryColor(newSecondaryColor);
-  //       setActualTertiaryColor(newTertiaryColor);
-  //       setActualFontColor(newFontColor);
-  //       break;
-  //   }
-  // }
   async function sendModification() {
     const selected = getActiveList()[incrementIndex];
 
