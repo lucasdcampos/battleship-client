@@ -20,7 +20,7 @@ function LoginForm() {
     e.preventDefault();
 
     await signIn(email, password);
-    navigate("/Perfil");
+    navigate("/lobby");
   }
 
   async function handleSubmitSignupForm(e) {
@@ -72,11 +72,7 @@ function LoginForm() {
           >
             Criar nova conta
           </button>
-          <button
-            type="submit"
-            className={styles.main_button}
-            onClick={() => handleSubmitLoginForm()}
-          >
+          <button type="submit" className={styles.main_button}>
             Entrar
           </button>
         </form>

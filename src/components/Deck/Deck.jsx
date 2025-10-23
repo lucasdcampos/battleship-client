@@ -1,20 +1,20 @@
 import React from "react";
 import styles from "./Deck.module.css";
 import Card from "../Cards/Card";
-import AimShot from "../../assets/cards/aim-shot.png";
-import HitKill from "../../assets/cards/hit-kill.png";
-import Resurrect from "../../assets/cards/resurrect.png";
-import GhostShip from "../../assets/cards/ghost-ship.png";
-import Shield from "../../assets/cards/shield.png";
+import C00001 from "../../assets/cosmetic/cards/C00001.png";
+import C00002 from "../../assets/cosmetic/cards/C00002.png";
+import C00003 from "../../assets/cosmetic/cards/C00003.png";
+import C00004 from "../../assets/cosmetic/cards/C00004.png";
+import C00005 from "../../assets/cosmetic/cards/C00005.png";
 
 const Deck = ({ cards = [] }) => {
   // Dados de exemplo para visualização
   const exampleCards = [
-    { id: "c1", image: AimShot, title: "Teleguiado" },
-    { id: "c2", image: HitKill, title: "Hit-Kill" },
-    { id: "c3", image: Resurrect, title: "Ressureição" },
-    { id: "c4", image: GhostShip, title: "Fanstama" },
-    { id: "c5", image: Shield, title: "Escudo" },
+    { id: "c1", image: C00001, title: "Teleguiado" },
+    { id: "c2", image: C00002, title: "Hit-Kill" },
+    { id: "c3", image: C00003, title: "Massivo" },
+    { id: "c4", image: C00004, title: "Counter" },
+    { id: "c5", image: C00005, title: "Fantasma" },
   ];
 
   const cardsToDisplay = cards.length > 0 ? cards : exampleCards;

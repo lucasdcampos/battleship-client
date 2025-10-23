@@ -1,0 +1,129 @@
+.lobbyBackground {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 80px); /* Altura da viewport menos o header */
+    width: 100%;
+    background-color: var(--primary-color);
+    color: var(--font-color);
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+.lobbyContainer {
+    background-color: var(--secondary-color);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+}
+
+.title {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    color: var(--tertiary-color);
+}
+
+.cardContainer {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+}
+
+.gameCard {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--tertiary-color);
+    border-radius: 10px;
+    padding: 30px;
+    width: 300px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gameCard:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.gameCard h3 {
+    margin-top: 0;
+    font-size: 1.8rem;
+    color: var(--tertiary-color);
+}
+
+.gameCard p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.spinner {
+    border: 6px solid rgba(255, 255, 255, 0.3);
+    border-top: 6px solid var(--tertiary-color);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.loadingContainer p {
+    font-size: 1.2rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.inviteContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.inviteInput {
+    padding: 12px;
+    width: 300px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+.inviteButton, .backButton {
+    padding: 12px 25px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.inviteButton {
+    background-color: var(--tertiary-color);
+    color: white;
+}
+
+.inviteButton:hover {
+    background-color: #d8931a;
+}
+
+.backButton {
+    background-color: #6c757d;
+    color: white;
+}
+
+.backButton:hover {
+    background-color: #5a6268;
+}
