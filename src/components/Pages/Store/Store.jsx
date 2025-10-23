@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
 import Card from "./elements/Cards/Cards";
 import styles from "./Store.module.css";
 import fc from "../../../assets/development/fc.png";
 import { getUser, updateUser } from "../../../../backandSimulation/userService";
+import { useAuth } from "../../../user/useAuth";
+import { useState, useEffect } from "react";
 
 export default function Store() {
+  const { user, loading, isAuthenticated } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
   const [tabs, setTabs] = useState(null);
-  const [Fatec_coins, setFatecCoins] = useState(0);
+  const Fatec_coins = user?.basicData?.fatecCoins || 0;
 
-  function setMarket() {
-    getUser(1).then((data) => {
+  function setMarket(userID) {
+    getUser(userID).then((data) => {
       setTabs({
         icons: data.market.sell_icons,
         effects: data.market.sell_effects,
@@ -18,12 +20,6 @@ export default function Store() {
         cards: data.market.sell_cards,
         ships: data.market.sell_ships,
       });
-    });
-  }
-
-  function loadUserCoins() {
-    getUser(1).then((data) => {
-      setFatecCoins(data.basicData.fatecCoins);
     });
   }
 
@@ -70,32 +66,85 @@ export default function Store() {
     ).href;
   }
 
-  function handleBuy(fatecCoins, productPrice, userID) {
-    if (fatecCoins < productPrice) {
+  const handleBuy = async (product) => {
+    const userID = user?.id || 1;
+    const currentFatecCoins = user?.basicData?.fatecCoins || 0;
+    const productPrice = product.preco;
+
+    if (currentFatecCoins < productPrice) {
       alert("sem saldo fi, ta duro dorme!");
-    } else {
-      try {
-        getUser(1).then((data) => {
-          const newCoinsValue = fatecCoins - productPrice;
-          const coinsUpdate = { basicData: { fatecCoins: newCoinsValue } };
-          updateUser(userID, coinsUpdate);
-          const complete =
-            "available" + actualTab[0].toUpperCase() + actualTab.slice(1);
-          const newProductsAvaible = data.availableCosmetic[complete];
-          console.log(newProductsAvaible);
-        });
-      } catch {
-        alert("erro ao comprar!");
-      }
+      return;
     }
-  }
+
+    try {
+      // att muedas
+      const newCoinsValue = currentFatecCoins - productPrice;
+      const coinsUpdate = { basicData: { fatecCoins: newCoinsValue } };
+      await updateUser(userID, coinsUpdate); // Await para garantir que a atualização termine
+
+      // add item no inv do ujsuario
+      let updatePayload = {};
+      let cosmeticTypeKey =
+        "available" + actualTab[0].toUpperCase() + actualTab.slice(1);
+
+      if (actualTab === "ships") {
+        let shipType;
+        if (product.imagem[0] === "H") shipType = "aircraftCarrier";
+        else if (product.imagem[0] === "G") shipType = "battleship";
+        else if (product.imagem[0] === "F") shipType = "destroyer";
+        else if (product.imagem[0] === "I") shipType = "submarine";
+
+        // pega skins atual e ad novas
+        const currentShipSkins = user?.availableShipSkins?.[shipType] || [];
+        updatePayload.availableShipSkins = {
+          ...user.availableShipSkins,
+          [shipType]: [...currentShipSkins, product.imagem],
+        };
+      } else {
+        // icons, effects, backgrounds, cards
+        const currentCosmetics =
+          user?.availableCosmetic?.[cosmeticTypeKey] || [];
+        updatePayload.availableCosmetic = {
+          ...user.availableCosmetic,
+          [cosmeticTypeKey]: [...currentCosmetics, product.imagem],
+        };
+      }
+
+      await updateUser(userID, updatePayload);
+
+      alert(`Você comprou ${product.titulo} por ${productPrice} Fatec Coins!`);
+
+      // Após a compra, recarregue os dados do usuário para refletir as mudanças
+      // Isso deve ser feito através do seu AuthContext para atualizar o 'user' globalmente.
+      // Assumindo que você tem uma função para recarregar o usuário no AuthContext
+      if (user && user.refreshUser) {
+        // Se você tem essa função no seu AuthContext
+        user.refreshUser();
+      } else {
+        // Se não tiver refreshUser, você pode re-chamar setMarket e loadUserCoins
+        // Mas o ideal é que o user no contexto seja atualizado
+        setMarket(1);
+        // loadUserCoins(); // Não é mais um estado local
+      }
+    } catch (error) {
+      alert("Erro ao comprar!");
+      console.error("Erro na compra:", error);
+    }
+  };
 
   useEffect(() => {
-    setMarket();
-    loadUserCoins();
-  }, []);
+    if (!loading && user) {
+      setMarket(1);
+    }
+  }, [loading, user]);
 
-  handleBuy();
+  if (loading) {
+    return <div>Carregando Loja...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className={styles.container}>
@@ -173,7 +222,7 @@ export default function Store() {
               titulo={card.titulo}
               preco={card.preco}
               imagem={getImagePath(card.imagem)}
-              // onComprar={handleBuy(1, Fatec_coins, card.preco)}
+              onComprar={() => handleBuy(card)}
             />
           ))}
       </div>

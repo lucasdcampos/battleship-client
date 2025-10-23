@@ -126,7 +126,7 @@ export function AuthProvider({ children }) {
                 availableIcons: ["E00001", "E00002"],
                 availableBackgrounds: ["A00001", "A00002"],
                 availableEffects: ["D00001", "D00002"],
-                availableCards: [ 
+                availableCards: [
                   "C00001",
                   "C00002",
                   "C00003",
