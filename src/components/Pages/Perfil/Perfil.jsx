@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import styles from "./Perfil.module.css";
 import ProgressBar from "./elements/ProgressBar";
 import Perfil_Card from "./elements/Perfil_Card";
+import PopupComponent from "./elements/PopupComponent"; // IMPORTAR O POPUP
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
 import { getUser } from "../../../../backandSimulation/userService";
 import { updateUser } from "../../../../backandSimulation/userService";
 
 function Perfil() {
-  // Abaixo estão todos os dados do usuário que virão por meio do backend. No momento os valores abaixo são simulação
+  // Estados existentes...
   const [lvl, setLvl] = useState(0);
   const [exp, setExp] = useState(0);
   const [partidas, setPartidas] = useState(0);
@@ -25,7 +26,8 @@ function Perfil() {
   const [actualSecondaryColor, setActualSecondaryColor] = useState(null);
   const [actualTertiaryColor, setActualTertiaryColor] = useState(null);
   const [actualFontColor, setActualFontColor] = useState(null);
-  // Abaixo as variáveis utilizadas nas funções
+  
+  // Estados existentes do popup de perfil
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
   const [activeTab, setActiveTab] = useState("icons");
   const [incrementIndex, setIncrementIndex] = useState(0);
@@ -34,10 +36,14 @@ function Perfil() {
   const [newTertiaryColor, setNewTertiaryColor] = useState(null);
   const [newFontColor, setNewFontColor] = useState(null);
 
+  // NOVOS ESTADOS PARA O POPUP DE CARDS/SKINS
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [popupType, setPopupType] = useState('cards'); // 'cards' ou 'skins'
+
   const { user, setUserAtt } = useAuth();
 
   useEffect(() => {
-    getUser(user.data.basicData.id).then((data) => {
+    getUser(1).then((data) => {
       // Estatísticas
       setLvl(data.statistic.lvl);
       setExp(data.statistic.exp);
@@ -76,6 +82,47 @@ function Perfil() {
     );
   }
 
+  // NOVAS FUNÇÕES PARA ABRIR O POPUP
+  const handleOpenCardsPopup = () => {
+    setPopupType('cards');
+    setIsPopupOpen(true);
+  };
+
+  const handleOpenSkinsPopup = () => {
+    setPopupType('skins');
+    setIsPopupOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+  };
+
+  // NOVA FUNÇÃO PARA RECARREGAR DADOS APÓS SALVAR
+  const handlePopupSave = () => {
+    getUser(user.data.basicData.id).then((data) => {
+      // Atualizar todos os estados com os dados mais recentes
+      setLvl(data.statistic.lvl);
+      setExp(data.statistic.exp);
+      setPartidas(data.statistic.gamesPlayed);
+      setVitorias(data.statistic.gamesWon);
+      setCards(data.availableCosmetic.availableCards.length);
+      setIcons(data.availableCosmetic.availableIcons);
+      setBackgrounds(data.availableCosmetic.availableBackgrounds);
+      setEffects(data.availableCosmetic.availableEffects);
+      setActualIcon(data.currentCosmetic.currentIcon);
+      setActualBackground(data.currentCosmetic.currentBackground);
+      setActualEffect(data.currentCosmetic.currentEffect);
+      setActualPrimaryColor(data.currentCosmetic.currentPrimaryColor);
+      setActualSecondaryColor(data.currentCosmetic.currentSecondaryColor);
+      setActualTertiaryColor(data.currentCosmetic.currentTertiaryColor);
+      setActualFontColor(data.currentCosmetic.currentFontColor);
+    });
+    
+    // Notificar contexto de autenticação sobre mudanças
+    setUserAtt((prev) => !prev);
+  };
+
+  // Funções existentes...
   function getActiveList() {
     switch (activeTab) {
       case "icons":
@@ -88,6 +135,7 @@ function Perfil() {
         return [];
     }
   }
+
   function getImagePath(code) {
     let basePath = "";
 
@@ -105,7 +153,6 @@ function Perfil() {
         return "";
     }
 
-    // retorna a URL absoluta pra funcionar no Vite
     return new URL(
       `${basePath}${code}.${activeTab === "effects" ? "gif" : "png"}`,
       import.meta.url
@@ -138,46 +185,6 @@ function Perfil() {
       : setIncrementIndex(getActiveList().length - 1);
   }
 
-  // function sendModification() {
-  //   const selected = getActiveList()[incrementIndex];
-
-  //   switch (activeTab) {
-  //     case "icons":
-  //       setActualIcon(selected);
-  //       localStorage.setItem("userIcon", selected);
-  //       break;
-  //     case "backgrounds":
-  //       setActualBackground(selected);
-  //       localStorage.setItem("userBackground", selected);
-  //       break;
-  //     case "effects":
-  //       setActualEffect(selected);
-  //       localStorage.setItem("userEffect", selected);
-  //       break;
-  //     case "colors":
-  //       document.documentElement.style.setProperty(
-  //         "--primary-color",
-  //         newPrimaryColor
-  //       );
-  //       document.documentElement.style.setProperty(
-  //         "--secondary-color",
-  //         newSecondaryColor
-  //       );
-  //       document.documentElement.style.setProperty(
-  //         "--tertiary-color",
-  //         newTertiaryColor
-  //       );
-  //       document.documentElement.style.setProperty(
-  //         "--font-color",
-  //         newFontColor
-  //       );
-  //       setActualPrimaryColor(newPrimaryColor);
-  //       setActualSecondaryColor(newSecondaryColor);
-  //       setActualTertiaryColor(newTertiaryColor);
-  //       setActualFontColor(newFontColor);
-  //       break;
-  //   }
-  // }
   async function sendModification() {
     const selected = getActiveList()[incrementIndex];
 
@@ -231,6 +238,7 @@ function Perfil() {
   useEffect(() => {
     setIncrementIndex(0);
   }, [activeTab]);
+
   return (
     <div
       className={styles.Perfil_Main_Container}
@@ -270,12 +278,21 @@ function Perfil() {
           />
         </div>
       </div>
+      
       <div className={styles.Perfil_Cards_Container}>
         <Perfil_Card num={partidas} title={"Partidas"} />
         <Perfil_Card num={vitorias} title={"Vitórias"} />
-        <Perfil_Card num={cards} title={"Cards"} />
-        <Perfil_Card num={totalShipSkins()} title={"Skins"} />
+        {/* MODIFICAR O CARD DE CARDS PARA ABRIR O POPUP */}
+        <div onClick={handleOpenCardsPopup}>
+          <Perfil_Card num={cards} title={"Cards"} />
+        </div>
+        {/* MODIFICAR O CARD DE SKINS PARA ABRIR O POPUP */}
+        <div onClick={handleOpenSkinsPopup}>
+          <Perfil_Card num={totalShipSkins()} title={"Skins"} />
+        </div>
       </div>
+
+      {/* POPUP EXISTENTE DE EDIÇÃO DE PERFIL */}
       <div
         className={styles.Perfil_Edit_Pop_UP}
         style={{ display: perfilEditPopUP }}
@@ -399,6 +416,15 @@ function Perfil() {
           OK
         </button>
       </div>
+
+      {/* NOVO POPUP COMPONENT PARA CARDS E SKINS */}
+      <PopupComponent
+        isOpen={isPopupOpen}
+        onClose={handleClosePopup}
+        type={popupType}
+        userData={user.data}
+        onSave={handlePopupSave}
+      />
     </div>
   );
 }

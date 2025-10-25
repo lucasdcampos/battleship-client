@@ -1,6 +1,6 @@
-import React from "react";
-import fc from "../../../../../assets/development/fc.png";
+// src/pages/Store/elements/Cards/Cards.jsx
 
+import fc from "../../../../../assets/development/fc.png";
 import styles from "./Cards.module.css";
 
 export default function Card({ titulo, preco, imagem, onComprar }) {
@@ -14,7 +14,12 @@ export default function Card({ titulo, preco, imagem, onComprar }) {
         {preco} <img src={fc} alt="" style={{ width: "15px" }} />
       </p>
 
-      <button className={styles.button} onClick={onComprar}>
+      <button
+        className={styles.button}
+        onClick={() => {
+          onComprar(); // <--- AQUI ESTAVA O PROBLEMA! Chame a função onComprar!
+        }}
+      >
         <span className={styles.icon}>🛒</span> Comprar
       </button>
     </div>
