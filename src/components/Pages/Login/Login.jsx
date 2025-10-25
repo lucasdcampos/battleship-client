@@ -8,12 +8,33 @@ import { useAuth } from "../../../user/useAuth";
 import { useNavigate } from "react-router-dom";
 
 function LoginForm() {
+  // Função para registrar usuário
+  async function registerUser({ username, email, password }) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+      const data = await response.json();
+      return { ok: response.ok, data };
+    } catch (error) {
+      return { ok: false, error };
+    }
+  }
   // Variáveis
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Estados para registro
+  const [signupUsername, setSignupUsername] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [actualTab, setActualTab] = useState("login");
   const navigate = useNavigate();
-  const { signIn, signOut } = useAuth();
+  const { signIn } = useAuth();
 
   // Funções
   async function handleSubmitLoginForm(e) {
@@ -25,7 +46,28 @@ function LoginForm() {
 
   async function handleSubmitSignupForm(e) {
     e.preventDefault();
-    signOut();
+    // Validação simples de senha
+    if (signupPassword !== signupConfirmPassword) {
+      alert("As senhas não coincidem.");
+      return;
+    }
+    // Chama a função de registro
+    const result = await registerUser({
+      username: signupUsername,
+      email: signupEmail,
+      password: signupPassword,
+    });
+    if (result.ok) {
+      alert("Conta criada com sucesso!");
+      // Limpa campos e volta para login
+      setSignupUsername("");
+      setSignupEmail("");
+      setSignupPassword("");
+      setSignupConfirmPassword("");
+      setActualTab("login");
+    } else {
+      alert("Erro ao criar conta: " + (result.data?.message || result.error || "Erro desconhecido"));
+    }
   }
 
   return (
@@ -85,10 +127,34 @@ function LoginForm() {
           onSubmit={handleSubmitSignupForm}
           style={{ display: actualTab === "new_account" ? "flex" : "none" }}
         >
-          <input type="text" placeholder="Nome de usuário" required />
-          <input type="email" placeholder="E-mail" required />
-          <input type="password" placeholder="Senha" required />
-          <input type="password" placeholder="Confirmar senha" required />
+          <input
+            type="text"
+            placeholder="Nome de usuário"
+            required
+            value={signupUsername}
+            onChange={(e) => setSignupUsername(e.target.value)}
+          />
+          <input
+            type="email"
+            placeholder="E-mail"
+            required
+            value={signupEmail}
+            onChange={(e) => setSignupEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Senha"
+            required
+            value={signupPassword}
+            onChange={(e) => setSignupPassword(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Confirmar senha"
+            required
+            value={signupConfirmPassword}
+            onChange={(e) => setSignupConfirmPassword(e.target.value)}
+          />
           <button
             type="button"
             className={styles.text_link_stacked_link}
@@ -99,7 +165,6 @@ function LoginForm() {
           <button
             type="submit"
             className={styles.main_button}
-            onClick={() => handleSubmitSignupForm()}
           >
             Criar
           </button>
