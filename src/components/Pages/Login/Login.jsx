@@ -8,6 +8,9 @@ import { useAuth } from "../../../user/useAuth";
 import { useNavigate } from "react-router-dom";
 
 function LoginForm() {
+  // Estado para mensagem de feedback do registro
+  const [signupMessage, setSignupMessage] = useState("");
+  const [signupMessageType, setSignupMessageType] = useState(""); // "success" ou "error"
   // Função para registrar usuário
   async function registerUser({ username, email, password }) {
     try {
@@ -48,7 +51,8 @@ function LoginForm() {
     e.preventDefault();
     // Validação simples de senha
     if (signupPassword !== signupConfirmPassword) {
-      alert("As senhas não coincidem.");
+      setSignupMessage("As senhas não coincidem.");
+      setSignupMessageType("error");
       return;
     }
     // Chama a função de registro
@@ -58,15 +62,22 @@ function LoginForm() {
       password: signupPassword,
     });
     if (result.ok) {
-      alert("Conta criada com sucesso!");
+      setSignupMessage("Conta criada com sucesso!");
+      setSignupMessageType("success");
       // Limpa campos e volta para login
       setSignupUsername("");
       setSignupEmail("");
       setSignupPassword("");
       setSignupConfirmPassword("");
-      setActualTab("login");
+      setTimeout(() => {
+        setActualTab("login");
+        setSignupMessage("");
+        setSignupMessageType("");
+      }, 2000);
     } else {
-      alert("Erro ao criar conta: " + (result.data?.message || result.error || "Erro desconhecido"));
+      const errorMsg = result.data?.detail || result.data?.message || result.error || "Erro desconhecido";
+      setSignupMessage("Erro ao criar conta: " + errorMsg);
+      setSignupMessageType("error");
     }
   }
 
@@ -127,6 +138,18 @@ function LoginForm() {
           onSubmit={handleSubmitSignupForm}
           style={{ display: actualTab === "new_account" ? "flex" : "none" }}
         >
+          {/* Mensagem de feedback no topo */}
+          {signupMessage && (
+            <div
+              style={{
+                color: signupMessageType === "success" ? "green" : "red",
+                fontWeight: "bold",
+                marginBottom: "10px",
+              }}
+            >
+              {signupMessage}
+            </div>
+          )}
           <input
             type="text"
             placeholder="Nome de usuário"
