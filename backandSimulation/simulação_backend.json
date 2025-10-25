@@ -3,7 +3,7 @@
     {
       "id": "1",
       "basicData": {
-        "fatecCoins": 88
+        "fatecCoins": 54
       },
       "currentCosmetic": {
         "currentIcon": "E00002",
@@ -25,29 +25,56 @@
       },
       "availableCosmetic": {
         "availableIcons": [
-          "E00004"
+          "E00004",
+          "E00003",
+          "E00003",
+          "E00003",
+          "E00002",
+          "E00003",
+          "E00003"
+        ],
+        "availableCards": [
+          "C00004",
+          "C00002",
+          "C00006",
+          "C00003"
+        ],
+        "availableEffects": [
+          "D00002",
+          "D00003",
+          "D00004"
+        ],
+        "availableBackgrounds": [
+          "A00002",
+          "A00004",
+          "A00005",
+          "A00001"
         ]
       },
       "availableShipSkins": {
         "destroyer": [
           "F00001",
           "F00002",
-          "F00003"
+          "F00003",
+          "F00004"
         ],
         "battleship": [
           "G00001",
           "G00002",
-          "G00003"
+          "G00003",
+          "G00004"
         ],
         "submarine": [
           "I00001",
           "I00002",
-          "I00003"
+          "I00003",
+          "I00004"
         ],
         "aircraftCarrier": [
           "H00001",
           "H00002",
-          "H00003"
+          "H00003",
+          "H00004"
         ]
       },
       "statistic": {
@@ -141,7 +168,7 @@
           },
           {
             "titulo": "Fantasma",
-            "preco": "0",
+            "preco": "250",
             "imagem": "C00005"
           },
           {

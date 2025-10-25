@@ -6,10 +6,11 @@ import { useAuth } from "../../../user/useAuth";
 import { useState, useEffect } from "react";
 
 export default function Store() {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading, isAuthenticated, setUserAtt } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
   const [tabs, setTabs] = useState(null);
-  const Fatec_coins = user?.basicData?.fatecCoins || 0;
+  const [fatecCoins, setFatecCoins] = useState(0);
+  const [inventory, setInventory] = useState(new Set());
 
   function setMarket(userID) {
     getUser(userID).then((data) => {
@@ -20,6 +21,21 @@ export default function Store() {
         cards: data.market.sell_cards,
         ships: data.market.sell_ships,
       });
+
+      // Carrega o saldo e o inventário do usuário
+      setFatecCoins(data.basicData.fatecCoins);
+
+      const userInventory = new Set([
+        ...(data.availableCosmetic?.availableIcons || []),
+        ...(data.availableCosmetic?.availableEffects || []),
+        ...(data.availableCosmetic?.availableBackgrounds || []),
+        ...(data.availableCosmetic?.availableCards || []),
+        ...(data.availableShipSkins?.destroyer || []),
+        ...(data.availableShipSkins?.battleship || []),
+        ...(data.availableShipSkins?.aircraftCarrier || []),
+        ...(data.availableShipSkins?.submarine || []),
+      ]);
+      setInventory(userInventory);
     });
   }
 
@@ -67,25 +83,24 @@ export default function Store() {
   }
 
   const handleBuy = async (product) => {
-    const userID = user?.id || 1;
-    const currentFatecCoins = user?.basicData?.fatecCoins || 0;
-    const productPrice = product.preco;
+    const userID = user?.data?.basicData?.id || "1";
+    const productPrice = parseInt(product.preco, 10);
 
-    if (currentFatecCoins < productPrice) {
-      alert("sem saldo fi, ta duro dorme!");
+    // a) Validação de saldo
+    if (fatecCoins < productPrice) {
+      alert("Saldo insuficiente para realizar a compra.");
       return;
     }
 
     try {
-      // att muedas
-      const newCoinsValue = currentFatecCoins - productPrice;
+      // d) Desconto do saldo
+      const newCoinsValue = fatecCoins - productPrice;
       const coinsUpdate = { basicData: { fatecCoins: newCoinsValue } };
-      await updateUser(userID, coinsUpdate); // Await para garantir que a atualização termine
+      await updateUser(userID, coinsUpdate);
 
-      // add item no inv do ujsuario
+      // b) Aquisição do item
+      const userData = await getUser(userID); // Pega os dados mais recentes para evitar sobrescrever
       let updatePayload = {};
-      let cosmeticTypeKey =
-        "available" + actualTab[0].toUpperCase() + actualTab.slice(1);
 
       if (actualTab === "ships") {
         let shipType;
@@ -94,49 +109,45 @@ export default function Store() {
         else if (product.imagem[0] === "F") shipType = "destroyer";
         else if (product.imagem[0] === "I") shipType = "submarine";
 
-        // pega skins atual e ad novas
-        const currentShipSkins = user?.availableShipSkins?.[shipType] || [];
+        const currentShipSkins = userData.availableShipSkins?.[shipType] || [];
         updatePayload.availableShipSkins = {
-          ...user.availableShipSkins,
+          ...userData.availableShipSkins,
           [shipType]: [...currentShipSkins, product.imagem],
         };
       } else {
-        // icons, effects, backgrounds, cards
+        const cosmeticTypeKey = "available" + actualTab.charAt(0).toUpperCase() + actualTab.slice(1);
         const currentCosmetics =
-          user?.availableCosmetic?.[cosmeticTypeKey] || [];
+          userData.availableCosmetic?.[cosmeticTypeKey] || [];
         updatePayload.availableCosmetic = {
-          ...user.availableCosmetic,
+          ...userData.availableCosmetic,
           [cosmeticTypeKey]: [...currentCosmetics, product.imagem],
         };
       }
 
       await updateUser(userID, updatePayload);
 
-      alert(`Você comprou ${product.titulo} por ${productPrice} Fatec Coins!`);
+      // c) Desabilitação na Loja (atualizando o estado local)
+      setFatecCoins(newCoinsValue);
+      setInventory(prevInventory => new Set(prevInventory).add(product.imagem));
 
-      // Após a compra, recarregue os dados do usuário para refletir as mudanças
-      // Isso deve ser feito através do seu AuthContext para atualizar o 'user' globalmente.
-      // Assumindo que você tem uma função para recarregar o usuário no AuthContext
-      if (user && user.refreshUser) {
-        // Se você tem essa função no seu AuthContext
-        user.refreshUser();
-      } else {
-        // Se não tiver refreshUser, você pode re-chamar setMarket e loadUserCoins
-        // Mas o ideal é que o user no contexto seja atualizado
-        setMarket(1);
-        // loadUserCoins(); // Não é mais um estado local
-      }
+      // Atualiza o contexto de autenticação para refletir as mudanças em outros componentes
+      setUserAtt(prev => !prev);
+
+      alert(`Você comprou ${product.titulo} por ${productPrice} Fatec Coins!`);
     } catch (error) {
-      alert("Erro ao comprar!");
+      alert("Ocorreu um erro durante a compra. Tente novamente.");
       console.error("Erro na compra:", error);
+      // Se der erro, recarrega os dados para garantir consistência
+      setMarket(userID);
     }
   };
 
   useEffect(() => {
     if (!loading && user) {
-      setMarket(1);
+      const userID = user?.data?.basicData?.id || "1";
+      setMarket(userID);
     }
-  }, [loading, user]);
+  }, [loading, user, setUserAtt]);
 
   if (loading) {
     return <div>Carregando Loja...</div>;
@@ -210,21 +221,30 @@ export default function Store() {
       <div className={styles.FC_Container}>
         <h1>
           Fatec Coins:{" "}
-          <span style={{ color: "var(--tertiary-color)" }}>{Fatec_coins}</span>
+          <span style={{ color: "var(--tertiary-color)" }}>{fatecCoins}</span>
         </h1>
         <img src={fc} alt="FC" />
       </div>
       <div className={styles.Cards_Container}>
-        {tabs &&
-          tabs[actualTab]?.map((card, index) => (
-            <Card
-              key={index}
-              titulo={card.titulo}
-              preco={card.preco}
-              imagem={getImagePath(card.imagem)}
-              onComprar={() => handleBuy(card)}
-            />
-          ))}
+        {(() => {
+          const availableItems =
+            tabs &&
+            tabs[actualTab]?.filter((card) => !inventory.has(card.imagem));
+
+          if (availableItems && availableItems.length > 0) {
+            return availableItems.map((card, index) => (
+              <Card
+                key={index}
+                titulo={card.titulo}
+                preco={card.preco}
+                imagem={getImagePath(card.imagem)}
+                onComprar={() => handleBuy(card)}
+              />
+            ));
+          } else if (tabs) {
+            return <p>Não há itens disponíveis nessa categoria</p>;
+          }
+        })()}
       </div>
     </div>
   );
