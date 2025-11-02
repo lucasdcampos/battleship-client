@@ -1,7 +1,7 @@
 import Card from "./elements/Cards/Cards";
 import styles from "./Store.module.css";
 import fc from "../../../assets/development/fc.png";
-import { getUser, updateUser } from "../../../../backandSimulation/userService";
+import { getUser, updateUser } from "../../../services/userService";
 import { useAuth } from "../../../user/useAuth";
 import { useState, useEffect } from "react";
 
@@ -56,8 +56,6 @@ export default function Store() {
           basePath = "/src/assets/cosmetic/ships/submarine/";
           break;
         }
-      default:
-        return "";
     }
     // retorna a URL absoluta pra funcionar no Vite
     return new URL(

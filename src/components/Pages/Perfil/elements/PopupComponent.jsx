@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './Popup.module.css';
 import Card from '../../../Cards/Card';
-import { updateUser } from '../../../../../backandSimulation/userService';
+import { updateUser } from '../../../../services/userService';
 
 // Ícones SVG inline
 const XIcon = () => (

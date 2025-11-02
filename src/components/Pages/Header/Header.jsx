@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Perfil_Icon from "../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
 import { useMe } from "../../../user/useMe";
-import { getUser } from "../../../../backandSimulation/userService";
+// service not required here because we read from `me`/context
 
 function Header() {
   const [select, setSelect] = useState(null);
@@ -46,19 +46,21 @@ function Header() {
     // guard with optional chaining: user may be an object but the nested
     // `data` or `basicData` fields can be missing depending on the auth
     // provider response shape. Only call getUser when we have an id.
-  const userId = me?.basicData?.id || user?.data?.basicData?.id;
-    if (!loading && userId) {
-      getUser(userId).then((data) => {
-        setActualIcon(data.currentCosmetic.currentIcon);
-      });
-      getUser(userId).then((data) => {
-        setActualEffect(data.currentCosmetic.currentEffect);
-      });
-    } else if (!loading && !user) {
-      setActualIcon("E00001");
-      setActualEffect(null);
+  // prefer reading currentCosmetic from `me` (already fetched via useMe)
+    // prefer reading currentCosmetic from `me` (already fetched via useMe)
+    if (!loading) {
+      if (me || user) {
+        const current = me?.currentCosmetic ?? user?.data?.currentCosmetic;
+        if (current) {
+          setActualIcon(current.currentIcon || Perfil_Icon);
+          setActualEffect(current.currentEffect || null);
+        }
+      } else {
+        setActualIcon("E00001");
+        setActualEffect(null);
+      }
     }
-  }, [loading, user, userAtt, me?.basicData?.id]);
+  }, [loading, user, userAtt, me]);
 
   const navigate = useNavigate();
 

@@ -6,8 +6,9 @@ import PopupComponent from "./elements/PopupComponent"; // IMPORTAR O POPUP
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
 import { useMe } from '../../../user/useMe';
-import { getUser } from "../../../../backandSimulation/userService";
-import { updateUser } from "../../../../backandSimulation/userService";
+import { updateUser, getMe, updateUserConfig } from '../../../services/userService';
+// getUser removed: prefer using useMe() and useUserConfig()
+import { useUserConfig } from '../../../user/useUserConfig';
 
 function Perfil() {
   // Estados existentes...
@@ -31,17 +32,18 @@ function Perfil() {
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
   const [activeTab, setActiveTab] = useState("icons");
   const [incrementIndex, setIncrementIndex] = useState(0);
-  const [setNewPrimaryColor] = useState(null);
-  const [setNewSecondaryColor] = useState(null);
-  const [setNewTertiaryColor] = useState(null);
-  const [setNewFontColor] = useState(null);
+  const [newPrimaryColor, setNewPrimaryColor] = useState(null);
+  const [newSecondaryColor, setNewSecondaryColor] = useState(null);
+  const [newTertiaryColor, setNewTertiaryColor] = useState(null);
+  const [newFontColor, setNewFontColor] = useState(null);
 
   // NOVOS ESTADOS PARA O POPUP DE CARDS/SKINS
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupType, setPopupType] = useState('cards'); // 'cards' ou 'skins'
 
   const { user, setUserAtt } = useAuth();
-  const { me } = useMe();
+  const { me, refresh: refreshMe } = useMe();
+  const { config: userConfig, refresh: refreshUserConfig } = useUserConfig();
 
   // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
   const resolveIconSrc = (icon) => {
@@ -56,37 +58,62 @@ function Perfil() {
     }
   };
 
+  // Populate fields from `me` when available instead of fetching by id
   useEffect(() => {
-    const id = me?.basicData?.id || 1;
-    getUser(id).then((data) => {
-      // Estatísticas
-      setLvl(data.statistic.lvl);
-      setExp(data.statistic.exp);
-      setPartidas(data.statistic.gamesPlayed);
-      setVitorias(data.statistic.gamesWon);
-      // Inventário disponível
-      setCards(data.availableCosmetic.availableCards.length);
-      setIcons(data.availableCosmetic.availableIcons);
-      setBackgrounds(data.availableCosmetic.availableBackgrounds);
-      setEffects(data.availableCosmetic.availableEffects);
-      // Últimos cosméticos e configurações de cores setados
-      setActualIcon(data.currentCosmetic.currentIcon);
-      setActualBackground(data.currentCosmetic.currentBackground);
-      setActualEffect(data.currentCosmetic.currentEffect);
-      setActualPrimaryColor(data.currentCosmetic.currentPrimaryColor);
-      setActualSecondaryColor(data.currentCosmetic.currentSecondaryColor);
-      setActualTertiaryColor(data.currentCosmetic.currentTertiaryColor);
-      setActualFontColor(data.currentCosmetic.currentFontColor);
-    });
-  }, [me?.basicData?.id]);
+    if (!me) return;
+    const data = me;
+    setLvl(data.statistic?.lvl || 0);
+    setExp(data.statistic?.exp || 0);
+    setPartidas(data.statistic?.gamesPlayed || 0);
+    setVitorias(data.statistic?.gamesWon || 0);
+    setCards(data.availableCosmetic?.availableCards?.length || 0);
+    setIcons(data.availableCosmetic?.availableIcons || []);
+    setBackgrounds(data.availableCosmetic?.availableBackgrounds || []);
+    setEffects(data.availableCosmetic?.availableEffects || []);
+    setActualIcon(data.currentCosmetic?.currentIcon || perfil_icon);
+    setActualBackground(data.currentCosmetic?.currentBackground || null);
+    setActualEffect(data.currentCosmetic?.currentEffect || null);
+    setActualPrimaryColor(data.currentCosmetic?.currentPrimaryColor || null);
+    setActualSecondaryColor(data.currentCosmetic?.currentSecondaryColor || null);
+    setActualTertiaryColor(data.currentCosmetic?.currentTertiaryColor || null);
+    setActualFontColor(data.currentCosmetic?.currentFontColor || null);
+  }, [me]);
 
+  // Apply colors from user config when available
   useEffect(() => {
-    const root = getComputedStyle(document.documentElement);
-    setActualPrimaryColor(root.getPropertyValue("--primary-color").trim());
-    setActualSecondaryColor(root.getPropertyValue("--secondary-color").trim());
-    setActualTertiaryColor(root.getPropertyValue("--tertiary-color").trim());
-    setActualFontColor(root.getPropertyValue("--font-color").trim());
-  }, [actualPrimaryColor, actualSecondaryColor, actualTertiaryColor]);
+    if (!userConfig) return;
+    setActualPrimaryColor((prev) => userConfig.primary_color || prev);
+    setActualSecondaryColor((prev) => userConfig.secondary_color || prev);
+    setActualTertiaryColor((prev) => userConfig.tertiary_color || prev);
+    setActualFontColor((prev) => userConfig.font_color || prev);
+  }, [userConfig]);
+
+  // Initialize "nova" inputs with current config/colors when available
+  useEffect(() => {
+    if (userConfig) {
+      setNewPrimaryColor(userConfig.primary_color || userConfig.primaryColor || actualPrimaryColor || '#000000');
+      setNewSecondaryColor(userConfig.secondary_color || userConfig.secondaryColor || actualSecondaryColor || '#000000');
+      setNewTertiaryColor(userConfig.tertiary_color || userConfig.tertiaryColor || actualTertiaryColor || '#000000');
+      setNewFontColor(userConfig.font_color || userConfig.fontColor || actualFontColor || '#000000');
+    } else {
+      // fallback to currently applied actual colors
+      if (actualPrimaryColor) setNewPrimaryColor(actualPrimaryColor);
+      if (actualSecondaryColor) setNewSecondaryColor(actualSecondaryColor);
+      if (actualTertiaryColor) setNewTertiaryColor(actualTertiaryColor);
+      if (actualFontColor) setNewFontColor(actualFontColor);
+    }
+  }, [userConfig, actualPrimaryColor, actualSecondaryColor, actualTertiaryColor, actualFontColor]);
+
+  // Apply current actual colors to :root CSS variables so the UI uses
+  // the real user configuration colors. This avoids reading from a mock
+  // and ensures components using the CSS variables reflect the config.
+  useEffect(() => {
+    const rootStyle = document.documentElement.style;
+    if (actualPrimaryColor) rootStyle.setProperty("--primary-color", actualPrimaryColor);
+    if (actualSecondaryColor) rootStyle.setProperty("--secondary-color", actualSecondaryColor);
+    if (actualTertiaryColor) rootStyle.setProperty("--tertiary-color", actualTertiaryColor);
+    if (actualFontColor) rootStyle.setProperty("--font-color", actualFontColor);
+  }, [actualPrimaryColor, actualSecondaryColor, actualTertiaryColor, actualFontColor]);
 
   function totalShipSkins() {
     // protect against missing user/data/availableShipSkins and prefer `me` when available
@@ -114,29 +141,36 @@ function Perfil() {
   };
 
   // NOVA FUNÇÃO PARA RECARREGAR DADOS APÓS SALVAR
-  const handlePopupSave = () => {
-    const userId = me?.basicData?.id || user?.data?.basicData?.id || 1;
-    getUser(userId).then((data) => {
+  const handlePopupSave = async () => {
+    try {
+  const latest = await getMe();
+      const data = latest?.data ? latest.data : latest;
       // Atualizar todos os estados com os dados mais recentes
-      setLvl(data.statistic.lvl);
-      setExp(data.statistic.exp);
-      setPartidas(data.statistic.gamesPlayed);
-      setVitorias(data.statistic.gamesWon);
-      setCards(data.availableCosmetic.availableCards.length);
-      setIcons(data.availableCosmetic.availableIcons);
-      setBackgrounds(data.availableCosmetic.availableBackgrounds);
-      setEffects(data.availableCosmetic.availableEffects);
-      setActualIcon(data.currentCosmetic.currentIcon);
-      setActualBackground(data.currentCosmetic.currentBackground);
-      setActualEffect(data.currentCosmetic.currentEffect);
-      setActualPrimaryColor(data.currentCosmetic.currentPrimaryColor);
-      setActualSecondaryColor(data.currentCosmetic.currentSecondaryColor);
-      setActualTertiaryColor(data.currentCosmetic.currentTertiaryColor);
-      setActualFontColor(data.currentCosmetic.currentFontColor);
-    });
-    
-    // Notificar contexto de autenticação sobre mudanças
-    setUserAtt((prev) => !prev);
+      setLvl(data.statistic?.lvl || 0);
+      setExp(data.statistic?.exp || 0);
+      setPartidas(data.statistic?.gamesPlayed || 0);
+      setVitorias(data.statistic?.gamesWon || 0);
+      setCards(data.availableCosmetic?.availableCards?.length || 0);
+      setIcons(data.availableCosmetic?.availableIcons || []);
+      setBackgrounds(data.availableCosmetic?.availableBackgrounds || []);
+      setEffects(data.availableCosmetic?.availableEffects || []);
+      setActualIcon(data.currentCosmetic?.currentIcon || perfil_icon);
+      setActualBackground(data.currentCosmetic?.currentBackground || null);
+      setActualEffect(data.currentCosmetic?.currentEffect || null);
+      setActualPrimaryColor(data.currentCosmetic?.currentPrimaryColor || null);
+      setActualSecondaryColor(data.currentCosmetic?.currentSecondaryColor || null);
+      setActualTertiaryColor(data.currentCosmetic?.currentTertiaryColor || null);
+      setActualFontColor(data.currentCosmetic?.currentFontColor || null);
+
+      // refresh hooks
+      if (typeof refreshMe === 'function') await refreshMe();
+      if (typeof refreshUserConfig === 'function') await refreshUserConfig();
+
+      // Notificar contexto de autenticação sobre mudanças
+      setUserAtt((prev) => !prev);
+    } catch (err) {
+      console.error('Erro ao recarregar dados após salvar popup:', err);
+    }
   };
 
   // Funções existentes...
@@ -237,6 +271,37 @@ function Perfil() {
         break;
     }
     setUserAtt((prev) => !prev);
+  }
+
+  // Save colors to backend when activeTab === 'colors'
+  async function saveColors() {
+    try {
+      const userId = me?.basicData?.id || user?.data?.basicData?.id || null;
+      const payload = {
+        enabled_background: userConfig?.enabledBackground ?? 0,
+        enabled_skin: userConfig?.enabledSkin ?? 0,
+        enabled_effect: userConfig?.enabledEffect ?? 0,
+        enabled_icon: userConfig?.enabledIcon ?? 0,
+        primary_color: newPrimaryColor || actualPrimaryColor || "#000000",
+        secondary_color: newSecondaryColor || actualSecondaryColor || "#000000",
+        tertiary_color: newTertiaryColor || actualTertiaryColor || "#000000",
+        font_color: newFontColor || actualFontColor || "#000000",
+      };
+
+  await updateUserConfig(userId, payload);
+
+      // refresh local config and applied colors
+      if (typeof refreshUserConfig === 'function') await refreshUserConfig();
+      // apply immediately locally
+      setActualPrimaryColor(payload.primary_color);
+      setActualSecondaryColor(payload.secondary_color);
+      setActualTertiaryColor(payload.tertiary_color);
+      setActualFontColor(payload.font_color);
+      alert('Cores atualizadas com sucesso');
+    } catch (err) {
+      console.error('Erro ao salvar cores:', err);
+      alert('Falha ao salvar cores');
+    }
   }
 
   const userPrimaryColorChange = (e) => {
@@ -410,16 +475,16 @@ function Perfil() {
               <tr>
                 <td>nova</td>
                 <td>
-                  <input type="color" onChange={userPrimaryColorChange} />
+                  <input type="color" value={newPrimaryColor || '#000000'} onChange={userPrimaryColorChange} />
                 </td>
                 <td>
-                  <input type="color" onChange={userSecondaryColorChange} />
+                  <input type="color" value={newSecondaryColor || '#000000'} onChange={userSecondaryColorChange} />
                 </td>
                 <td>
-                  <input type="color" onChange={userTertiaryColorChange} />
+                  <input type="color" value={newTertiaryColor || '#000000'} onChange={userTertiaryColorChange} />
                 </td>
                 <td>
-                  <input type="color" onChange={userFontColorChange} />
+                  <input type="color" value={newFontColor || '#000000'} onChange={userFontColorChange} />
                 </td>
               </tr>
             </tbody>
@@ -433,7 +498,13 @@ function Perfil() {
         </button>
         <button
           className={styles.Button_Send}
-          onClick={() => sendModification()}
+          onClick={() => {
+            if (activeTab === 'colors') {
+              saveColors();
+            } else {
+              sendModification();
+            }
+          }}
         >
           OK
         </button>
