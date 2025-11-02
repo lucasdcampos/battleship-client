@@ -6,6 +6,8 @@ import EmojiBox from "../../EmojiBox/EmojiBox";
 import EmojiAnimation from "../../EmojiBox/EmojiAnimation";
 import Placar from "../../Placar/Placar";
 import Deck from "../../Deck/Deck";
+import TurnIndicator from "../../TurnIndicator/TurnIndicator";
+import Timer from "../../Timer/Timer";
 
 function Play() {
   const boardRef = useRef(null);
@@ -17,6 +19,7 @@ function Play() {
   const [isPlacementConfirmed, setIsPlacementConfirmed] = useState(false);
   const [playerShipsState, setPlayerShipsState] = useState([]);
   const [enemyShipsState, setEnemyShipsState] = useState([]);
+  const [currentPlayer, setCurrentPlayer] = useState('player'); // 'player' ou 'enemy'
 
   const handleRandomizeClick = () => {
     if (shipsRef.current) {
@@ -25,6 +28,9 @@ function Play() {
   };
 
   const handleCellClick = (x, y) => {
+    // Só permite clicar se for a vez do jogador e o jogo já começou
+    if (currentPlayer !== 'player' || !isPlacementConfirmed) return;
+
     // Define as colunas para a conversão de coordenadas
     const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
     const coordinate = `${cols[x]}${y + 1}`;
@@ -47,12 +53,32 @@ function Play() {
     setShots([...shots, { x, y, isHit: !!hitShipId }]);
     // Atualiza o estado dos navios inimigos para o placar
     setEnemyShipsState(enemyShipsRef.current.getShips());
+    setCurrentPlayer('enemy'); // Passa a vez para o inimigo
   };
 
   const handleConfirmClick = () => {
     console.log("Posicionamento confirmado!");
     setIsPlacementConfirmed(true);
   };
+
+  const handleTimeEnd = () => {
+    console.log("O tempo acabou!");
+    // Troca o turno quando o tempo acaba
+    setCurrentPlayer(prevPlayer => prevPlayer === 'player' ? 'enemy' : 'player');
+  };
+
+  // Simula a jogada do inimigo e devolve o turno para o jogador
+  useEffect(() => {
+    if (currentPlayer === 'enemy' && isPlacementConfirmed) {
+      const enemyTurnTimeout = setTimeout(() => {
+        console.log("Inimigo jogou, sua vez!");
+        // Aqui você adicionaria a lógica da jogada do inimigo
+        setCurrentPlayer('player');
+      }, 2000); // Simula um delay para a jogada do inimigo
+
+      return () => clearTimeout(enemyTurnTimeout);
+    }
+  }, [currentPlayer, isPlacementConfirmed]);
 
   useEffect(() => {
     // Posiciona os navios inimigos aleatoriamente quando o jogador confirma sua posição
@@ -79,7 +105,14 @@ function Play() {
   return (
     <div className={styles.playContainer}>
       {isPlacementConfirmed && <Placar titulo="Seu Placar" ships={playerShipsState} />}
+      
       <div className={styles.mainGameArea}>
+        {isPlacementConfirmed && (
+          <div className={styles.gameStatusContainer}>
+            <TurnIndicator currentPlayer={currentPlayer} />
+            <Timer duration={30} onTimeEnd={handleTimeEnd} isRunning={currentPlayer === 'player'} key={currentPlayer} />
+          </div>
+        )}
         <div className={styles.boardsContainer}>
           {/* Tabuleiro do Jogador */}
           <div className={styles.boardWrapper}>

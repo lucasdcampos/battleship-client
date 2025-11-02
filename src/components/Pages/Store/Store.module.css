@@ -61,3 +61,19 @@
 .FC_Container img {
   width: 30px;
 }
+
+@media (max-width: 768px) {
+  .Nav_Buttons_Container ul {
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .Nav_Buttons_Container li {
+    min-width: 120px;
+    width: auto;
+  }
+
+  .FC_Container {
+    padding: 0 15px;
+  }
+}

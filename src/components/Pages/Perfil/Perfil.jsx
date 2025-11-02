@@ -27,7 +27,7 @@ function Perfil() {
   const [actualSecondaryColor, setActualSecondaryColor] = useState(null);
   const [actualTertiaryColor, setActualTertiaryColor] = useState(null);
   const [actualFontColor, setActualFontColor] = useState(null);
-  
+
   // Estados existentes do popup de perfil
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
   const [activeTab, setActiveTab] = useState("icons");
@@ -39,7 +39,7 @@ function Perfil() {
 
   // NOVOS ESTADOS PARA O POPUP DE CARDS/SKINS
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [popupType, setPopupType] = useState('cards'); // 'cards' ou 'skins'
+  const [popupType, setPopupType] = useState("cards"); // 'cards' ou 'skins'
 
   const { user, setUserAtt } = useAuth();
   const { me, refresh: refreshMe } = useMe();
@@ -127,12 +127,12 @@ function Perfil() {
 
   // NOVAS FUNÇÕES PARA ABRIR O POPUP
   const handleOpenCardsPopup = () => {
-    setPopupType('cards');
+    setPopupType("cards");
     setIsPopupOpen(true);
   };
 
   const handleOpenSkinsPopup = () => {
-    setPopupType('skins');
+    setPopupType("skins");
     setIsPopupOpen(true);
   };
 
@@ -365,10 +365,14 @@ function Perfil() {
           ) : null}
         </div>
       </div>
-      
+
       <div className={styles.Perfil_Cards_Container}>
-        <Perfil_Card num={partidas} title={"Partidas"} />
-        <Perfil_Card num={vitorias} title={"Vitórias"} />
+        <div>
+          <Perfil_Card num={partidas} title={"Partidas"} />
+        </div>
+        <div>
+          <Perfil_Card num={vitorias} title={"Vitórias"} />
+        </div>
         {/* MODIFICAR O CARD DE CARDS PARA ABRIR O POPUP */}
         <div onClick={handleOpenCardsPopup}>
           <Perfil_Card num={cards} title={"Cards"} />

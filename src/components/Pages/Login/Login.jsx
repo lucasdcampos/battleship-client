@@ -50,7 +50,7 @@ function LoginForm() {
     if (res?.ok) {
       setLoginMessage("Login realizado com sucesso.");
       setLoginMessageType("success");
-      navigate("/Perfil");
+      navigate("/lobby");
     } else {
       setLoginMessage(res?.message || "Erro ao fazer login");
       setLoginMessageType("error");

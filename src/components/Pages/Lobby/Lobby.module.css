@@ -1,0 +1,298 @@
+.lobbyBackground {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alinhado ao topo */
+    height: calc(100vh - 80px); /* Altura da viewport menos o header */
+    width: 100%;
+    background-color: var(--primary-color);
+    color: var(--font-color);
+    box-sizing: border-box;
+    padding: 20px;
+    overflow-y: auto; /* Permite rolagem se o conteúdo exceder */
+}
+
+.lobbyContainer {
+    background-color: var(--secondary-color);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 1200px; /* Aumentado para acomodar a nova layout */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.filters {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.filterSelect, .searchInput {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    font-size: 1rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--font-color);
+}
+
+.searchInput {
+    width: 350px;
+}
+
+.newGameButton {
+    padding: 12px 25px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: var(--tertiary-color);
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.newGameButton:hover {
+    background-color: #d8931a;
+}
+
+.roomList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Duas colunas */
+    gap: 20px;
+    width: 100%;
+}
+
+.roomCard {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.roomCard:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: var(--tertiary-color);
+}
+
+.roomInfo h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.5rem;
+    color: var(--font-color);
+}
+
+.roomInfo p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.roomStatus {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.publicTag, .privateTag {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.publicTag {
+    background-color: #28a745;
+    color: white;
+}
+
+.privateTag {
+    background-color: #dc3545;
+    color: white;
+}
+
+.joinButton {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.joinButton:hover {
+    background-color: #0056b3;
+}
+
+.noRooms {
+    grid-column: 1 / -1; /* Ocupa todas as colunas */
+    text-align: center;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 40px 0;
+}
+
+/* Estilos do Modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: var(--secondary-color);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    color: var(--font-color);
+}
+
+.modalContent h2 {
+    margin-top: 0;
+    color: var(--tertiary-color);
+    text-align: center;
+}
+
+.closeButton {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--font-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modalForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modalForm input {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    font-size: 1rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--font-color);
+}
+
+.toggleContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--tertiary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.cancelButton, .confirmButton {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.cancelButton {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancelButton:hover {
+    background-color: #5a6268;
+}
+
+.confirmButton {
+    background-color: #28a745;
+    color: white;
+}
+
+.confirmButton:hover {
+    background-color: #218838;
+}
