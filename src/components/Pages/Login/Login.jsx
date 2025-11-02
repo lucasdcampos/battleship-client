@@ -14,7 +14,7 @@ function LoginForm() {
   // Função para registrar usuário
   async function registerUser({ username, email, password }) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/user`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,6 +30,9 @@ function LoginForm() {
   // Variáveis
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Estado para mensagem de feedback do login
+  const [loginMessage, setLoginMessage] = useState("");
+  const [loginMessageType, setLoginMessageType] = useState(""); // "success" ou "error"
   // Estados para registro
   const [signupUsername, setSignupUsername] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
@@ -41,10 +44,17 @@ function LoginForm() {
 
   // Funções
   async function handleSubmitLoginForm(e) {
-    e.preventDefault();
-
-    await signIn(email, password);
-    navigate("/Perfil");
+    e?.preventDefault();
+    setLoginMessage("");
+    const res = await signIn(email, password);
+    if (res?.ok) {
+      setLoginMessage("Login realizado com sucesso.");
+      setLoginMessageType("success");
+      navigate("/Perfil");
+    } else {
+      setLoginMessage(res?.message || "Erro ao fazer login");
+      setLoginMessageType("error");
+    }
   }
 
   async function handleSubmitSignupForm(e) {
@@ -62,7 +72,8 @@ function LoginForm() {
       password: signupPassword,
     });
     if (result.ok) {
-      setSignupMessage("Conta criada com sucesso!");
+      const createdUsername = result.data?.username;
+      setSignupMessage(createdUsername ? `Conta criada com sucesso! Bem-vindo, ${createdUsername}` : "Conta criada com sucesso!");
       setSignupMessageType("success");
       // Limpa campos e volta para login
       setSignupUsername("");
@@ -75,7 +86,19 @@ function LoginForm() {
         setSignupMessageType("");
       }, 2000);
     } else {
-      const errorMsg = result.data?.detail || result.data?.message || result.error || "Erro desconhecido";
+      let errorMsg = result.error || "Erro desconhecido";
+      if (result.data) {
+        if (Array.isArray(result.data.detail)) {
+          errorMsg = result.data.detail
+            .map((d) => {
+              const loc = Array.isArray(d.loc) ? d.loc.join(".") : d.loc;
+              return `${loc}: ${d.msg}`;
+            })
+            .join("; ");
+        } else {
+          errorMsg = result.data.detail || result.data.message || errorMsg;
+        }
+      }
       setSignupMessage("Erro ao criar conta: " + errorMsg);
       setSignupMessageType("error");
     }
@@ -95,6 +118,18 @@ function LoginForm() {
           onSubmit={handleSubmitLoginForm}
           style={{ display: actualTab === "login" ? "flex" : "none" }}
         >
+          {/* Mensagem de feedback do login (topo) */}
+          {loginMessage && (
+            <div
+              style={{
+                color: loginMessageType === "success" ? "green" : "red",
+                fontWeight: "bold",
+                marginBottom: "10px",
+              }}
+            >
+              {loginMessage}
+            </div>
+          )}
           <input
             type="email"
             placeholder="E-mail"
@@ -128,7 +163,6 @@ function LoginForm() {
           <button
             type="submit"
             className={styles.main_button}
-            onClick={() => handleSubmitLoginForm()}
           >
             Entrar
           </button>
