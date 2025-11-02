@@ -5,8 +5,10 @@ import Perfil_Card from "./elements/Perfil_Card";
 import PopupComponent from "./elements/PopupComponent"; // IMPORTAR O POPUP
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
-import { getUser } from "../../../../backandSimulation/userService";
-import { updateUser } from "../../../../backandSimulation/userService";
+import { useMe } from '../../../user/useMe';
+import { updateUser, getMe, updateUserConfig } from '../../../services/userService';
+// getUser removed: prefer using useMe() and useUserConfig()
+import { useUserConfig } from '../../../user/useUserConfig';
 
 function Perfil() {
   // Estados existentes...
@@ -15,7 +17,6 @@ function Perfil() {
   const [partidas, setPartidas] = useState(0);
   const [vitorias, setVitorias] = useState(0);
   const [cards, setCards] = useState(0);
-  const [skins, setSkins] = useState(0);
   const [icons, setIcons] = useState([]);
   const [backgrounds, setBackgrounds] = useState([]);
   const [effects, setEffects] = useState([]);
@@ -41,45 +42,87 @@ function Perfil() {
   const [popupType, setPopupType] = useState("cards"); // 'cards' ou 'skins'
 
   const { user, setUserAtt } = useAuth();
+  const { me, refresh: refreshMe } = useMe();
+  const { config: userConfig, refresh: refreshUserConfig } = useUserConfig();
 
-  useEffect(() => {
-    getUser(1).then((data) => {
-      // Estatísticas
-      setLvl(data.statistic.lvl);
-      setExp(data.statistic.exp);
-      setPartidas(data.statistic.gamesPlayed);
-      setVitorias(data.statistic.gamesWon);
-      // Inventário disponível
-      setCards(data.availableCosmetic.availableCards.length);
-      setIcons(data.availableCosmetic.availableIcons);
-      setBackgrounds(data.availableCosmetic.availableBackgrounds);
-      setEffects(data.availableCosmetic.availableEffects);
-      // Últimos cosméticos e configurações de cores setados
-      setActualIcon(data.currentCosmetic.currentIcon);
-      setActualBackground(data.currentCosmetic.currentBackground);
-      setActualEffect(data.currentCosmetic.currentEffect);
-      setActualPrimaryColor(data.currentCosmetic.currentPrimaryColor);
-      setActualSecondaryColor(data.currentCosmetic.currentSecondaryColor);
-      setActualTertiaryColor(data.currentCosmetic.currentTertiaryColor);
-      setActualFontColor(data.currentCosmetic.currentFontColor);
-    });
-  }, []);
+  // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
+  const resolveIconSrc = (icon) => {
+    if (!icon) return perfil_icon;
+    if (typeof icon === 'string' && (icon.startsWith('http') || icon.includes('/') || icon.endsWith('.png'))) {
+      return icon;
+    }
+    try {
+      return new URL(`/src/assets/cosmetic/icons/${icon}.png`, import.meta.url).href;
+    } catch {
+      return perfil_icon;
+    }
+  };
 
+  // Populate fields from `me` when available instead of fetching by id
   useEffect(() => {
-    const root = getComputedStyle(document.documentElement);
-    setActualPrimaryColor(root.getPropertyValue("--primary-color").trim());
-    setActualSecondaryColor(root.getPropertyValue("--secondary-color").trim());
-    setActualTertiaryColor(root.getPropertyValue("--tertiary-color").trim());
-    setActualFontColor(root.getPropertyValue("--font-color").trim());
-  }, [actualPrimaryColor, actualSecondaryColor, actualTertiaryColor]);
+    if (!me) return;
+    const data = me;
+    setLvl(data.statistic?.lvl || 0);
+    setExp(data.statistic?.exp || 0);
+    setPartidas(data.statistic?.gamesPlayed || 0);
+    setVitorias(data.statistic?.gamesWon || 0);
+    setCards(data.availableCosmetic?.availableCards?.length || 0);
+    setIcons(data.availableCosmetic?.availableIcons || []);
+    setBackgrounds(data.availableCosmetic?.availableBackgrounds || []);
+    setEffects(data.availableCosmetic?.availableEffects || []);
+    setActualIcon(data.currentCosmetic?.currentIcon || perfil_icon);
+    setActualBackground(data.currentCosmetic?.currentBackground || null);
+    setActualEffect(data.currentCosmetic?.currentEffect || null);
+    setActualPrimaryColor(data.currentCosmetic?.currentPrimaryColor || null);
+    setActualSecondaryColor(data.currentCosmetic?.currentSecondaryColor || null);
+    setActualTertiaryColor(data.currentCosmetic?.currentTertiaryColor || null);
+    setActualFontColor(data.currentCosmetic?.currentFontColor || null);
+  }, [me]);
+
+  // Apply colors from user config when available
+  useEffect(() => {
+    if (!userConfig) return;
+    setActualPrimaryColor((prev) => userConfig.primary_color || prev);
+    setActualSecondaryColor((prev) => userConfig.secondary_color || prev);
+    setActualTertiaryColor((prev) => userConfig.tertiary_color || prev);
+    setActualFontColor((prev) => userConfig.font_color || prev);
+  }, [userConfig]);
+
+  // Initialize "nova" inputs with current config/colors when available
+  useEffect(() => {
+    if (userConfig) {
+      setNewPrimaryColor(userConfig.primary_color || userConfig.primaryColor || actualPrimaryColor || '#000000');
+      setNewSecondaryColor(userConfig.secondary_color || userConfig.secondaryColor || actualSecondaryColor || '#000000');
+      setNewTertiaryColor(userConfig.tertiary_color || userConfig.tertiaryColor || actualTertiaryColor || '#000000');
+      setNewFontColor(userConfig.font_color || userConfig.fontColor || actualFontColor || '#000000');
+    } else {
+      // fallback to currently applied actual colors
+      if (actualPrimaryColor) setNewPrimaryColor(actualPrimaryColor);
+      if (actualSecondaryColor) setNewSecondaryColor(actualSecondaryColor);
+      if (actualTertiaryColor) setNewTertiaryColor(actualTertiaryColor);
+      if (actualFontColor) setNewFontColor(actualFontColor);
+    }
+  }, [userConfig, actualPrimaryColor, actualSecondaryColor, actualTertiaryColor, actualFontColor]);
+
+  // Apply current actual colors to :root CSS variables so the UI uses
+  // the real user configuration colors. This avoids reading from a mock
+  // and ensures components using the CSS variables reflect the config.
+  useEffect(() => {
+    const rootStyle = document.documentElement.style;
+    if (actualPrimaryColor) rootStyle.setProperty("--primary-color", actualPrimaryColor);
+    if (actualSecondaryColor) rootStyle.setProperty("--secondary-color", actualSecondaryColor);
+    if (actualTertiaryColor) rootStyle.setProperty("--tertiary-color", actualTertiaryColor);
+    if (actualFontColor) rootStyle.setProperty("--font-color", actualFontColor);
+  }, [actualPrimaryColor, actualSecondaryColor, actualTertiaryColor, actualFontColor]);
 
   function totalShipSkins() {
-    return (
-      user.data.availableShipSkins.destroyer.length +
-      user.data.availableShipSkins.battleship.length +
-      user.data.availableShipSkins.aircraftCarrier.length +
-      user.data.availableShipSkins.submarine.length
-    );
+    // protect against missing user/data/availableShipSkins and prefer `me` when available
+    const source = me || user?.data;
+    const destroyer = source?.availableShipSkins?.destroyer?.length || 0;
+    const battleship = source?.availableShipSkins?.battleship?.length || 0;
+    const aircraftCarrier = source?.availableShipSkins?.aircraftCarrier?.length || 0;
+    const submarine = source?.availableShipSkins?.submarine?.length || 0;
+    return destroyer + battleship + aircraftCarrier + submarine;
   }
 
   // NOVAS FUNÇÕES PARA ABRIR O POPUP
@@ -98,28 +141,36 @@ function Perfil() {
   };
 
   // NOVA FUNÇÃO PARA RECARREGAR DADOS APÓS SALVAR
-  const handlePopupSave = () => {
-    getUser(user.data.basicData.id).then((data) => {
+  const handlePopupSave = async () => {
+    try {
+  const latest = await getMe();
+      const data = latest?.data ? latest.data : latest;
       // Atualizar todos os estados com os dados mais recentes
-      setLvl(data.statistic.lvl);
-      setExp(data.statistic.exp);
-      setPartidas(data.statistic.gamesPlayed);
-      setVitorias(data.statistic.gamesWon);
-      setCards(data.availableCosmetic.availableCards.length);
-      setIcons(data.availableCosmetic.availableIcons);
-      setBackgrounds(data.availableCosmetic.availableBackgrounds);
-      setEffects(data.availableCosmetic.availableEffects);
-      setActualIcon(data.currentCosmetic.currentIcon);
-      setActualBackground(data.currentCosmetic.currentBackground);
-      setActualEffect(data.currentCosmetic.currentEffect);
-      setActualPrimaryColor(data.currentCosmetic.currentPrimaryColor);
-      setActualSecondaryColor(data.currentCosmetic.currentSecondaryColor);
-      setActualTertiaryColor(data.currentCosmetic.currentTertiaryColor);
-      setActualFontColor(data.currentCosmetic.currentFontColor);
-    });
+      setLvl(data.statistic?.lvl || 0);
+      setExp(data.statistic?.exp || 0);
+      setPartidas(data.statistic?.gamesPlayed || 0);
+      setVitorias(data.statistic?.gamesWon || 0);
+      setCards(data.availableCosmetic?.availableCards?.length || 0);
+      setIcons(data.availableCosmetic?.availableIcons || []);
+      setBackgrounds(data.availableCosmetic?.availableBackgrounds || []);
+      setEffects(data.availableCosmetic?.availableEffects || []);
+      setActualIcon(data.currentCosmetic?.currentIcon || perfil_icon);
+      setActualBackground(data.currentCosmetic?.currentBackground || null);
+      setActualEffect(data.currentCosmetic?.currentEffect || null);
+      setActualPrimaryColor(data.currentCosmetic?.currentPrimaryColor || null);
+      setActualSecondaryColor(data.currentCosmetic?.currentSecondaryColor || null);
+      setActualTertiaryColor(data.currentCosmetic?.currentTertiaryColor || null);
+      setActualFontColor(data.currentCosmetic?.currentFontColor || null);
 
-    // Notificar contexto de autenticação sobre mudanças
-    setUserAtt((prev) => !prev);
+      // refresh hooks
+      if (typeof refreshMe === 'function') await refreshMe();
+      if (typeof refreshUserConfig === 'function') await refreshUserConfig();
+
+      // Notificar contexto de autenticação sobre mudanças
+      setUserAtt((prev) => !prev);
+    } catch (err) {
+      console.error('Erro ao recarregar dados após salvar popup:', err);
+    }
   };
 
   // Funções existentes...
@@ -193,7 +244,7 @@ function Perfil() {
         setActualIcon(selected);
         await updateUser(1, {
           currentCosmetic: {
-            ...user.data.currentCosmetic,
+            ...user?.data?.currentCosmetic,
             currentIcon: selected,
           },
         });
@@ -203,7 +254,7 @@ function Perfil() {
         setActualBackground(selected);
         await updateUser(1, {
           currentCosmetic: {
-            ...user.data.currentCosmetic,
+            ...user?.data?.currentCosmetic,
             currentBackground: selected,
           },
         });
@@ -213,13 +264,44 @@ function Perfil() {
         setActualEffect(selected);
         await updateUser(1, {
           currentCosmetic: {
-            ...user.data.currentCosmetic,
+            ...user?.data?.currentCosmetic,
             currentEffect: selected,
           },
         });
         break;
     }
     setUserAtt((prev) => !prev);
+  }
+
+  // Save colors to backend when activeTab === 'colors'
+  async function saveColors() {
+    try {
+      const userId = me?.basicData?.id || user?.data?.basicData?.id || null;
+      const payload = {
+        enabled_background: userConfig?.enabledBackground ?? 0,
+        enabled_skin: userConfig?.enabledSkin ?? 0,
+        enabled_effect: userConfig?.enabledEffect ?? 0,
+        enabled_icon: userConfig?.enabledIcon ?? 0,
+        primary_color: newPrimaryColor || actualPrimaryColor || "#000000",
+        secondary_color: newSecondaryColor || actualSecondaryColor || "#000000",
+        tertiary_color: newTertiaryColor || actualTertiaryColor || "#000000",
+        font_color: newFontColor || actualFontColor || "#000000",
+      };
+
+  await updateUserConfig(userId, payload);
+
+      // refresh local config and applied colors
+      if (typeof refreshUserConfig === 'function') await refreshUserConfig();
+      // apply immediately locally
+      setActualPrimaryColor(payload.primary_color);
+      setActualSecondaryColor(payload.secondary_color);
+      setActualTertiaryColor(payload.tertiary_color);
+      setActualFontColor(payload.font_color);
+      alert('Cores atualizadas com sucesso');
+    } catch (err) {
+      console.error('Erro ao salvar cores:', err);
+      alert('Falha ao salvar cores');
+    }
   }
 
   const userPrimaryColorChange = (e) => {
@@ -248,34 +330,39 @@ function Perfil() {
     >
       <div className={styles.Perfil_Container}>
         <img
-          src={
-            new URL(
-              `/src/assets/cosmetic/icons/${actualIcon}.png`,
-              import.meta.url
-            ).href
-          }
+          src={resolveIconSrc(actualIcon)}
           alt="User_Icon"
           className={styles.Perfil_Icon}
           onClick={() => setPerfilEditPopUP("flex")}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = perfil_icon;
+          }}
         />
         <h1>
-          {user?.data.basicData.username ? (
-            <span>{user.data.basicData.username}</span>
+          {me?.basicData?.username || user?.data?.basicData?.username ? (
+            <span>{me?.basicData?.username || user?.data?.basicData?.username}</span>
           ) : (
             <span>#user</span>
           )}
         </h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
-          <img
-            src={
-              new URL(
-                `/src/assets/cosmetic/effects/${actualEffect}.gif`,
-                import.meta.url
-              ).href
-            }
-            alt=""
-          />
+          {actualEffect ? (
+            <img
+              src={
+                new URL(
+                  `/src/assets/cosmetic/effects/${actualEffect}.gif`,
+                  import.meta.url
+                ).href
+              }
+              alt=""
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -392,16 +479,16 @@ function Perfil() {
               <tr>
                 <td>nova</td>
                 <td>
-                  <input type="color" onChange={userPrimaryColorChange} />
+                  <input type="color" value={newPrimaryColor || '#000000'} onChange={userPrimaryColorChange} />
                 </td>
                 <td>
-                  <input type="color" onChange={userSecondaryColorChange} />
+                  <input type="color" value={newSecondaryColor || '#000000'} onChange={userSecondaryColorChange} />
                 </td>
                 <td>
-                  <input type="color" onChange={userTertiaryColorChange} />
+                  <input type="color" value={newTertiaryColor || '#000000'} onChange={userTertiaryColorChange} />
                 </td>
                 <td>
-                  <input type="color" onChange={userFontColorChange} />
+                  <input type="color" value={newFontColor || '#000000'} onChange={userFontColorChange} />
                 </td>
               </tr>
             </tbody>
@@ -415,7 +502,13 @@ function Perfil() {
         </button>
         <button
           className={styles.Button_Send}
-          onClick={() => sendModification()}
+          onClick={() => {
+            if (activeTab === 'colors') {
+              saveColors();
+            } else {
+              sendModification();
+            }
+          }}
         >
           OK
         </button>
@@ -426,7 +519,7 @@ function Perfil() {
         isOpen={isPopupOpen}
         onClose={handleClosePopup}
         type={popupType}
-        userData={user.data}
+        userData={me || user?.data || null}
         onSave={handlePopupSave}
       />
     </div>
