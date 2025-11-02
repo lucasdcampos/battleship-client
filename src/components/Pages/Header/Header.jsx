@@ -35,7 +35,7 @@ function Header() {
   // Define o botão ativo com base na URL atual
   useEffect(() => {
     const path = location.pathname;
-    if (path.includes("Play")) setSelect("Play");
+    if (path.includes("/play") || path.includes("/lobby")) setSelect("Play");
     else if (path.includes("Store")) setSelect("Store");
     else if (path.includes("Perfil")) setSelect("Perfil");
     else if (path.includes("Login")) setSelect(null);
@@ -69,7 +69,7 @@ function Header() {
       <div className={styles.navbarLeft}>
         <Nav_Button
           id="Play"
-          path="/Play"
+          path="/lobby"
           label="PLAY"
           select={select}
           setSelect={setSelect}

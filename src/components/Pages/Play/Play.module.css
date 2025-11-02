@@ -4,15 +4,25 @@
     align-items: flex-start;
     justify-content: space-evenly;
     gap: 40px;
-    padding: 20px 20px 40px 20px; /* Adicionado padding-bottom de 40px */
+    padding: 10px 20px 20px 20px;
     width: 100%;
+    height: calc(100vh - 80px); /* Altura total da viewport menos a altura do Header */
+    overflow-y: auto; /* Habilita a rolagem vertical quando o conteúdo transborda */
+    box-sizing: border-box;
 }
 
 .mainGameArea {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 40px;
+}
+
+.gameStatusContainer {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    align-items: center;
 }
 
 .boardsContainer {
@@ -56,4 +66,23 @@
     background-color: #2ecc71; /* Verde */
     color: white;
     text-align: center; /* Centraliza o texto no botão */
+}
+
+/* Estiliza a barra de rolagem */
+.playContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.playContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.playContainer::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.playContainer {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
