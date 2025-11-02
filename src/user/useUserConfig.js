@@ -33,7 +33,7 @@ export function useUserConfig() {
       const token = localStorage.getItem('authToken');
       const id = me?.basicData?.id;
       const base = import.meta.env.VITE_API_URL;
-      const url = id ? `${base}/users/${id}/config` : `${base}/users/config`;
+      const url = id ? `${base}/users/${id}/config/` : `${base}/users/config/`;
 
       const res = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,

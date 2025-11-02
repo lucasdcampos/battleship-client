@@ -26,19 +26,19 @@ async function apiFetch(path, options = {}) {
 }
 
 export async function getMe() {
-  return apiFetch('/users/me', { method: 'GET' });
+  return apiFetch('/users/me/', { method: 'GET' });
 }
 
 export async function getUser(id) {
-  return apiFetch(`/users/${id}`, { method: 'GET' });
+  return apiFetch(`/users/${id}/`, { method: 'GET' });
 }
 
 export async function updateUser(id, data) {
-  return apiFetch(`/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+  return apiFetch(`/users/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
 }
 
 export async function updateUserConfig(id, data) {
-  const path = id ? `/users/${id}/config` : '/users/config';
+  const path = id ? `/users/${id}/config/` : '/users/config/';
   return apiFetch(path, { method: 'PUT', body: JSON.stringify(data) });
 }
 
