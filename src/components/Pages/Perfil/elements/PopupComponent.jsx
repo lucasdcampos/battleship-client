@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './Popup.module.css';
 import Card from '../../../Cards/Card';
-import { updateUser } from '../../../../../backandSimulation/userService';
+import { updateUser } from '../../../../services/userService';
 
 // Ícones SVG inline
 const XIcon = () => (
@@ -23,7 +23,7 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
-const PopupComponent = ({ isOpen, onClose, type = 'cards', userData, onSave }) => {
+const PopupComponent = ({ isOpen, onClose, type = 'cards', userData }) => {
   // Definir número de slots e títulos baseado no tipo
   const slotConfig = type === 'skins' 
     ? {
@@ -255,7 +255,7 @@ const PopupComponent = ({ isOpen, onClose, type = 'cards', userData, onSave }) =
 
   const handleSave = async () => {
     try {
-      const userId = userData.basicData?.id || "1";
+      const userId = userData?.basicData?.id || "1";
       
       if (type === 'cards') {
         // Salvar configuração de cards
@@ -286,14 +286,14 @@ const PopupComponent = ({ isOpen, onClose, type = 'cards', userData, onSave }) =
       } else if (type === 'skins') {
         // Salvar configuração de skins
         const updateData = {
-          currentDestroyer: slots[0] ? (slots[0].id || slots[0].code) : userData.currentCosmetic.currentDestroyer,
-          currentBattleship: slots[2] ? (slots[2].id || slots[2].code) : userData.currentCosmetic.currentBattleship,
-          currentAircraftCarrier: slots[3] ? (slots[3].id || slots[3].code) : userData.currentCosmetic.currentAircraftCarrier,
-          currentSubmarine: slots[4] ? (slots[4].id || slots[4].code) : userData.currentCosmetic.currentSubmarine
+          currentDestroyer: slots[0] ? (slots[0].id || slots[0].code) : userData?.currentCosmetic?.currentDestroyer,
+          currentBattleship: slots[2] ? (slots[2].id || slots[2].code) : userData?.currentCosmetic?.currentBattleship,
+          currentAircraftCarrier: slots[3] ? (slots[3].id || slots[3].code) : userData?.currentCosmetic?.currentAircraftCarrier,
+          currentSubmarine: slots[4] ? (slots[4].id || slots[4].code) : userData?.currentCosmetic?.currentSubmarine
         };
         
         // Atualizar dados localmente (sem backend por enquanto)
-        if (userData.currentCosmetic) {
+        if (userData?.currentCosmetic) {
           Object.assign(userData.currentCosmetic, updateData);
         }
         

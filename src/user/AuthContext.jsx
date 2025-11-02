@@ -13,62 +13,22 @@ export function AuthProvider({ children }) {
       setLoading(true);
       const token = localStorage.getItem("authToken");
       if (token) {
-        // vamos enviar este token para o backend
-        // para validar e pegar os dados do usuário.
-
-        // simulção temporaria
-        const response = {
-          status: 200,
-          data: {
-            basicData: {
-              id: 1,
-              email: "tioben@example.com",
-              username: "tioben",
-              fatecCoins: 9999,
-            },
-            currentCosmetic: {
-              currentIcon: "E00002",
-              currentBackground: "A00001",
-              currentEffect: "D00001",
-              currentPrimaryColor: "#242424",
-              currentSecondaryColor: "gray",
-              currentTertiaryColor: "orange",
-              currentFontColor: "white",
-              currentDestroyer: "F00001",
-              currentBattleship: "G00001",
-              currentAircraftCarrier: "H00001",
-              currentSubmarine: "I00001",
-              currentCards: ["C00001", "C00002", "C00003"],
-            },
-            availableCosmetic: {
-              availableIcons: ["E00001", "E00002"],
-              availableBackgrounds: ["A00001", "A00002"],
-              availableEffects: ["D00001", "D00002"],
-              availableCards: [
-                "C00001",
-                "C00002",
-                "C00003",
-                "C00004",
-                "C00005",
-                "C00006",
-              ],
-            },
-            availableShipSkins: {
-              destroyer: ["F00001", "F00002", "F00003"],
-              battleship: ["G00001", "G00002", "G00003"],
-              submarine: ["I00001", "I00002", "I00003"],
-              aircraftCarrier: ["H00001", "H00002", "H00003"],
-            },
-            statistic: {
-              gamesPlayed: 125,
-              gamesWon: 75,
-              lvl: 12,
-              exp: 700,
-            },
+        // tenta buscar os dados do usuário com o token salvo
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        };
-        setUser(response);
-        setIsAuthenticated(true);
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+          setIsAuthenticated(true);
+        } else {
+          // token inválido ou expirado
+          localStorage.removeItem("authToken");
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       }
     } catch (error) {
       console.error("Erro ao verifica status de login:", error);
@@ -85,79 +45,71 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signIn = async (email, password) => {
-    // Lógica para chamar API de login
-    // Se sucesso:
-    //   setUser(userData);
-    //   setIsAuthenticated(true);
-    //   localStorage.setItem('authToken', token);
-    // Se falha:
-    //   setIsAuthenticated(false);
-    //   setUser(null);
-    //   throw new Error('Falha no login');
+    setLoading(true);
+    try {
+      // Alguns backends (por exemplo FastAPI OAuth2) esperam form-url-encoded
+      // com o campo `username` em vez de `email`. Enviamos os dados nesse
+      // formato para suportar esse caso.
+      const body = new URLSearchParams();
+      body.append("username", email);
+      body.append("password", password);
 
-    // simulação temporaria
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (email === "teste@email.com" && password === "teste") {
-          const response = {
-            status: 200,
-            data: {
-              basicData: {
-                id: 1,
-                email: "tioben@example.com",
-                username: "tioben",
-                fatecCoins: 9999,
-              },
-              currentCosmetic: {
-                currentIcon: "E00002",
-                currentBackground: "A00001",
-                currentEffect: "D00001",
-                currentPrimaryColor: "#242424",
-                currentSecondaryColor: "gray",
-                currentTertiaryColor: "orange",
-                currentFontColor: "white",
-                currentDestroyer: "F00001",
-                currentBattleship: "G00001",
-                currentAircraftCarrier: "H00001",
-                currentSubmarine: "I00001",
-                currentCards: ["C00001", "C00002", "C00003"],
-              },
-              availableCosmetic: {
-                availableIcons: ["E00001", "E00002"],
-                availableBackgrounds: ["A00001", "A00002"],
-                availableEffects: ["D00001", "D00002"],
-                availableCards: [
-                  "C00001",
-                  "C00002",
-                  "C00003",
-                  "C00004",
-                  "C00005",
-                  "C00006",
-                ],
-              },
-              availableShipSkins: {
-                destroyer: ["F00001", "F00002", "F00003"],
-                battleship: ["G00001", "G00002", "G00003"],
-                submarine: ["I00001", "I00002", "I00003"],
-                aircraftCarrier: ["H00001", "H00002", "H00003"],
-              },
-              statistic: {
-                gamesPlayed: 125,
-                gamesWon: 75,
-                lvl: 12,
-                exp: 700,
-              },
-            },
-          };
-          setUser(response);
-          setIsAuthenticated(true);
-          localStorage.setItem("authToken", "simulated_token");
-          resolve(true);
-        } else {
-          resolve(false);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: body.toString(),
+      });
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setIsAuthenticated(false);
+        setUser(null);
+        // Se o backend devolver um array de validação em `detail`, formatamos
+        // ele para uma string legível.
+        if (Array.isArray(json.detail)) {
+          const msgs = json.detail
+            .map((d) => {
+              const loc = Array.isArray(d.loc) ? d.loc.join(".") : d.loc;
+              return `${loc}: ${d.msg}`;
+            })
+            .join("; ");
+          return { ok: false, message: msgs };
         }
-      }, 500);
-    });
+        return { ok: false, message: json.detail || json.message || "Falha no login" };
+      }
+
+      const token = json.access_token || json.token;
+      if (!token) {
+        return { ok: false, message: "Token não recebido do servidor" };
+      }
+
+      localStorage.setItem("authToken", token);
+
+      // buscar dados do usuário
+      const meRes = await fetch(`${import.meta.env.VITE_API_URL}/users/me/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!meRes.ok) {
+        localStorage.removeItem("authToken");
+        return { ok: false, message: "Falha ao obter dados do usuário" };
+      }
+
+      const meJson = await meRes.json();
+      setUser(meJson);
+      setIsAuthenticated(true);
+      return { ok: true };
+    } catch (error) {
+      console.error("Erro no signIn:", error);
+      return { ok: false, message: error.message || "Erro desconhecido" };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = () => {

@@ -4,15 +4,33 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Perfil_Icon from "../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
-import { getUser } from "../../../../backandSimulation/userService";
+import { useMe } from "../../../user/useMe";
+// service not required here because we read from `me`/context
 
 function Header() {
   const [select, setSelect] = useState(null);
   const [loggoutPop, setLoggoutPop] = useState(false);
   const location = useLocation();
-  const { user, signOut, loading, isAuthenticated, userAtt } = useAuth();
+  const { user, signOut, loading, userAtt } = useAuth();
+  const { me } = useMe();
   const [actualIcon, setActualIcon] = useState(Perfil_Icon);
   const [actualEffect, setActualEffect] = useState(null);
+  // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
+  const resolveIconSrc = (icon) => {
+    if (!icon) return Perfil_Icon;
+    // If icon is already a full path or imported URL, return it
+    if (typeof icon === 'string' && (icon.startsWith('http') || icon.includes('/') || icon.endsWith('.png'))) {
+      return icon;
+    }
+    try {
+      return new URL(`/src/assets/cosmetic/icons/${icon}.png`, import.meta.url).href;
+    } catch {
+      return Perfil_Icon;
+    }
+  };
+  // valores seguros para exibição (evitam acessar `user.data` quando `user` for null)
+  const displayName = me?.basicData?.username ?? user?.data?.basicData?.username ?? "#username";
+  const displayEmail = me?.basicData?.email ?? user?.data?.basicData?.email ?? "#e-mail";
 
   // Define o botão ativo com base na URL atual
   useEffect(() => {
@@ -25,18 +43,24 @@ function Header() {
   }, [location]);
 
   useEffect(() => {
-    if (!loading && user) {
-      getUser(user.data.basicData.id).then((data) => {
-        setActualIcon(data.currentCosmetic.currentIcon);
-      });
-      getUser(user.data.basicData.id).then((data) => {
-        setActualEffect(data.currentCosmetic.currentEffect);
-      });
-    } else if (!loading && !user) {
-      setActualIcon("E00001");
-      setActualEffect(null);
+    // guard with optional chaining: user may be an object but the nested
+    // `data` or `basicData` fields can be missing depending on the auth
+    // provider response shape. Only call getUser when we have an id.
+  // prefer reading currentCosmetic from `me` (already fetched via useMe)
+    // prefer reading currentCosmetic from `me` (already fetched via useMe)
+    if (!loading) {
+      if (me || user) {
+        const current = me?.currentCosmetic ?? user?.data?.currentCosmetic;
+        if (current) {
+          setActualIcon(current.currentIcon || Perfil_Icon);
+          setActualEffect(current.currentEffect || null);
+        }
+      } else {
+        setActualIcon("E00001");
+        setActualEffect(null);
+      }
     }
-  }, [loading, user, userAtt]);
+  }, [loading, user, userAtt, me]);
 
   const navigate = useNavigate();
 
@@ -72,25 +96,31 @@ function Header() {
           onClick={() => setLoggoutPop(!loggoutPop)}
         >
           <img
-            src={
-              new URL(
-                `/src/assets/cosmetic/icons/${actualIcon}.png`,
-                import.meta.url
-              ).href
-            }
+            src={resolveIconSrc(actualIcon)}
             alt="User_Icon"
             className={styles.Perfil_Icon}
+            onError={(e) => {
+              // fallback to imported default image
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = Perfil_Icon;
+            }}
           />
           <div className={styles.Effect_Container}>
-            <img
-              src={
-                new URL(
-                  `/src/assets/cosmetic/effects/${actualEffect}.gif`,
-                  import.meta.url
-                ).href
-              }
-              alt=""
-            />
+            {actualEffect ? (
+              <img
+                src={
+                  new URL(
+                    `/src/assets/cosmetic/effects/${actualEffect}.gif`,
+                    import.meta.url
+                  ).href
+                }
+                alt=""
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : null}
           </div>
         </div>
         <div
@@ -103,31 +133,22 @@ function Header() {
               onClick={() => setLoggoutPop(!loggoutPop)}
             >
               <img
-                src={
-                  new URL(
-                    `/src/assets/cosmetic/icons/${actualIcon}.png`,
-                    import.meta.url
-                  ).href
-                }
+                src={resolveIconSrc(actualIcon)}
                 alt="User_Icon"
                 className={styles.Perfil_Icon}
                 onClick={() => navigate("/Perfil")}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = Perfil_Icon;
+                }}
               />
             </div>
             <h1>
-              {user?.data.basicData.username ? (
-                <span>{user.data.basicData.username}</span>
-              ) : (
-                <span>#username</span>
-              )}
+              <span>{displayName}</span>
             </h1>
           </div>
           <h2>
-            {user?.data.basicData.email ? (
-              <span>{user.data.basicData.email}</span>
-            ) : (
-              <span>#e-mail</span>
-            )}
+            <span>{displayEmail}</span>
           </h2>
           <button onClick={() => signOut()}>Deslogar</button>
         </div>
