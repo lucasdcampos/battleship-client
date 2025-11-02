@@ -5,6 +5,7 @@ import Perfil_Card from "./elements/Perfil_Card";
 import PopupComponent from "./elements/PopupComponent"; // IMPORTAR O POPUP
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
+import { useMe } from '../../../user/useMe';
 import { getUser } from "../../../../backandSimulation/userService";
 import { updateUser } from "../../../../backandSimulation/userService";
 
@@ -15,7 +16,6 @@ function Perfil() {
   const [partidas, setPartidas] = useState(0);
   const [vitorias, setVitorias] = useState(0);
   const [cards, setCards] = useState(0);
-  const [skins, setSkins] = useState(0);
   const [icons, setIcons] = useState([]);
   const [backgrounds, setBackgrounds] = useState([]);
   const [effects, setEffects] = useState([]);
@@ -31,19 +31,34 @@ function Perfil() {
   const [perfilEditPopUP, setPerfilEditPopUP] = useState("none");
   const [activeTab, setActiveTab] = useState("icons");
   const [incrementIndex, setIncrementIndex] = useState(0);
-  const [newPrimaryColor, setNewPrimaryColor] = useState(null);
-  const [newSecondaryColor, setNewSecondaryColor] = useState(null);
-  const [newTertiaryColor, setNewTertiaryColor] = useState(null);
-  const [newFontColor, setNewFontColor] = useState(null);
+  const [setNewPrimaryColor] = useState(null);
+  const [setNewSecondaryColor] = useState(null);
+  const [setNewTertiaryColor] = useState(null);
+  const [setNewFontColor] = useState(null);
 
   // NOVOS ESTADOS PARA O POPUP DE CARDS/SKINS
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupType, setPopupType] = useState('cards'); // 'cards' ou 'skins'
 
   const { user, setUserAtt } = useAuth();
+  const { me } = useMe();
+
+  // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
+  const resolveIconSrc = (icon) => {
+    if (!icon) return perfil_icon;
+    if (typeof icon === 'string' && (icon.startsWith('http') || icon.includes('/') || icon.endsWith('.png'))) {
+      return icon;
+    }
+    try {
+      return new URL(`/src/assets/cosmetic/icons/${icon}.png`, import.meta.url).href;
+    } catch {
+      return perfil_icon;
+    }
+  };
 
   useEffect(() => {
-    getUser(1).then((data) => {
+    const id = me?.basicData?.id || 1;
+    getUser(id).then((data) => {
       // Estatísticas
       setLvl(data.statistic.lvl);
       setExp(data.statistic.exp);
@@ -63,7 +78,7 @@ function Perfil() {
       setActualTertiaryColor(data.currentCosmetic.currentTertiaryColor);
       setActualFontColor(data.currentCosmetic.currentFontColor);
     });
-  }, []);
+  }, [me?.basicData?.id]);
 
   useEffect(() => {
     const root = getComputedStyle(document.documentElement);
@@ -74,12 +89,13 @@ function Perfil() {
   }, [actualPrimaryColor, actualSecondaryColor, actualTertiaryColor]);
 
   function totalShipSkins() {
-    return (
-      user.data.availableShipSkins.destroyer.length +
-      user.data.availableShipSkins.battleship.length +
-      user.data.availableShipSkins.aircraftCarrier.length +
-      user.data.availableShipSkins.submarine.length
-    );
+    // protect against missing user/data/availableShipSkins and prefer `me` when available
+    const source = me || user?.data;
+    const destroyer = source?.availableShipSkins?.destroyer?.length || 0;
+    const battleship = source?.availableShipSkins?.battleship?.length || 0;
+    const aircraftCarrier = source?.availableShipSkins?.aircraftCarrier?.length || 0;
+    const submarine = source?.availableShipSkins?.submarine?.length || 0;
+    return destroyer + battleship + aircraftCarrier + submarine;
   }
 
   // NOVAS FUNÇÕES PARA ABRIR O POPUP
@@ -99,7 +115,8 @@ function Perfil() {
 
   // NOVA FUNÇÃO PARA RECARREGAR DADOS APÓS SALVAR
   const handlePopupSave = () => {
-    getUser(user.data.basicData.id).then((data) => {
+    const userId = me?.basicData?.id || user?.data?.basicData?.id || 1;
+    getUser(userId).then((data) => {
       // Atualizar todos os estados com os dados mais recentes
       setLvl(data.statistic.lvl);
       setExp(data.statistic.exp);
@@ -193,7 +210,7 @@ function Perfil() {
         setActualIcon(selected);
         await updateUser(1, {
           currentCosmetic: {
-            ...user.data.currentCosmetic,
+            ...user?.data?.currentCosmetic,
             currentIcon: selected,
           },
         });
@@ -203,7 +220,7 @@ function Perfil() {
         setActualBackground(selected);
         await updateUser(1, {
           currentCosmetic: {
-            ...user.data.currentCosmetic,
+            ...user?.data?.currentCosmetic,
             currentBackground: selected,
           },
         });
@@ -213,7 +230,7 @@ function Perfil() {
         setActualEffect(selected);
         await updateUser(1, {
           currentCosmetic: {
-            ...user.data.currentCosmetic,
+            ...user?.data?.currentCosmetic,
             currentEffect: selected,
           },
         });
@@ -248,34 +265,39 @@ function Perfil() {
     >
       <div className={styles.Perfil_Container}>
         <img
-          src={
-            new URL(
-              `/src/assets/cosmetic/icons/${actualIcon}.png`,
-              import.meta.url
-            ).href
-          }
+          src={resolveIconSrc(actualIcon)}
           alt="User_Icon"
           className={styles.Perfil_Icon}
           onClick={() => setPerfilEditPopUP("flex")}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = perfil_icon;
+          }}
         />
         <h1>
-          {user?.data.basicData.username ? (
-            <span>{user.data.basicData.username}</span>
+          {me?.basicData?.username || user?.data?.basicData?.username ? (
+            <span>{me?.basicData?.username || user?.data?.basicData?.username}</span>
           ) : (
             <span>#user</span>
           )}
         </h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
-          <img
-            src={
-              new URL(
-                `/src/assets/cosmetic/effects/${actualEffect}.gif`,
-                import.meta.url
-              ).href
-            }
-            alt=""
-          />
+          {actualEffect ? (
+            <img
+              src={
+                new URL(
+                  `/src/assets/cosmetic/effects/${actualEffect}.gif`,
+                  import.meta.url
+                ).href
+              }
+              alt=""
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : null}
         </div>
       </div>
       
@@ -422,7 +444,7 @@ function Perfil() {
         isOpen={isPopupOpen}
         onClose={handleClosePopup}
         type={popupType}
-        userData={user.data}
+        userData={me || user?.data || null}
         onSave={handlePopupSave}
       />
     </div>
