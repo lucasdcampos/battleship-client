@@ -227,3 +227,78 @@
   height: 60px;
   border-radius: 5px;
 }
+
+@media (max-width: 900px) {
+  .Perfil_Main_Container .Perfil_Edit_Open {
+    left: 15px;
+    top: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .Perfil_Edit_Pop_UP {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%;
+    height: 95%;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 15px;
+  }
+
+  .Perfil_Edit_left {
+    width: 100%;
+    border-right: none;
+    border-bottom: solid 1px var(--font-color);
+    padding-bottom: 10px;
+  }
+
+  .Perfil_Edit_Right {
+    width: 100%;
+    padding-top: 10px;
+  }
+
+  .Perfil_Edit_Right table {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .Perfil_Edit_Right table input[type="color"] {
+    width: 40px;
+    height: 20px;
+    padding: 1px;
+  }
+
+  .Button_Send {
+    position: static;
+    width: 100%;
+    height: 50px;
+    margin-top: 20px;
+  }
+
+  .Perfil_Cards_Container {
+    justify-content: center;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .Perfil_Cards_Container > div {
+    width: 45%;
+    min-width: 150px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .Perfil_Cards_Container > div > :first-child {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+}
