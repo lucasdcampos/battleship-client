@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
       const token = localStorage.getItem("authToken");
       if (token) {
         // tenta buscar os dados do usuário com o token salvo
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -54,7 +54,7 @@ export function AuthProvider({ children }) {
       body.append("username", email);
       body.append("password", password);
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/login`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -89,7 +89,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem("authToken", token);
 
       // buscar dados do usuário
-      const meRes = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+      const meRes = await fetch(`${import.meta.env.VITE_API_URL}/users/me/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

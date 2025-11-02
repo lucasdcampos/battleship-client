@@ -44,7 +44,7 @@ export function useMe() {
         return;
       }
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
