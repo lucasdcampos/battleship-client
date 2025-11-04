@@ -4,15 +4,12 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Perfil_Icon from "../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
-import { useMe } from "../../../user/useMe";
-// service not required here because we read from `me`/context
 
 function Header() {
   const [select, setSelect] = useState(null);
   const [loggoutPop, setLoggoutPop] = useState(false);
   const location = useLocation();
   const { user, signOut, loading, userAtt } = useAuth();
-  const { me } = useMe();
   const [actualIcon, setActualIcon] = useState(Perfil_Icon);
   const [actualEffect, setActualEffect] = useState(null);
   // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
@@ -29,8 +26,8 @@ function Header() {
     }
   };
   // valores seguros para exibição (evitam acessar `user.data` quando `user` for null)
-  const displayName = me?.basicData?.username ?? user?.data?.basicData?.username ?? "#username";
-  const displayEmail = me?.basicData?.email ?? user?.data?.basicData?.email ?? "#e-mail";
+  const displayName = user?.data?.basicData?.username || user?.basicData?.username || user?.username || "#username";
+  const displayEmail = user?.data?.basicData?.email || user?.basicData?.email || user?.email || "#e-mail";
 
   // Define o botão ativo com base na URL atual
   useEffect(() => {
@@ -43,14 +40,10 @@ function Header() {
   }, [location]);
 
   useEffect(() => {
-    // guard with optional chaining: user may be an object but the nested
-    // `data` or `basicData` fields can be missing depending on the auth
-    // provider response shape. Only call getUser when we have an id.
-  // prefer reading currentCosmetic from `me` (already fetched via useMe)
-    // prefer reading currentCosmetic from `me` (already fetched via useMe)
     if (!loading) {
-      if (me || user) {
-        const current = me?.currentCosmetic ?? user?.data?.currentCosmetic;
+      if (user) {
+        // Suporta user = { currentCosmetic }, { data: { currentCosmetic } }
+        const current = user?.data?.currentCosmetic || user?.currentCosmetic;
         if (current) {
           setActualIcon(current.currentIcon || Perfil_Icon);
           setActualEffect(current.currentEffect || null);
@@ -60,7 +53,7 @@ function Header() {
         setActualEffect(null);
       }
     }
-  }, [loading, user, userAtt, me]);
+  }, [loading, user, userAtt]);
 
   const navigate = useNavigate();
 
