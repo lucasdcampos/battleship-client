@@ -5,8 +5,7 @@ import Perfil_Card from "./elements/Perfil_Card";
 import PopupComponent from "./elements/PopupComponent"; // IMPORTAR O POPUP
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
-import { useMe } from '../../../user/useMe';
-import { updateUser, getMe, updateUserConfig } from '../../../services/userService';
+import { updateUser, updateUserConfig } from '../../../services/userService';
 // getUser removed: prefer using useMe() and useUserConfig()
 import { useUserConfig } from '../../../user/useUserConfig';
 
@@ -41,8 +40,7 @@ function Perfil() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupType, setPopupType] = useState("cards"); // 'cards' ou 'skins'
 
-  const { user, setUserAtt } = useAuth();
-  const { me, refresh: refreshMe } = useMe();
+  const { user, setUserAtt, refreshUser } = useAuth();
   const { config: userConfig, refresh: refreshUserConfig } = useUserConfig();
 
   // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
@@ -58,10 +56,10 @@ function Perfil() {
     }
   };
 
-  // Populate fields from `me` when available instead of fetching by id
+  // Populate fields from `user` when available
   useEffect(() => {
-    if (!me) return;
-    const data = me;
+    if (!user) return;
+    const data = user.data ? user.data : user;
     setLvl(data.statistic?.lvl || 0);
     setExp(data.statistic?.exp || 0);
     setPartidas(data.statistic?.gamesPlayed || 0);
@@ -77,7 +75,7 @@ function Perfil() {
     setActualSecondaryColor(data.currentCosmetic?.currentSecondaryColor || null);
     setActualTertiaryColor(data.currentCosmetic?.currentTertiaryColor || null);
     setActualFontColor(data.currentCosmetic?.currentFontColor || null);
-  }, [me]);
+  }, [user]);
 
   // Apply colors from user config when available
   useEffect(() => {
@@ -116,8 +114,8 @@ function Perfil() {
   }, [actualPrimaryColor, actualSecondaryColor, actualTertiaryColor, actualFontColor]);
 
   function totalShipSkins() {
-    // protect against missing user/data/availableShipSkins and prefer `me` when available
-    const source = me || user?.data;
+    // protect against missing user/data/availableShipSkins
+    const source = user?.data ? user.data : user;
     const destroyer = source?.availableShipSkins?.destroyer?.length || 0;
     const battleship = source?.availableShipSkins?.battleship?.length || 0;
     const aircraftCarrier = source?.availableShipSkins?.aircraftCarrier?.length || 0;
@@ -143,30 +141,9 @@ function Perfil() {
   // NOVA FUNÇÃO PARA RECARREGAR DADOS APÓS SALVAR
   const handlePopupSave = async () => {
     try {
-  const latest = await getMe();
-      const data = latest?.data ? latest.data : latest;
-      // Atualizar todos os estados com os dados mais recentes
-      setLvl(data.statistic?.lvl || 0);
-      setExp(data.statistic?.exp || 0);
-      setPartidas(data.statistic?.gamesPlayed || 0);
-      setVitorias(data.statistic?.gamesWon || 0);
-      setCards(data.availableCosmetic?.availableCards?.length || 0);
-      setIcons(data.availableCosmetic?.availableIcons || []);
-      setBackgrounds(data.availableCosmetic?.availableBackgrounds || []);
-      setEffects(data.availableCosmetic?.availableEffects || []);
-      setActualIcon(data.currentCosmetic?.currentIcon || perfil_icon);
-      setActualBackground(data.currentCosmetic?.currentBackground || null);
-      setActualEffect(data.currentCosmetic?.currentEffect || null);
-      setActualPrimaryColor(data.currentCosmetic?.currentPrimaryColor || null);
-      setActualSecondaryColor(data.currentCosmetic?.currentSecondaryColor || null);
-      setActualTertiaryColor(data.currentCosmetic?.currentTertiaryColor || null);
-      setActualFontColor(data.currentCosmetic?.currentFontColor || null);
-
-      // refresh hooks
-      if (typeof refreshMe === 'function') await refreshMe();
+      // Refresh user and config from context/hooks
+      if (typeof refreshUser === 'function') await refreshUser();
       if (typeof refreshUserConfig === 'function') await refreshUserConfig();
-
-      // Notificar contexto de autenticação sobre mudanças
       setUserAtt((prev) => !prev);
     } catch (err) {
       console.error('Erro ao recarregar dados após salvar popup:', err);
@@ -276,7 +253,7 @@ function Perfil() {
   // Save colors to backend when activeTab === 'colors'
   async function saveColors() {
     try {
-      const userId = me?.basicData?.id || user?.data?.basicData?.id || null;
+  const userId = user?.data?.basicData?.id || user?.basicData?.id || null;
       const payload = {
         enabled_background: userConfig?.enabledBackground ?? 0,
         enabled_skin: userConfig?.enabledSkin ?? 0,
@@ -340,11 +317,14 @@ function Perfil() {
           }}
         />
         <h1>
-          {me?.basicData?.username || user?.data?.basicData?.username ? (
-            <span>{me?.basicData?.username || user?.data?.basicData?.username}</span>
-          ) : (
-            <span>#user</span>
-          )}
+          {(() => {
+            // Suporta user = { username }, { basicData }, { data: { basicData } }
+            const username = user?.data?.basicData?.username || user?.basicData?.username || user?.username;
+            if (username && typeof username === 'string' && username.trim().length > 0) {
+              return <span>{username}</span>;
+            }
+            return <span>#user</span>;
+          })()}
         </h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
@@ -519,7 +499,7 @@ function Perfil() {
         isOpen={isPopupOpen}
         onClose={handleClosePopup}
         type={popupType}
-        userData={me || user?.data || null}
+        userData={user?.data || user || null}
         onSave={handlePopupSave}
       />
     </div>

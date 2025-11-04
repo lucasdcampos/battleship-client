@@ -2,31 +2,31 @@ import Card from "./elements/Cards/Cards";
 import defaultCosmeticImg from "../../../assets/development/fc.png";
 import styles from "./Store.module.css";
 import fc from "../../../assets/development/fc.png";
-import { getMe, updateUser } from "../../../services/userService";
+import { updateUser } from "../../../services/userService";
 import { getCosmetics } from "../../../services/storeService";
 import { useAuth } from "../../../user/useAuth";
 import { useState, useEffect } from "react";
 
 export default function Store() {
-  const { user, loading, setUserAtt } = useAuth();
+  const { user, loading, setUserAtt, refreshUser, userAtt } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
   const [cosmetics, setCosmetics] = useState([]);
   const [fatecCoins, setFatecCoins] = useState(0);
   const [inventory, setInventory] = useState(new Set());
 
   async function setMarket() {
-    // Busca dados do usuário logado (/me)
-    const data = await getMe();
-    setFatecCoins(data.basicData?.fatecCoins || data.coins || 0);
+    // Usa o usuário do contexto
+    const data = user;
+    setFatecCoins(data?.basicData?.fatecCoins || data?.coins || 0);
     const userInventory = new Set([
-      ...(data.availableCosmetic?.availableIcons || []),
-      ...(data.availableCosmetic?.availableEffects || []),
-      ...(data.availableCosmetic?.availableBackgrounds || []),
-      ...(data.availableCosmetic?.availableCards || []),
-      ...(data.availableShipSkins?.destroyer || []),
-      ...(data.availableShipSkins?.battleship || []),
-      ...(data.availableShipSkins?.aircraftCarrier || []),
-      ...(data.availableShipSkins?.submarine || []),
+      ...(data?.availableCosmetic?.availableIcons || []),
+      ...(data?.availableCosmetic?.availableEffects || []),
+      ...(data?.availableCosmetic?.availableBackgrounds || []),
+      ...(data?.availableCosmetic?.availableCards || []),
+      ...(data?.availableShipSkins?.destroyer || []),
+      ...(data?.availableShipSkins?.battleship || []),
+      ...(data?.availableShipSkins?.aircraftCarrier || []),
+      ...(data?.availableShipSkins?.submarine || []),
     ]);
     setInventory(userInventory);
     // Busca cosméticos da loja
@@ -54,7 +54,8 @@ export default function Store() {
       await updateUser(null, coinsUpdate); // null para /me/
 
       // b) Aquisição do item
-      const userData = await getMe(); // Pega os dados mais recentes para evitar sobrescrever
+      await refreshUser(); // Atualiza o contexto global
+      const userData = user; // Usa o contexto atualizado
       let updatePayload = {};
 
       if (actualTab === "ships") {
@@ -64,17 +65,17 @@ export default function Store() {
         else if (product.imagem[0] === "F") shipType = "destroyer";
         else if (product.imagem[0] === "I") shipType = "submarine";
 
-        const currentShipSkins = userData.availableShipSkins?.[shipType] || [];
+        const currentShipSkins = userData?.availableShipSkins?.[shipType] || [];
         updatePayload.availableShipSkins = {
-          ...userData.availableShipSkins,
+          ...userData?.availableShipSkins,
           [shipType]: [...currentShipSkins, product.imagem],
         };
       } else {
         const cosmeticTypeKey = "available" + actualTab.charAt(0).toUpperCase() + actualTab.slice(1);
         const currentCosmetics =
-          userData.availableCosmetic?.[cosmeticTypeKey] || [];
+          userData?.availableCosmetic?.[cosmeticTypeKey] || [];
         updatePayload.availableCosmetic = {
-          ...userData.availableCosmetic,
+          ...userData?.availableCosmetic,
           [cosmeticTypeKey]: [...currentCosmetics, product.imagem],
         };
       }
@@ -101,7 +102,8 @@ export default function Store() {
     if (!loading && user) {
       setMarket();
     }
-  }, [loading, user, setUserAtt]);
+    // eslint-disable-next-line
+  }, [loading, userAtt]);
 
   if (loading) {
     return <div className={styles.container}>Carregando Loja...</div>;
