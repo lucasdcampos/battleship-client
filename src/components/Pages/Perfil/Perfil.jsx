@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import styles from "./Perfil.module.css";
 import ProgressBar from "./elements/ProgressBar";
 import Perfil_Card from "./elements/Perfil_Card";
-import PopupComponent from "./elements/PopupComponent"; // IMPORTAR O POPUP
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
-import { useMe } from '../../../user/useMe';
-import { updateUser, getMe, updateUserConfig } from '../../../services/userService';
-// getUser removed: prefer using useMe() and useUserConfig()
+import { updateUser, updateUserConfig } from '../../../services/userService';
+import { getUserCosmetics } from '../../../services/storeService';
 import { useUserConfig } from '../../../user/useUserConfig';
+
 
 function Perfil() {
   // Estados existentes...
@@ -37,12 +36,8 @@ function Perfil() {
   const [newTertiaryColor, setNewTertiaryColor] = useState(null);
   const [newFontColor, setNewFontColor] = useState(null);
 
-  // NOVOS ESTADOS PARA O POPUP DE CARDS/SKINS
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [popupType, setPopupType] = useState("cards"); // 'cards' ou 'skins'
 
   const { user, setUserAtt } = useAuth();
-  const { me, refresh: refreshMe } = useMe();
   const { config: userConfig, refresh: refreshUserConfig } = useUserConfig();
 
   // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
@@ -58,18 +53,14 @@ function Perfil() {
     }
   };
 
-  // Populate fields from `me` when available instead of fetching by id
+  // Busca cosméticos do usuário e popula os estados
   useEffect(() => {
-    if (!me) return;
-    const data = me;
+    if (!user) return;
+    const data = user.data ? user.data : user;
     setLvl(data.statistic?.lvl || 0);
     setExp(data.statistic?.exp || 0);
     setPartidas(data.statistic?.gamesPlayed || 0);
     setVitorias(data.statistic?.gamesWon || 0);
-    setCards(data.availableCosmetic?.availableCards?.length || 0);
-    setIcons(data.availableCosmetic?.availableIcons || []);
-    setBackgrounds(data.availableCosmetic?.availableBackgrounds || []);
-    setEffects(data.availableCosmetic?.availableEffects || []);
     setActualIcon(data.currentCosmetic?.currentIcon || perfil_icon);
     setActualBackground(data.currentCosmetic?.currentBackground || null);
     setActualEffect(data.currentCosmetic?.currentEffect || null);
@@ -77,7 +68,21 @@ function Perfil() {
     setActualSecondaryColor(data.currentCosmetic?.currentSecondaryColor || null);
     setActualTertiaryColor(data.currentCosmetic?.currentTertiaryColor || null);
     setActualFontColor(data.currentCosmetic?.currentFontColor || null);
-  }, [me]);
+
+    // Busca cosméticos do backend
+    getUserCosmetics().then(res => {
+      const cosmetics = res.cosmetics || [];
+      setIcons(cosmetics.filter(c => c.type === 'ICON'));
+      setBackgrounds(cosmetics.filter(c => c.type === 'BACKGROUND'));
+      setEffects(cosmetics.filter(c => c.type === 'EFFECT'));
+      setCards(cosmetics.filter(c => c.type === 'CARD').length);
+    }).catch(() => {
+      setIcons([]);
+      setBackgrounds([]);
+      setEffects([]);
+      setCards(0);
+    });
+  }, [user]);
 
   // Apply colors from user config when available
   useEffect(() => {
@@ -116,8 +121,8 @@ function Perfil() {
   }, [actualPrimaryColor, actualSecondaryColor, actualTertiaryColor, actualFontColor]);
 
   function totalShipSkins() {
-    // protect against missing user/data/availableShipSkins and prefer `me` when available
-    const source = me || user?.data;
+    // protect against missing user/data/availableShipSkins
+    const source = user?.data ? user.data : user;
     const destroyer = source?.availableShipSkins?.destroyer?.length || 0;
     const battleship = source?.availableShipSkins?.battleship?.length || 0;
     const aircraftCarrier = source?.availableShipSkins?.aircraftCarrier?.length || 0;
@@ -125,90 +130,25 @@ function Perfil() {
     return destroyer + battleship + aircraftCarrier + submarine;
   }
 
-  // NOVAS FUNÇÕES PARA ABRIR O POPUP
-  const handleOpenCardsPopup = () => {
-    setPopupType("cards");
-    setIsPopupOpen(true);
-  };
-
-  const handleOpenSkinsPopup = () => {
-    setPopupType("skins");
-    setIsPopupOpen(true);
-  };
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
-  };
-
-  // NOVA FUNÇÃO PARA RECARREGAR DADOS APÓS SALVAR
-  const handlePopupSave = async () => {
-    try {
-  const latest = await getMe();
-      const data = latest?.data ? latest.data : latest;
-      // Atualizar todos os estados com os dados mais recentes
-      setLvl(data.statistic?.lvl || 0);
-      setExp(data.statistic?.exp || 0);
-      setPartidas(data.statistic?.gamesPlayed || 0);
-      setVitorias(data.statistic?.gamesWon || 0);
-      setCards(data.availableCosmetic?.availableCards?.length || 0);
-      setIcons(data.availableCosmetic?.availableIcons || []);
-      setBackgrounds(data.availableCosmetic?.availableBackgrounds || []);
-      setEffects(data.availableCosmetic?.availableEffects || []);
-      setActualIcon(data.currentCosmetic?.currentIcon || perfil_icon);
-      setActualBackground(data.currentCosmetic?.currentBackground || null);
-      setActualEffect(data.currentCosmetic?.currentEffect || null);
-      setActualPrimaryColor(data.currentCosmetic?.currentPrimaryColor || null);
-      setActualSecondaryColor(data.currentCosmetic?.currentSecondaryColor || null);
-      setActualTertiaryColor(data.currentCosmetic?.currentTertiaryColor || null);
-      setActualFontColor(data.currentCosmetic?.currentFontColor || null);
-
-      // refresh hooks
-      if (typeof refreshMe === 'function') await refreshMe();
-      if (typeof refreshUserConfig === 'function') await refreshUserConfig();
-
-      // Notificar contexto de autenticação sobre mudanças
-      setUserAtt((prev) => !prev);
-    } catch (err) {
-      console.error('Erro ao recarregar dados após salvar popup:', err);
-    }
-  };
 
   // Funções existentes...
   function getActiveList() {
     switch (activeTab) {
       case "icons":
-        return icons;
+        return icons.map(c => c.cosmetic_id);
       case "backgrounds":
-        return backgrounds;
+        return backgrounds.map(c => c.cosmetic_id);
       case "effects":
-        return effects;
+        return effects.map(c => c.cosmetic_id);
       default:
         return [];
     }
   }
 
-  function getImagePath(code) {
-    let basePath = "";
 
-    switch (activeTab) {
-      case "icons":
-        basePath = "/src/assets/cosmetic/icons/";
-        break;
-      case "backgrounds":
-        basePath = "/src/assets/cosmetic/backgrounds/";
-        break;
-      case "effects":
-        basePath = "/src/assets/cosmetic/effects/";
-        break;
-      default:
-        return "";
-    }
-
-    return new URL(
-      `${basePath}${code}.${activeTab === "effects" ? "gif" : "png"}`,
-      import.meta.url
-    ).href;
-  }
+  // Placeholder SVG para imagens inválidas
+  const placeholderImg =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%25" height="100%25" fill="%23ccc"/><text x="50%25" y="50%25" font-size="12" text-anchor="middle" fill="%23666" dy=".3em">?</text></svg>';
 
   function incIndex() {
     switch (activeTab) {
@@ -276,7 +216,7 @@ function Perfil() {
   // Save colors to backend when activeTab === 'colors'
   async function saveColors() {
     try {
-      const userId = me?.basicData?.id || user?.data?.basicData?.id || null;
+  const userId = user?.data?.basicData?.id || user?.basicData?.id || null;
       const payload = {
         enabled_background: userConfig?.enabledBackground ?? 0,
         enabled_skin: userConfig?.enabledSkin ?? 0,
@@ -340,11 +280,14 @@ function Perfil() {
           }}
         />
         <h1>
-          {me?.basicData?.username || user?.data?.basicData?.username ? (
-            <span>{me?.basicData?.username || user?.data?.basicData?.username}</span>
-          ) : (
-            <span>#user</span>
-          )}
+          {(() => {
+            // Suporta user = { username }, { basicData }, { data: { basicData } }
+            const username = user?.data?.basicData?.username || user?.basicData?.username || user?.username;
+            if (username && typeof username === 'string' && username.trim().length > 0) {
+              return <span>{username}</span>;
+            }
+            return <span>#user</span>;
+          })()}
         </h1>
         <ProgressBar lvl={lvl} exp={exp} />
         <div className={styles.Effect_Container}>
@@ -373,12 +316,10 @@ function Perfil() {
         <div>
           <Perfil_Card num={vitorias} title={"Vitórias"} />
         </div>
-        {/* MODIFICAR O CARD DE CARDS PARA ABRIR O POPUP */}
-        <div onClick={handleOpenCardsPopup}>
+        <div>
           <Perfil_Card num={cards} title={"Cards"} />
         </div>
-        {/* MODIFICAR O CARD DE SKINS PARA ABRIR O POPUP */}
-        <div onClick={handleOpenSkinsPopup}>
+        <div>
           <Perfil_Card num={totalShipSkins()} title={"Skins"} />
         </div>
       </div>
@@ -446,10 +387,42 @@ function Perfil() {
         >
           <button onClick={() => decIndex()}></button>
           <div>
-            <img
-              src={getImagePath(getActiveList()[incrementIndex])}
-              alt="fault"
-            />
+            {/* Imagem principal do cosmético selecionado */}
+            {(() => {
+              let cosmetics = [];
+              if (activeTab === 'icons') cosmetics = icons;
+              else if (activeTab === 'backgrounds') cosmetics = backgrounds;
+              else if (activeTab === 'effects') cosmetics = effects;
+              const selected = cosmetics[incrementIndex];
+              return (
+                <img
+                  src={selected?.link || placeholderImg}
+                  alt={selected?.description || 'cosmético'}
+                  style={{ width: 64, height: 64, objectFit: 'contain', borderRadius: 8, background: '#fff', border: '1px solid #ccc' }}
+                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = placeholderImg; }}
+                />
+              );
+            })()}
+            {/* Miniaturas dos cosméticos do tipo selecionado */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16, justifyContent: 'center' }}>
+              {(() => {
+                let cosmetics = [];
+                if (activeTab === 'icons') cosmetics = icons;
+                else if (activeTab === 'backgrounds') cosmetics = backgrounds;
+                else if (activeTab === 'effects') cosmetics = effects;
+                return cosmetics.map((cosmetic, idx) => (
+                  <img
+                    key={cosmetic.cosmetic_id}
+                    src={cosmetic.link || placeholderImg}
+                    alt={cosmetic.description}
+                    title={cosmetic.description}
+                    style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', border: incrementIndex === idx ? '2px solid orange' : '1px solid #ccc', cursor: 'pointer' }}
+                    onClick={() => setIncrementIndex(idx)}
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = placeholderImg; }}
+                  />
+                ));
+              })()}
+            </div>
           </div>
           <button onClick={() => incIndex()}></button>
         </div>
@@ -514,14 +487,6 @@ function Perfil() {
         </button>
       </div>
 
-      {/* NOVO POPUP COMPONENT PARA CARDS E SKINS */}
-      <PopupComponent
-        isOpen={isPopupOpen}
-        onClose={handleClosePopup}
-        type={popupType}
-        userData={me || user?.data || null}
-        onSave={handlePopupSave}
-      />
     </div>
   );
 }

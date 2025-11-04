@@ -3,10 +3,10 @@
 import fc from "../../../../../assets/development/fc.png";
 import styles from "./Cards.module.css";
 
-export default function Card({ titulo, preco, imagem, onComprar }) {
+export default function Card({ titulo, preco, imagem, onComprar, onImgError }) {
   return (
     <div className={styles.card}>
-      <img src={imagem} alt={titulo} className={styles.image} />
+      <img src={imagem} alt={titulo} className={styles.image} onError={onImgError} />
 
       <h3 className={styles.title}>{titulo}</h3>
 
@@ -17,7 +17,7 @@ export default function Card({ titulo, preco, imagem, onComprar }) {
       <button
         className={styles.button}
         onClick={() => {
-          onComprar(); // <--- AQUI ESTAVA O PROBLEMA! Chame a função onComprar!
+          onComprar();
         }}
       >
         <span className={styles.icon}>🛒</span> Comprar

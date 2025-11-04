@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 
 const AuthContext = createContext(null);
 
@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userAtt, setUserAtt] = useState(false);
 
-  const checkUserToken = async () => {
+  const checkUserToken = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
@@ -38,11 +38,13 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkUserToken();
-  }, []);
+  }, [checkUserToken]);
+  // Permite forçar o refresh dos dados do usuário logado
+  const refreshUser = checkUserToken;
 
   const signIn = async (email, password) => {
     setLoading(true);
@@ -128,6 +130,7 @@ export function AuthProvider({ children }) {
         isAuthenticated,
         setUserAtt,
         userAtt,
+        refreshUser,
       }}
     >
       {children}
