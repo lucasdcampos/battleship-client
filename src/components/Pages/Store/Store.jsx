@@ -1,87 +1,44 @@
 import Card from "./elements/Cards/Cards";
+import defaultCosmeticImg from "../../../assets/development/fc.png";
 import styles from "./Store.module.css";
 import fc from "../../../assets/development/fc.png";
-import { getUser, updateUser } from "../../../services/userService";
+import { getMe, updateUser } from "../../../services/userService";
+import { getCosmetics } from "../../../services/storeService";
 import { useAuth } from "../../../user/useAuth";
 import { useState, useEffect } from "react";
 
 export default function Store() {
-  const { user, loading, isAuthenticated, setUserAtt } = useAuth();
+  const { user, loading, setUserAtt } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
-  const [tabs, setTabs] = useState(null);
+  const [cosmetics, setCosmetics] = useState([]);
   const [fatecCoins, setFatecCoins] = useState(0);
   const [inventory, setInventory] = useState(new Set());
 
-  function setMarket(userID) {
-    getUser(userID).then((data) => {
-      setTabs({
-        icons: data.market.sell_icons,
-        effects: data.market.sell_effects,
-        backgrounds: data.market.sell_backgrounds,
-        cards: data.market.sell_cards,
-        ships: data.market.sell_ships,
-      });
-
-      // Carrega o saldo e o inventário do usuário
-      setFatecCoins(data.basicData.fatecCoins);
-
-      const userInventory = new Set([
-        ...(data.availableCosmetic?.availableIcons || []),
-        ...(data.availableCosmetic?.availableEffects || []),
-        ...(data.availableCosmetic?.availableBackgrounds || []),
-        ...(data.availableCosmetic?.availableCards || []),
-        ...(data.availableShipSkins?.destroyer || []),
-        ...(data.availableShipSkins?.battleship || []),
-        ...(data.availableShipSkins?.aircraftCarrier || []),
-        ...(data.availableShipSkins?.submarine || []),
-      ]);
-      setInventory(userInventory);
-    });
-  }
-
-  function getImagePath(code) {
-    let basePath = "";
-
-    switch (actualTab) {
-      case "icons":
-        basePath = "/src/assets/cosmetic/icons/";
-        break;
-      case "backgrounds":
-        basePath = "/src/assets/cosmetic/backgrounds/";
-        break;
-      case "effects":
-        basePath = "/src/assets/cosmetic/effects/";
-        break;
-      case "cards":
-        basePath = "/src/assets/cosmetic/cards/";
-        break;
-      case "ships":
-        if (code[0] === "H") {
-          basePath = "/src/assets/cosmetic/ships/aircraftCarrier/";
-          break;
-        }
-        if (code[0] === "G") {
-          basePath = "/src/assets/cosmetic/ships/battleship/";
-          break;
-        }
-        if (code[0] === "F") {
-          basePath = "/src/assets/cosmetic/ships/destroyer/";
-          break;
-        }
-        if (code[0] === "I") {
-          basePath = "/src/assets/cosmetic/ships/submarine/";
-          break;
-        }
+  async function setMarket() {
+    // Busca dados do usuário logado (/me)
+    const data = await getMe();
+    setFatecCoins(data.basicData?.fatecCoins || data.coins || 0);
+    const userInventory = new Set([
+      ...(data.availableCosmetic?.availableIcons || []),
+      ...(data.availableCosmetic?.availableEffects || []),
+      ...(data.availableCosmetic?.availableBackgrounds || []),
+      ...(data.availableCosmetic?.availableCards || []),
+      ...(data.availableShipSkins?.destroyer || []),
+      ...(data.availableShipSkins?.battleship || []),
+      ...(data.availableShipSkins?.aircraftCarrier || []),
+      ...(data.availableShipSkins?.submarine || []),
+    ]);
+    setInventory(userInventory);
+    // Busca cosméticos da loja
+    try {
+      const res = await getCosmetics();
+      setCosmetics(res.cosmetics || []);
+    } catch {
+      setCosmetics([]);
     }
-    // retorna a URL absoluta pra funcionar no Vite
-    return new URL(
-      `${basePath}${code}.${actualTab === "effects" ? "gif" : "png"}`,
-      import.meta.url
-    ).href;
   }
 
   const handleBuy = async (product) => {
-    const userID = user?.data?.basicData?.id || "1";
     const productPrice = parseInt(product.preco, 10);
 
     // a) Validação de saldo
@@ -94,10 +51,10 @@ export default function Store() {
       // d) Desconto do saldo
       const newCoinsValue = fatecCoins - productPrice;
       const coinsUpdate = { basicData: { fatecCoins: newCoinsValue } };
-      await updateUser(userID, coinsUpdate);
+      await updateUser(null, coinsUpdate); // null para /me/
 
       // b) Aquisição do item
-      const userData = await getUser(userID); // Pega os dados mais recentes para evitar sobrescrever
+      const userData = await getMe(); // Pega os dados mais recentes para evitar sobrescrever
       let updatePayload = {};
 
       if (actualTab === "ships") {
@@ -122,7 +79,7 @@ export default function Store() {
         };
       }
 
-      await updateUser(userID, updatePayload);
+      await updateUser(null, updatePayload); // null para /me/
 
       // c) Desabilitação na Loja (atualizando o estado local)
       setFatecCoins(newCoinsValue);
@@ -136,25 +93,21 @@ export default function Store() {
       alert("Ocorreu um erro durante a compra. Tente novamente.");
       console.error("Erro na compra:", error);
       // Se der erro, recarrega os dados para garantir consistência
-      setMarket(userID);
+      setMarket();
     }
   };
 
   useEffect(() => {
     if (!loading && user) {
-      const userID = user?.data?.basicData?.id || "1";
-      setMarket(userID);
+      setMarket();
     }
   }, [loading, user, setUserAtt]);
 
   if (loading) {
-    return <div>Carregando Loja...</div>;
+    return <div className={styles.container}>Carregando Loja...</div>;
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
+  // Renderização normal da loja
   return (
     <div className={styles.container}>
       <div className={styles.Nav_Buttons_Container}>
@@ -218,28 +171,42 @@ export default function Store() {
       </div>
       <div className={styles.FC_Container}>
         <h1>
-          Fatec Coins:{" "}
+          Fatec Coins: {" "}
           <span style={{ color: "var(--tertiary-color)" }}>{fatecCoins}</span>
         </h1>
         <img src={fc} alt="FC" />
       </div>
       <div className={styles.Cards_Container}>
         {(() => {
-          const availableItems =
-            tabs &&
-            tabs[actualTab]?.filter((card) => !inventory.has(card.imagem));
-
-          if (availableItems && availableItems.length > 0) {
-            return availableItems.map((card, index) => (
+          // Mapeia a aba para o type do backend
+          const tabTypeMap = {
+            icons: "ICON",
+            backgrounds: "BACKGROUND",
+            effects: "EFFECT",
+            cards: "CARD",
+            ships: "SKIN"
+          };
+          const backendType = tabTypeMap[actualTab];
+          const filtered = cosmetics.filter(
+            (item) => item.type === backendType && !inventory.has(item.cosmetic_id)
+          );
+          if (filtered.length > 0) {
+            return filtered.map((item) => (
               <Card
-                key={index}
-                titulo={card.titulo}
-                preco={card.preco}
-                imagem={getImagePath(card.imagem)}
-                onComprar={() => handleBuy(card)}
+                key={item.cosmetic_id}
+                titulo={item.description}
+                preco={item.price}
+                imagem={item.link || defaultCosmeticImg}
+                onComprar={() => handleBuy({
+                  ...item,
+                  imagem: item.cosmetic_id, // para controle de inventário
+                  titulo: item.description,
+                  preco: item.price
+                })}
+                onImgError={e => { e.target.onerror = null; e.target.src = defaultCosmeticImg; }}
               />
             ));
-          } else if (tabs) {
+          } else {
             return <p>Não há itens disponíveis nessa categoria</p>;
           }
         })()}
