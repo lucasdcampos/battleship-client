@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import styles from "./Perfil.module.css";
 import ProgressBar from "./elements/ProgressBar";
 import Perfil_Card from "./elements/Perfil_Card";
-import PopupComponent from "./elements/PopupComponent"; // IMPORTAR O POPUP
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
 import { useAuth } from "../../../user/useAuth";
 import { updateUser, updateUserConfig } from '../../../services/userService';
 import { getUserCosmetics } from '../../../services/storeService';
 import { useUserConfig } from '../../../user/useUserConfig';
 
-const defaultCosmeticImg = perfil_icon;
 
 function Perfil() {
   // Estados existentes...
@@ -21,8 +19,6 @@ function Perfil() {
   const [icons, setIcons] = useState([]);
   const [backgrounds, setBackgrounds] = useState([]);
   const [effects, setEffects] = useState([]);
-  const [cardsCosmetics, setCardsCosmetics] = useState([]);
-  const [skinsCosmetics, setSkinsCosmetics] = useState([]);
   const [actualIcon, setActualIcon] = useState(perfil_icon);
   const [actualBackground, setActualBackground] = useState(null);
   const [actualEffect, setActualEffect] = useState(null);
@@ -40,11 +36,8 @@ function Perfil() {
   const [newTertiaryColor, setNewTertiaryColor] = useState(null);
   const [newFontColor, setNewFontColor] = useState(null);
 
-  // NOVOS ESTADOS PARA O POPUP DE CARDS/SKINS
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [popupType, setPopupType] = useState("cards"); // 'cards' ou 'skins'
 
-  const { user, setUserAtt, refreshUser } = useAuth();
+  const { user, setUserAtt } = useAuth();
   const { config: userConfig, refresh: refreshUserConfig } = useUserConfig();
 
   // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
@@ -82,15 +75,11 @@ function Perfil() {
       setIcons(cosmetics.filter(c => c.type === 'ICON'));
       setBackgrounds(cosmetics.filter(c => c.type === 'BACKGROUND'));
       setEffects(cosmetics.filter(c => c.type === 'EFFECT'));
-      setCardsCosmetics(cosmetics.filter(c => c.type === 'CARD'));
-      setSkinsCosmetics(cosmetics.filter(c => c.type === 'SKIN'));
       setCards(cosmetics.filter(c => c.type === 'CARD').length);
     }).catch(() => {
       setIcons([]);
       setBackgrounds([]);
       setEffects([]);
-      setCardsCosmetics([]);
-      setSkinsCosmetics([]);
       setCards(0);
     });
   }, [user]);
@@ -141,32 +130,6 @@ function Perfil() {
     return destroyer + battleship + aircraftCarrier + submarine;
   }
 
-  // NOVAS FUNÇÕES PARA ABRIR O POPUP
-  const handleOpenCardsPopup = () => {
-    setPopupType("cards");
-    setIsPopupOpen(true);
-  };
-
-  const handleOpenSkinsPopup = () => {
-    setPopupType("skins");
-    setIsPopupOpen(true);
-  };
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
-  };
-
-  // NOVA FUNÇÃO PARA RECARREGAR DADOS APÓS SALVAR
-  const handlePopupSave = async () => {
-    try {
-      // Refresh user and config from context/hooks
-      if (typeof refreshUser === 'function') await refreshUser();
-      if (typeof refreshUserConfig === 'function') await refreshUserConfig();
-      setUserAtt((prev) => !prev);
-    } catch (err) {
-      console.error('Erro ao recarregar dados após salvar popup:', err);
-    }
-  };
 
   // Funções existentes...
   function getActiveList() {
@@ -177,37 +140,15 @@ function Perfil() {
         return backgrounds.map(c => c.cosmetic_id);
       case "effects":
         return effects.map(c => c.cosmetic_id);
-      case "cards":
-        return cardsCosmetics.map(c => c.cosmetic_id);
-      case "skins":
-        return skinsCosmetics.map(c => c.cosmetic_id);
       default:
         return [];
     }
   }
 
-  function getImagePath(code) {
-    let basePath = "";
 
-    switch (activeTab) {
-      case "icons":
-        basePath = "/src/assets/cosmetic/icons/";
-        break;
-      case "backgrounds":
-        basePath = "/src/assets/cosmetic/backgrounds/";
-        break;
-      case "effects":
-        basePath = "/src/assets/cosmetic/effects/";
-        break;
-      default:
-        return "";
-    }
-
-    return new URL(
-      `${basePath}${code}.${activeTab === "effects" ? "gif" : "png"}`,
-      import.meta.url
-    ).href;
-  }
+  // Placeholder SVG para imagens inválidas
+  const placeholderImg =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%25" height="100%25" fill="%23ccc"/><text x="50%25" y="50%25" font-size="12" text-anchor="middle" fill="%23666" dy=".3em">?</text></svg>';
 
   function incIndex() {
     switch (activeTab) {
@@ -375,10 +316,10 @@ function Perfil() {
         <div>
           <Perfil_Card num={vitorias} title={"Vitórias"} />
         </div>
-        <div onClick={handleOpenCardsPopup}>
+        <div>
           <Perfil_Card num={cards} title={"Cards"} />
         </div>
-        <div onClick={handleOpenSkinsPopup}>
+        <div>
           <Perfil_Card num={totalShipSkins()} title={"Skins"} />
         </div>
       </div>
@@ -446,10 +387,22 @@ function Perfil() {
         >
           <button onClick={() => decIndex()}></button>
           <div>
-            <img
-              src={getImagePath(getActiveList()[incrementIndex])}
-              alt="fault"
-            />
+            {/* Imagem principal do cosmético selecionado */}
+            {(() => {
+              let cosmetics = [];
+              if (activeTab === 'icons') cosmetics = icons;
+              else if (activeTab === 'backgrounds') cosmetics = backgrounds;
+              else if (activeTab === 'effects') cosmetics = effects;
+              const selected = cosmetics[incrementIndex];
+              return (
+                <img
+                  src={selected?.link || placeholderImg}
+                  alt={selected?.description || 'cosmético'}
+                  style={{ width: 64, height: 64, objectFit: 'contain', borderRadius: 8, background: '#fff', border: '1px solid #ccc' }}
+                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = placeholderImg; }}
+                />
+              );
+            })()}
             {/* Miniaturas dos cosméticos do tipo selecionado */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16, justifyContent: 'center' }}>
               {(() => {
@@ -457,16 +410,15 @@ function Perfil() {
                 if (activeTab === 'icons') cosmetics = icons;
                 else if (activeTab === 'backgrounds') cosmetics = backgrounds;
                 else if (activeTab === 'effects') cosmetics = effects;
-                else if (activeTab === 'cards') cosmetics = cardsCosmetics;
-                else if (activeTab === 'skins') cosmetics = skinsCosmetics;
-                return cosmetics.map(cosmetic => (
+                return cosmetics.map((cosmetic, idx) => (
                   <img
                     key={cosmetic.cosmetic_id}
-                    src={cosmetic.link || defaultCosmeticImg}
+                    src={cosmetic.link || placeholderImg}
                     alt={cosmetic.description}
                     title={cosmetic.description}
-                    style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', border: '1px solid #ccc' }}
-                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = defaultCosmeticImg; }}
+                    style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', border: incrementIndex === idx ? '2px solid orange' : '1px solid #ccc', cursor: 'pointer' }}
+                    onClick={() => setIncrementIndex(idx)}
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = placeholderImg; }}
                   />
                 ));
               })()}
@@ -535,14 +487,6 @@ function Perfil() {
         </button>
       </div>
 
-      {/* NOVO POPUP COMPONENT PARA CARDS E SKINS */}
-      <PopupComponent
-        isOpen={isPopupOpen}
-        onClose={handleClosePopup}
-        type={popupType}
-        userData={user?.data || user || null}
-        onSave={handlePopupSave}
-      />
     </div>
   );
 }
