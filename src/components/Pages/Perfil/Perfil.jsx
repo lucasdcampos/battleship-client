@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./Perfil.module.css";
+import PopupComponent from "./elements/PopupComponent";
 import ProgressBar from "./elements/ProgressBar";
 import Perfil_Card from "./elements/Perfil_Card";
 import perfil_icon from "./../../../assets/cosmetic/icons/E00001.png";
@@ -16,6 +17,9 @@ function Perfil() {
   const [partidas, setPartidas] = useState(0);
   const [vitorias, setVitorias] = useState(0);
   const [cards, setCards] = useState(0);
+  // Estado para popup central de cards/skins
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [popupType, setPopupType] = useState('cards'); // 'cards' ou 'skins'
   const [icons, setIcons] = useState([]);
   const [backgrounds, setBackgrounds] = useState([]);
   const [effects, setEffects] = useState([]);
@@ -38,6 +42,26 @@ function Perfil() {
 
 
   const { user, setUserAtt } = useAuth();
+  // Handlers para popup de cards/skins
+  const handleOpenCardsPopup = () => {
+    setPopupType('cards');
+    setIsPopupOpen(true);
+  };
+  const handleOpenSkinsPopup = () => {
+    setPopupType('skins');
+    setIsPopupOpen(true);
+  };
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+  };
+  const handlePopupSave = () => {
+    if (!user) return;
+    // Atualiza dados do usuário após salvar no popup
+    if (user.data?.basicData?.id || user.basicData?.id) {
+      // Se houver função para atualizar dados, pode ser chamada aqui
+      if (typeof setUserAtt === 'function') setUserAtt((prev) => !prev);
+    }
+  };
   const { config: userConfig, refresh: refreshUserConfig } = useUserConfig();
 
   // Resolve icon path: accept either a code (e.g. 'E00001') or a full URL/path.
@@ -262,6 +286,7 @@ function Perfil() {
   }, [activeTab]);
 
   return (
+
     <div
       className={styles.Perfil_Main_Container}
       style={{
@@ -281,7 +306,6 @@ function Perfil() {
         />
         <h1>
           {(() => {
-            // Suporta user = { username }, { basicData }, { data: { basicData } }
             const username = user?.data?.basicData?.username || user?.basicData?.username || user?.username;
             if (username && typeof username === 'string' && username.trim().length > 0) {
               return <span>{username}</span>;
@@ -316,13 +340,23 @@ function Perfil() {
         <div>
           <Perfil_Card num={vitorias} title={"Vitórias"} />
         </div>
-        <div>
+        {/* Card de Cards abre popup central */}
+        <div onClick={handleOpenCardsPopup} style={{ cursor: 'pointer' }}>
           <Perfil_Card num={cards} title={"Cards"} />
         </div>
-        <div>
+        {/* Card de Skins abre popup central */}
+        <div onClick={handleOpenSkinsPopup} style={{ cursor: 'pointer' }}>
           <Perfil_Card num={totalShipSkins()} title={"Skins"} />
         </div>
       </div>
+      {/* Popup central para cards/skins */}
+      <PopupComponent
+        isOpen={isPopupOpen}
+        onClose={handleClosePopup}
+        type={popupType}
+        userData={user?.data}
+        onSave={handlePopupSave}
+      />
 
       {/* POPUP EXISTENTE DE EDIÇÃO DE PERFIL */}
       <div
