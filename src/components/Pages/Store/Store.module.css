@@ -77,3 +77,18 @@
     padding: 0 15px;
   }
 }
+
+.subCategoryBox {
+  width: 100%;
+  max-width: 800px;
+  background-color: #1565c0;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.subCategoryBox > ul {
+  justify-content: space-around;
+}
