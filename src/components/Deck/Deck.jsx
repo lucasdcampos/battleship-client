@@ -13,15 +13,13 @@ const Deck = ({ cards = [] }) => {
     { id: "c1", image: C00001, title: "Teleguiado" },
     { id: "c2", image: C00002, title: "Hit-Kill" },
     { id: "c3", image: C00003, title: "Massivo" },
-    { id: "c4", image: C00004, title: "Counter" },
-    { id: "c5", image: C00005, title: "Fantasma" },
   ];
 
   const cardsToDisplay = cards.length > 0 ? cards : exampleCards;
 
   return (
     <div className={styles.deckContainer}>
-      {Array.from({ length: 5 }).map((_, index) => {
+      {Array.from({ length:3 }).map((_, index) => {
         const card = cardsToDisplay[index];
         return (
           <div key={index} className={styles.cardSlot}>
