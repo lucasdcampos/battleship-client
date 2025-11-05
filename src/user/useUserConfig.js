@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useMe } from './useMe';
+import { useAuth } from './useAuth';
 
 // Hook para obter as configurações de usuário (cores e enabled_*).
 // Ele tenta usar o `me` do hook useMe e, se disponível, busca
 // `/users/{id}/config`; caso contrário, tenta `/users/config` (rota "me").
 export function useUserConfig() {
-  const { me } = useMe();
+  const { user } = useAuth();
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,7 +31,8 @@ export function useUserConfig() {
     setError(null);
     try {
       const token = localStorage.getItem('authToken');
-      const id = me?.basicData?.id;
+      // Suporta user = { basicData }, { data: { basicData } }, { id }
+      const id = user?.data?.basicData?.id || user?.basicData?.id || user?.id;
       const base = import.meta.env.VITE_API_URL;
       const url = id ? `${base}/users/${id}/config/` : `${base}/users/config/`;
 
@@ -48,7 +49,7 @@ export function useUserConfig() {
     } finally {
       setLoading(false);
     }
-  }, [me?.basicData?.id]);
+  }, [user]);
 
   useEffect(() => {
     fetchConfig();

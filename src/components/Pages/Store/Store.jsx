@@ -1,12 +1,14 @@
 import Card from "./elements/Cards/Cards";
+import defaultCosmeticImg from "../../../assets/development/fc.png";
 import styles from "./Store.module.css";
 import fc from "../../../assets/development/fc.png";
-import { getUser, updateUser } from "../../../services/userService";
+// import { updateUser } from "../../../services/userService";
+import { getCosmetics, purchaseCosmetic } from "../../../services/storeService";
 import { useAuth } from "../../../user/useAuth";
 import { useState, useEffect } from "react";
 
 export default function Store() {
-  const { user, loading, isAuthenticated, setUserAtt } = useAuth();
+  const { user, loading, setUserAtt, userAtt } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
   const [shipSubCategory, setShipSubCategory] = useState("all"); // Estado para o submenu de navios
   const [tabs, setTabs] = useState(null);
@@ -75,70 +77,40 @@ export default function Store() {
           break;
         }
     }
-    // retorna a URL absoluta pra funcionar no Vite
-    return new URL(
-      `${basePath}${code}.${actualTab === "effects" ? "gif" : "png"}`,
-      import.meta.url
-    ).href;
   }
 
   const handleBuy = async (product) => {
-    const userID = user?.data?.basicData?.id || "1";
+    // Validação: id do cosmético
+    if (!product?.imagem && !product?.cosmetic_id) {
+      alert("ID do cosmético inválido.");
+      return;
+    }
+    const cosmeticId = product.imagem || product.cosmetic_id;
+    // Validação: já possui
+    if (inventory.has(cosmeticId)) {
+      alert("Você já possui este item.");
+      return;
+    }
+    // Validação: saldo
     const productPrice = parseInt(product.preco, 10);
-
-    // a) Validação de saldo
     if (fatecCoins < productPrice) {
       alert("Saldo insuficiente para realizar a compra.");
       return;
     }
-
     try {
-      // d) Desconto do saldo
-      const newCoinsValue = fatecCoins - productPrice;
-      const coinsUpdate = { basicData: { fatecCoins: newCoinsValue } };
-      await updateUser(userID, coinsUpdate);
-
-      // b) Aquisição do item
-      const userData = await getUser(userID); // Pega os dados mais recentes para evitar sobrescrever
-      let updatePayload = {};
-
-      if (actualTab === "ships") {
-        let shipType;
-        if (product.imagem[0] === "H") shipType = "aircraftCarrier";
-        else if (product.imagem[0] === "G") shipType = "battleship";
-        else if (product.imagem[0] === "F") shipType = "destroyer";
-        else if (product.imagem[0] === "I") shipType = "submarine";
-
-        const currentShipSkins = userData.availableShipSkins?.[shipType] || [];
-        updatePayload.availableShipSkins = {
-          ...userData.availableShipSkins,
-          [shipType]: [...currentShipSkins, product.imagem],
-        };
-      } else {
-        const cosmeticTypeKey = "available" + actualTab.charAt(0).toUpperCase() + actualTab.slice(1);
-        const currentCosmetics =
-          userData.availableCosmetic?.[cosmeticTypeKey] || [];
-        updatePayload.availableCosmetic = {
-          ...userData.availableCosmetic,
-          [cosmeticTypeKey]: [...currentCosmetics, product.imagem],
-        };
-      }
-
-      await updateUser(userID, updatePayload);
-
-      // c) Desabilitação na Loja (atualizando o estado local)
-      setFatecCoins(newCoinsValue);
-      setInventory(prevInventory => new Set(prevInventory).add(product.imagem));
-
-      // Atualiza o contexto de autenticação para refletir as mudanças em outros componentes
+      // Chama a API de compra
+  await purchaseCosmetic(cosmeticId);
+      // Atualiza inventário local
+      setInventory(prev => new Set(prev).add(cosmeticId));
+      // Atualiza saldo local (diminui pelo preço do item)
+      setFatecCoins(prev => prev - productPrice);
+      // Atualiza contexto global
       setUserAtt(prev => !prev);
-
       alert(`Você comprou ${product.titulo} por ${productPrice} Fatec Coins!`);
     } catch (error) {
       alert("Ocorreu um erro durante a compra. Tente novamente.");
       console.error("Erro na compra:", error);
-      // Se der erro, recarrega os dados para garantir consistência
-      setMarket(userID);
+      setMarket();
     }
   };
 
@@ -149,19 +121,16 @@ export default function Store() {
 
   useEffect(() => {
     if (!loading && user) {
-      const userID = user?.data?.basicData?.id || "1";
-      setMarket(userID);
+      setMarket();
     }
-  }, [loading, user, setUserAtt]);
+    // eslint-disable-next-line
+  }, [loading, userAtt]);
 
   if (loading) {
-    return <div>Carregando Loja...</div>;
+    return <div className={styles.container}>Carregando Loja...</div>;
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
+  // Renderização normal da loja
   return (
     <div className={styles.container}>
       <div className={styles.Nav_Buttons_Container}>
@@ -275,7 +244,7 @@ export default function Store() {
       )}
       <div className={styles.FC_Container}>
         <h1>
-          Fatec Coins:{" "}
+          Fatec Coins: {" "}
           <span style={{ color: "var(--tertiary-color)" }}>{fatecCoins}</span>
         </h1>
         <img src={fc} alt="FC" />
@@ -300,14 +269,20 @@ export default function Store() {
           if (availableItems && availableItems.length > 0) {
             return availableItems.map((card, index) => (
               <Card
-                key={index}
-                titulo={card.titulo}
-                preco={card.preco}
-                imagem={getImagePath(card.imagem)}
-                onComprar={() => handleBuy(card)}
+                key={item.cosmetic_id}
+                titulo={item.description}
+                preco={item.price}
+                imagem={item.link || defaultCosmeticImg}
+                onComprar={() => handleBuy({
+                  ...item,
+                  imagem: item.cosmetic_id, // para controle de inventário
+                  titulo: item.description,
+                  preco: item.price
+                })}
+                onImgError={e => { e.target.onerror = null; e.target.src = defaultCosmeticImg; }}
               />
             ));
-          } else if (tabs) {
+          } else {
             return <p>Não há itens disponíveis nessa categoria</p>;
           }
         })()}
