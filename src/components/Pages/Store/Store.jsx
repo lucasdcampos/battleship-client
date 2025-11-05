@@ -10,31 +10,72 @@ import { useState, useEffect } from "react";
 export default function Store() {
   const { user, loading, setUserAtt, userAtt } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
-  const [cosmetics, setCosmetics] = useState([]);
+  const [shipSubCategory, setShipSubCategory] = useState("all"); // Estado para o submenu de navios
+  const [tabs, setTabs] = useState(null);
   const [fatecCoins, setFatecCoins] = useState(0);
   const [inventory, setInventory] = useState(new Set());
 
-  async function setMarket() {
-    // Usa o usuário do contexto
-    const data = user;
-    setFatecCoins(data?.basicData?.fatecCoins || data?.coins || 0);
-    const userInventory = new Set([
-      ...(data?.availableCosmetic?.availableIcons || []),
-      ...(data?.availableCosmetic?.availableEffects || []),
-      ...(data?.availableCosmetic?.availableBackgrounds || []),
-      ...(data?.availableCosmetic?.availableCards || []),
-      ...(data?.availableShipSkins?.destroyer || []),
-      ...(data?.availableShipSkins?.battleship || []),
-      ...(data?.availableShipSkins?.aircraftCarrier || []),
-      ...(data?.availableShipSkins?.submarine || []),
-    ]);
-    setInventory(userInventory);
-    // Busca cosméticos da loja
-    try {
-      const res = await getCosmetics();
-      setCosmetics(res.cosmetics || []);
-    } catch {
-      setCosmetics([]);
+
+  function setMarket(userID) {
+    getUser(userID).then((data) => {
+      setTabs({
+        icons: data.market.sell_icons,
+        effects: data.market.sell_effects,
+        backgrounds: data.market.sell_backgrounds,
+        cards: data.market.sell_cards,
+        ships: data.market.sell_ships,
+      });
+
+      // Carrega o saldo e o inventário do usuário
+      setFatecCoins(data.basicData.fatecCoins);
+
+      const userInventory = new Set([
+        ...(data.availableCosmetic?.availableIcons || []),
+        ...(data.availableCosmetic?.availableEffects || []),
+        ...(data.availableCosmetic?.availableBackgrounds || []),
+        ...(data.availableCosmetic?.availableCards || []),
+        ...(data.availableShipSkins?.destroyer || []),
+        ...(data.availableShipSkins?.battleship || []),
+        ...(data.availableShipSkins?.aircraftCarrier || []),
+        ...(data.availableShipSkins?.submarine || []),
+      ]);
+      setInventory(userInventory);
+    });
+  }
+
+  function getImagePath(code) {
+    let basePath = "";
+
+    switch (actualTab) {
+      case "icons":
+        basePath = "/src/assets/cosmetic/icons/";
+        break;
+      case "backgrounds":
+        basePath = "/src/assets/cosmetic/backgrounds/";
+        break;
+      case "effects":
+        basePath = "/src/assets/cosmetic/effects/";
+        break;
+      case "cards":
+        basePath = "/src/assets/cosmetic/cards/";
+        break;
+      case "ships":
+        if (code[0] === "H") {
+          basePath = "/src/assets/cosmetic/ships/aircraftCarrier/";
+          break;
+        }
+        if (code[0] === "G") {
+          basePath = "/src/assets/cosmetic/ships/battleship/";
+          break;
+        }
+        if (code[0] === "F") {
+          basePath = "/src/assets/cosmetic/ships/destroyer/";
+          break;
+        }
+        if (code[0] === "I") {
+          basePath = "/src/assets/cosmetic/ships/submarine/";
+          break;
+        }
     }
   }
 
@@ -73,6 +114,11 @@ export default function Store() {
     }
   };
 
+  const handleTabClick = (tab) => {
+    setActualTab(tab);
+    setShipSubCategory("all"); // Reseta a subcategoria ao trocar de aba
+  };
+
   useEffect(() => {
     if (!loading && user) {
       setMarket();
@@ -96,7 +142,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("icons")}
+            onClick={() => handleTabClick("icons")}
           >
             Ícones
           </li>
@@ -107,7 +153,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("effects")}
+            onClick={() => handleTabClick("effects")}
           >
             Efeitos
           </li>
@@ -118,7 +164,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("backgrounds")}
+            onClick={() => handleTabClick("backgrounds")}
           >
             Backgrounds
           </li>
@@ -129,7 +175,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("cards")}
+            onClick={() => handleTabClick("cards")}
           >
             Cards
           </li>
@@ -140,12 +186,62 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("ships")}
+            onClick={() => handleTabClick("ships")}
           >
             Navios
           </li>
         </ul>
       </div>
+      {actualTab === "ships" && (
+        <div className={styles.subCategoryBox}>
+          <ul type="none" className={styles.Nav_Buttons_Container}>
+            <li
+              style={{
+                border:
+                  shipSubCategory === "aircraftCarrier"
+                    ? "solid 3px var(--tertiary-color)"
+                    : "none",
+              }}
+              onClick={() => setShipSubCategory("aircraftCarrier")}
+            >
+              Porta-Aviões
+            </li>
+            <li
+              style={{
+                border:
+                  shipSubCategory === "battleship"
+                    ? "solid 3px var(--tertiary-color)"
+                    : "none",
+              }}
+              onClick={() => setShipSubCategory("battleship")}
+            >
+              Encouraçado
+            </li>
+            <li
+              style={{
+                border:
+                  shipSubCategory === "submarine"
+                    ? "solid 3px var(--tertiary-color)"
+                    : "none",
+              }}
+              onClick={() => setShipSubCategory("submarine")}
+            >
+              Submarino
+            </li>
+            <li
+              style={{
+                border:
+                  shipSubCategory === "destroyer"
+                    ? "solid 3px var(--tertiary-color)"
+                    : "none",
+              }}
+              onClick={() => setShipSubCategory("destroyer")}
+            >
+              Destroier
+            </li>
+          </ul>
+        </div>
+      )}
       <div className={styles.FC_Container}>
         <h1>
           Fatec Coins: {" "}
@@ -155,20 +251,23 @@ export default function Store() {
       </div>
       <div className={styles.Cards_Container}>
         {(() => {
-          // Mapeia a aba para o type do backend
-          const tabTypeMap = {
-            icons: "ICON",
-            backgrounds: "BACKGROUND",
-            effects: "EFFECT",
-            cards: "CARD",
-            ships: "SKIN"
-          };
-          const backendType = tabTypeMap[actualTab];
-          const filtered = cosmetics.filter(
-            (item) => item.type === backendType && !inventory.has(item.cosmetic_id)
-          );
-          if (filtered.length > 0) {
-            return filtered.map((item) => (
+          const availableItems =
+            tabs && tabs[actualTab]?.filter((card) => {
+                if (inventory.has(card.imagem)) {
+                  return false;
+                }
+                if (actualTab === "ships" && shipSubCategory !== "all") {
+                  const firstLetter = card.imagem[0];
+                  if (shipSubCategory === 'aircraftCarrier' && firstLetter !== 'H') return false;
+                  if (shipSubCategory === 'battleship' && firstLetter !== 'G') return false;
+                  if (shipSubCategory === 'submarine' && firstLetter !== 'I') return false;
+                  if (shipSubCategory === 'destroyer' && firstLetter !== 'F') return false;
+                }
+                return true;
+              });
+
+          if (availableItems && availableItems.length > 0) {
+            return availableItems.map((card, index) => (
               <Card
                 key={item.cosmetic_id}
                 titulo={item.description}
