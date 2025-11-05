@@ -8,9 +8,11 @@ import { useState, useEffect } from "react";
 export default function Store() {
   const { user, loading, isAuthenticated, setUserAtt } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
+  const [shipSubCategory, setShipSubCategory] = useState("all"); // Estado para o submenu de navios
   const [tabs, setTabs] = useState(null);
   const [fatecCoins, setFatecCoins] = useState(0);
   const [inventory, setInventory] = useState(new Set());
+
 
   function setMarket(userID) {
     getUser(userID).then((data) => {
@@ -140,6 +142,11 @@ export default function Store() {
     }
   };
 
+  const handleTabClick = (tab) => {
+    setActualTab(tab);
+    setShipSubCategory("all"); // Reseta a subcategoria ao trocar de aba
+  };
+
   useEffect(() => {
     if (!loading && user) {
       const userID = user?.data?.basicData?.id || "1";
@@ -166,7 +173,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("icons")}
+            onClick={() => handleTabClick("icons")}
           >
             Ícones
           </li>
@@ -177,7 +184,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("effects")}
+            onClick={() => handleTabClick("effects")}
           >
             Efeitos
           </li>
@@ -188,7 +195,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("backgrounds")}
+            onClick={() => handleTabClick("backgrounds")}
           >
             Backgrounds
           </li>
@@ -199,7 +206,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("cards")}
+            onClick={() => handleTabClick("cards")}
           >
             Cards
           </li>
@@ -210,12 +217,62 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => setActualTab("ships")}
+            onClick={() => handleTabClick("ships")}
           >
             Navios
           </li>
         </ul>
       </div>
+      {actualTab === "ships" && (
+        <div className={styles.subCategoryBox}>
+          <ul type="none" className={styles.Nav_Buttons_Container}>
+            <li
+              style={{
+                border:
+                  shipSubCategory === "aircraftCarrier"
+                    ? "solid 3px var(--tertiary-color)"
+                    : "none",
+              }}
+              onClick={() => setShipSubCategory("aircraftCarrier")}
+            >
+              Porta-Aviões
+            </li>
+            <li
+              style={{
+                border:
+                  shipSubCategory === "battleship"
+                    ? "solid 3px var(--tertiary-color)"
+                    : "none",
+              }}
+              onClick={() => setShipSubCategory("battleship")}
+            >
+              Encouraçado
+            </li>
+            <li
+              style={{
+                border:
+                  shipSubCategory === "submarine"
+                    ? "solid 3px var(--tertiary-color)"
+                    : "none",
+              }}
+              onClick={() => setShipSubCategory("submarine")}
+            >
+              Submarino
+            </li>
+            <li
+              style={{
+                border:
+                  shipSubCategory === "destroyer"
+                    ? "solid 3px var(--tertiary-color)"
+                    : "none",
+              }}
+              onClick={() => setShipSubCategory("destroyer")}
+            >
+              Destroier
+            </li>
+          </ul>
+        </div>
+      )}
       <div className={styles.FC_Container}>
         <h1>
           Fatec Coins:{" "}
@@ -226,8 +283,19 @@ export default function Store() {
       <div className={styles.Cards_Container}>
         {(() => {
           const availableItems =
-            tabs &&
-            tabs[actualTab]?.filter((card) => !inventory.has(card.imagem));
+            tabs && tabs[actualTab]?.filter((card) => {
+                if (inventory.has(card.imagem)) {
+                  return false;
+                }
+                if (actualTab === "ships" && shipSubCategory !== "all") {
+                  const firstLetter = card.imagem[0];
+                  if (shipSubCategory === 'aircraftCarrier' && firstLetter !== 'H') return false;
+                  if (shipSubCategory === 'battleship' && firstLetter !== 'G') return false;
+                  if (shipSubCategory === 'submarine' && firstLetter !== 'I') return false;
+                  if (shipSubCategory === 'destroyer' && firstLetter !== 'F') return false;
+                }
+                return true;
+              });
 
           if (availableItems && availableItems.length > 0) {
             return availableItems.map((card, index) => (
