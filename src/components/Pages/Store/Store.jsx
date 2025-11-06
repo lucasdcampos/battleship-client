@@ -1,20 +1,16 @@
 import Card from "./elements/Cards/Cards";
-import defaultCosmeticImg from "../../../assets/development/fc.png";
 import styles from "./Store.module.css";
 import fc from "../../../assets/development/fc.png";
-// import { updateUser } from "../../../services/userService";
-import { getCosmetics, purchaseCosmetic } from "../../../services/storeService";
+import { getUser, updateUser } from "../../../services/userService";
 import { useAuth } from "../../../user/useAuth";
 import { useState, useEffect } from "react";
 
 export default function Store() {
-  const { user, loading, setUserAtt, userAtt } = useAuth();
+  const { user, loading, isAuthenticated, setUserAtt } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
-  const [shipSubCategory, setShipSubCategory] = useState("all"); // Estado para o submenu de navios
   const [tabs, setTabs] = useState(null);
   const [fatecCoins, setFatecCoins] = useState(0);
   const [inventory, setInventory] = useState(new Set());
-
 
   function setMarket(userID) {
     getUser(userID).then((data) => {
@@ -77,60 +73,88 @@ export default function Store() {
           break;
         }
     }
+    // retorna a URL absoluta pra funcionar no Vite
+    return new URL(
+      `${basePath}${code}.${actualTab === "effects" ? "gif" : "png"}`,
+      import.meta.url
+    ).href;
   }
 
   const handleBuy = async (product) => {
-    // Validação: id do cosmético
-    if (!product?.imagem && !product?.cosmetic_id) {
-      alert("ID do cosmético inválido.");
-      return;
-    }
-    const cosmeticId = product.imagem || product.cosmetic_id;
-    // Validação: já possui
-    if (inventory.has(cosmeticId)) {
-      alert("Você já possui este item.");
-      return;
-    }
-    // Validação: saldo
+    const userID = user?.data?.basicData?.id || "1";
     const productPrice = parseInt(product.preco, 10);
+
+    // a) Validação de saldo
     if (fatecCoins < productPrice) {
       alert("Saldo insuficiente para realizar a compra.");
       return;
     }
+
     try {
-      // Chama a API de compra
-  await purchaseCosmetic(cosmeticId);
-      // Atualiza inventário local
-      setInventory(prev => new Set(prev).add(cosmeticId));
-      // Atualiza saldo local (diminui pelo preço do item)
-      setFatecCoins(prev => prev - productPrice);
-      // Atualiza contexto global
+      // d) Desconto do saldo
+      const newCoinsValue = fatecCoins - productPrice;
+      const coinsUpdate = { basicData: { fatecCoins: newCoinsValue } };
+      await updateUser(userID, coinsUpdate);
+
+      // b) Aquisição do item
+      const userData = await getUser(userID); // Pega os dados mais recentes para evitar sobrescrever
+      let updatePayload = {};
+
+      if (actualTab === "ships") {
+        let shipType;
+        if (product.imagem[0] === "H") shipType = "aircraftCarrier";
+        else if (product.imagem[0] === "G") shipType = "battleship";
+        else if (product.imagem[0] === "F") shipType = "destroyer";
+        else if (product.imagem[0] === "I") shipType = "submarine";
+
+        const currentShipSkins = userData.availableShipSkins?.[shipType] || [];
+        updatePayload.availableShipSkins = {
+          ...userData.availableShipSkins,
+          [shipType]: [...currentShipSkins, product.imagem],
+        };
+      } else {
+        const cosmeticTypeKey = "available" + actualTab.charAt(0).toUpperCase() + actualTab.slice(1);
+        const currentCosmetics =
+          userData.availableCosmetic?.[cosmeticTypeKey] || [];
+        updatePayload.availableCosmetic = {
+          ...userData.availableCosmetic,
+          [cosmeticTypeKey]: [...currentCosmetics, product.imagem],
+        };
+      }
+
+      await updateUser(userID, updatePayload);
+
+      // c) Desabilitação na Loja (atualizando o estado local)
+      setFatecCoins(newCoinsValue);
+      setInventory(prevInventory => new Set(prevInventory).add(product.imagem));
+
+      // Atualiza o contexto de autenticação para refletir as mudanças em outros componentes
       setUserAtt(prev => !prev);
+
       alert(`Você comprou ${product.titulo} por ${productPrice} Fatec Coins!`);
     } catch (error) {
       alert("Ocorreu um erro durante a compra. Tente novamente.");
       console.error("Erro na compra:", error);
-      setMarket();
+      // Se der erro, recarrega os dados para garantir consistência
+      setMarket(userID);
     }
-  };
-
-  const handleTabClick = (tab) => {
-    setActualTab(tab);
-    setShipSubCategory("all"); // Reseta a subcategoria ao trocar de aba
   };
 
   useEffect(() => {
     if (!loading && user) {
-      setMarket();
+      const userID = user?.data?.basicData?.id || "1";
+      setMarket(userID);
     }
-    // eslint-disable-next-line
-  }, [loading, userAtt]);
+  }, [loading, user, setUserAtt]);
 
   if (loading) {
-    return <div className={styles.container}>Carregando Loja...</div>;
+    return <div>Carregando Loja...</div>;
   }
 
-  // Renderização normal da loja
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.Nav_Buttons_Container}>
@@ -142,7 +166,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => handleTabClick("icons")}
+            onClick={() => setActualTab("icons")}
           >
             Ícones
           </li>
@@ -153,7 +177,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => handleTabClick("effects")}
+            onClick={() => setActualTab("effects")}
           >
             Efeitos
           </li>
@@ -164,7 +188,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => handleTabClick("backgrounds")}
+            onClick={() => setActualTab("backgrounds")}
           >
             Backgrounds
           </li>
@@ -175,7 +199,7 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => handleTabClick("cards")}
+            onClick={() => setActualTab("cards")}
           >
             Cards
           </li>
@@ -186,65 +210,15 @@ export default function Store() {
                   ? "solid 3px var(--tertiary-color)"
                   : "none",
             }}
-            onClick={() => handleTabClick("ships")}
+            onClick={() => setActualTab("ships")}
           >
             Navios
           </li>
         </ul>
       </div>
-      {actualTab === "ships" && (
-        <div className={styles.subCategoryBox}>
-          <ul type="none" className={styles.Nav_Buttons_Container}>
-            <li
-              style={{
-                border:
-                  shipSubCategory === "aircraftCarrier"
-                    ? "solid 3px var(--tertiary-color)"
-                    : "none",
-              }}
-              onClick={() => setShipSubCategory("aircraftCarrier")}
-            >
-              Porta-Aviões
-            </li>
-            <li
-              style={{
-                border:
-                  shipSubCategory === "battleship"
-                    ? "solid 3px var(--tertiary-color)"
-                    : "none",
-              }}
-              onClick={() => setShipSubCategory("battleship")}
-            >
-              Encouraçado
-            </li>
-            <li
-              style={{
-                border:
-                  shipSubCategory === "submarine"
-                    ? "solid 3px var(--tertiary-color)"
-                    : "none",
-              }}
-              onClick={() => setShipSubCategory("submarine")}
-            >
-              Submarino
-            </li>
-            <li
-              style={{
-                border:
-                  shipSubCategory === "destroyer"
-                    ? "solid 3px var(--tertiary-color)"
-                    : "none",
-              }}
-              onClick={() => setShipSubCategory("destroyer")}
-            >
-              Destroier
-            </li>
-          </ul>
-        </div>
-      )}
       <div className={styles.FC_Container}>
         <h1>
-          Fatec Coins: {" "}
+          Fatec Coins:{" "}
           <span style={{ color: "var(--tertiary-color)" }}>{fatecCoins}</span>
         </h1>
         <img src={fc} alt="FC" />
@@ -252,37 +226,20 @@ export default function Store() {
       <div className={styles.Cards_Container}>
         {(() => {
           const availableItems =
-            tabs && tabs[actualTab]?.filter((card) => {
-                if (inventory.has(card.imagem)) {
-                  return false;
-                }
-                if (actualTab === "ships" && shipSubCategory !== "all") {
-                  const firstLetter = card.imagem[0];
-                  if (shipSubCategory === 'aircraftCarrier' && firstLetter !== 'H') return false;
-                  if (shipSubCategory === 'battleship' && firstLetter !== 'G') return false;
-                  if (shipSubCategory === 'submarine' && firstLetter !== 'I') return false;
-                  if (shipSubCategory === 'destroyer' && firstLetter !== 'F') return false;
-                }
-                return true;
-              });
+            tabs &&
+            tabs[actualTab]?.filter((card) => !inventory.has(card.imagem));
 
           if (availableItems && availableItems.length > 0) {
             return availableItems.map((card, index) => (
               <Card
-                key={item.cosmetic_id}
-                titulo={item.description}
-                preco={item.price}
-                imagem={item.link || defaultCosmeticImg}
-                onComprar={() => handleBuy({
-                  ...item,
-                  imagem: item.cosmetic_id, // para controle de inventário
-                  titulo: item.description,
-                  preco: item.price
-                })}
-                onImgError={e => { e.target.onerror = null; e.target.src = defaultCosmeticImg; }}
+                key={index}
+                titulo={card.titulo}
+                preco={card.preco}
+                imagem={getImagePath(card.imagem)}
+                onComprar={() => handleBuy(card)}
               />
             ));
-          } else {
+          } else if (tabs) {
             return <p>Não há itens disponíveis nessa categoria</p>;
           }
         })()}
