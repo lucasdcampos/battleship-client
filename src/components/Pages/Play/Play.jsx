@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import styles from "./Play.module.css";
 import Board from "../../Board/Board";
 import Ships from "../../Ships/Ships";
@@ -8,8 +8,11 @@ import Placar from "../../Placar/Placar";
 import Deck from "../../Deck/Deck";
 import TurnIndicator from "../../TurnIndicator/TurnIndicator";
 import Timer from "../../Timer/Timer";
+import PopupComponent from "../Perfil/elements/PopupComponent";
+import { useAuth } from "../../../user/useAuth";
 
 function Play() {
+  const { user, setUserAtt } = useAuth();
   const boardRef = useRef(null);
   const shipsRef = useRef(null);
   const enemyBoardRef = useRef(null);
@@ -20,6 +23,7 @@ function Play() {
   const [playerShipsState, setPlayerShipsState] = useState([]);
   const [enemyShipsState, setEnemyShipsState] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState('player'); // 'player' ou 'enemy'
+  const [isDeckPopupOpen, setIsDeckPopupOpen] = useState(false);
 
   const handleRandomizeClick = () => {
     if (shipsRef.current) {
@@ -102,6 +106,11 @@ function Play() {
     setActiveEmoji(null);
   };
 
+  const handleDeckSave = useCallback(() => {
+    // Atualiza o estado do usuário para refletir as mudanças de cartas
+    if (typeof setUserAtt === 'function') setUserAtt((prev) => !prev);
+  }, [setUserAtt]);
+
   return (
     <div className={styles.playContainer}>
       {isPlacementConfirmed && <Placar titulo="Seu Placar" ships={playerShipsState} />}
@@ -127,13 +136,20 @@ function Play() {
                 </button>
               </div>
             )}
+            {!isPlacementConfirmed && (
+              <div className={styles.deckContainer} onClick={() => setIsDeckPopupOpen(true)}>
+              <Deck />
+              </div>
+            )}
           </div>
           {/* Tabuleiro Inimigo (Réplica) */}
-          <div className={styles.boardWrapper}>
-            <Board ref={enemyBoardRef} onCellClick={handleCellClick} shots={shots} >
-              <Ships ref={enemyShipsRef} boardRef={enemyBoardRef} isLocked={true} areShipsHidden={true} />
-            </Board>
-          </div>
+          {isPlacementConfirmed && (
+            <div className={styles.boardWrapper}>
+              <Board ref={enemyBoardRef} onCellClick={handleCellClick} shots={shots} >
+                <Ships ref={enemyShipsRef} boardRef={enemyBoardRef} isLocked={true} areShipsHidden={true} />
+              </Board>
+            </div>
+          )}
         </div>
         {isPlacementConfirmed && (
           <>
@@ -145,6 +161,13 @@ function Play() {
         )}
       </div>
       {isPlacementConfirmed && <Placar titulo="Placar Inimigo" ships={enemyShipsState} />}
+      <PopupComponent
+        isOpen={isDeckPopupOpen}
+        onClose={() => setIsDeckPopupOpen(false)}
+        type="cards"
+        userData={user?.data || user}
+        onSave={handleDeckSave}
+      />
     </div>
   );
 }
