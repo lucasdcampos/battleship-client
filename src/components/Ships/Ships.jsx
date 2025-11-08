@@ -166,8 +166,8 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
     const rect = shipElement.getBoundingClientRect();
 
     setDraggingShip(shipId);
-    // Define um offset fixo para que o navio fique a 15px do cursor
-    setDragOffset({ x: 15, y: 15 });
+    // Zera o offset para que o canto do navio se alinhe ao cursor
+    setDragOffset({ x: 0, y: 0 });
     setOriginalPosition({ top: ship.top, left: ship.left });
 
     e.preventDefault();
@@ -179,23 +179,28 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
 
       if (!draggingShip) return;
 
+      const boardElement = boardRef.current;
+      if (!boardElement) return;
+
+      const boardRect = boardElement.getBoundingClientRect();
+
       setShips((prevShips) =>
         prevShips.map((s) =>
           s.id === draggingShip
             ? {
                 ...s,
                 isDragging: true,
-                top: e.clientY - dragOffset.y,
-                left: e.clientX - dragOffset.x,
+                top: e.clientY - boardRect.top - dragOffset.y,
+                left: e.clientX - boardRect.left - dragOffset.x,
               }
             : s
         )
       );
     },
-    [draggingShip, dragOffset, isLocked]
+    [draggingShip, dragOffset, isLocked, boardRef]
   );
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((e) => {
     if (isLocked) return;
 
     if (!draggingShip) return;
@@ -210,63 +215,41 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
           }
 
           const boardRect = boardElement.getBoundingClientRect();
+          // Posição do mouse relativa ao canto superior esquerdo do tabuleiro
+          const mouseX = e.clientX - boardRect.left;
+          const mouseY = e.clientY - boardRect.top;
+          const relativeX = mouseX - CELL_SIZE;
+          const relativeY = mouseY - CELL_SIZE;
 
-          // Posição relativa do canto superior esquerdo do navio em relação ao tabuleiro
-          const shipLeft = s.left;
-          const shipTop = s.top;
+          // Calcula a célula do grid mais próxima
+          const snappedGridX = Math.round(relativeX / CELL_SIZE);
+          const snappedGridY = Math.round(relativeY / CELL_SIZE);
 
-          // Dimensões do navio em células
-          const shipCellsWidth = s.rotation === 0 ? s.size : 1;
-          const shipCellsHeight = s.rotation === 0 ? 1 : s.size;
+          // Posição e dimensões do navio em coordenadas de grid
+          const newShipPosition = {
+            ...s,
+            gridX: snappedGridX,
+            gridY: snappedGridY,
+          };
 
-          // Dimensões do navio em pixels
-          const shipPixelWidth = shipCellsWidth * CELL_SIZE;
-          const shipPixelHeight = shipCellsHeight * CELL_SIZE;
-
-          // Define a área jogável (grid 10x10), que começa após os cabeçalhos
-          const playableAreaLeft = boardRect.left + CELL_SIZE;
-          const playableAreaTop = boardRect.top + CELL_SIZE;
-          const playableAreaRight = boardRect.left + 11 * CELL_SIZE;
-          const playableAreaBottom = boardRect.top + 11 * CELL_SIZE;
-
-          // Verifica se o navio está totalmente dentro da área jogável
-          const isWithinBounds =
-            shipLeft >= playableAreaLeft &&
-            shipTop >= playableAreaTop &&
-            shipLeft + shipPixelWidth <= playableAreaRight &&
-            shipTop + shipPixelHeight <= playableAreaBottom;
-
-          if (isWithinBounds) {
-            // Posição relativa do canto do navio dentro da área de jogo (grid 10x10)
-            const relativeX = shipLeft - (boardRect.left + CELL_SIZE);
-            const relativeY = shipTop - (boardRect.top + CELL_SIZE);
-
-            // Calcula a célula do grid mais próxima
-            const snappedGridX = Math.round(relativeX / CELL_SIZE);
-            const snappedGridY = Math.round(relativeY / CELL_SIZE);
-
-            // Posição e dimensões do navio em coordenadas de grid
-            const newShipPosition = {
+          if (isPositionValid(newShipPosition, prevShips)) {
+            const snappedLeft = (snappedGridX * CELL_SIZE) + CELL_SIZE;
+            const snappedTop = (snappedGridY * CELL_SIZE) + CELL_SIZE;
+            return {
               ...s,
+              isDragging: false,
+              top: snappedTop,
+              left: snappedLeft,
+              isPlaced: true,
               gridX: snappedGridX,
               gridY: snappedGridY,
             };
-
-            // Verifica a sobreposição com outros navios já no tabuleiro
-            const collision = prevShips.some((otherShip) => {
-              if (otherShip.id === s.id || !otherShip.isPlaced) return false;
-              return isOverlapping(newShipPosition, otherShip);
-            });
-
-            if (!collision) {
-              const snappedLeft =
-                snappedGridX * CELL_SIZE + CELL_SIZE;
-              const snappedTop = snappedGridY * CELL_SIZE + CELL_SIZE;
-              return { ...s, isDragging: false, top: snappedTop, left: snappedLeft, isPlaced: true, gridX: snappedGridX, gridY: snappedGridY };
-            }
           }
 
-          // Se estiver fora dos limites, retorna para a posição original
+          // Se a posição não for válida (fora dos limites ou colisão),
+          // retorna para a posição original antes do arraste.
+
+          // Se não estava posicionado, retorna para a área inicial.
           return {
             ...s,
             isDragging: false,
@@ -282,7 +265,7 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
     );
 
     setDraggingShip(null);
-  }, [draggingShip, boardRef, originalPosition, isLocked]);
+  }, [draggingShip, boardRef, originalPosition, isLocked, isPositionValid]);
 
   const handleContextMenu = (e, shipId) => {
     if (isLocked) return;
@@ -329,8 +312,7 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
           // Atualiza a posição do navio se o movimento for válido
           setShips((prevShips) =>
             prevShips.map((s) => {
-              if (s.id === selectedShipId) {
-                const newLeft = (newGridX * CELL_SIZE) + CELL_SIZE;
+              if (s.id === selectedShipId) {                const newLeft = (newGridX * CELL_SIZE) + CELL_SIZE;
                 const newTop = (newGridY * CELL_SIZE) + CELL_SIZE;
                 return { ...s, gridX: newGridX, gridY: newGridY, top: newTop, left: newLeft };
               }
@@ -339,7 +321,7 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
           );
         }
       }
-
+      // Rotaciona o navio com a tecla Enter
       if (e.key === "Enter") {
         e.preventDefault();
         const newRotation = (ship.rotation + 90) % 180;
@@ -352,7 +334,7 @@ const Ships = forwardRef(({ boardRef, isLocked = false, areShipsHidden = false }
         }
       }
     },
-    [selectedShipId, ships, boardRef, isPositionValid]
+    [selectedShipId, ships, isPositionValid, isLocked]
   );
 
   const placeShipsRandomly = useCallback(() => {
