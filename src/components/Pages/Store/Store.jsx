@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import styles from "./Store.module.css";
 import Card from "./elements/Cards/Cards";
-import { getCosmetics } from "../../../services/storeService";
+import { getCosmetics, purchaseCosmetic } from "../../../services/storeService";
 
 export default function Store() {
   const [loading, setLoading] = useState(true);
   const [cosmetics, setCosmetics] = useState([]);
   const [tab, setTab] = useState("ICON");
+  const [processing, setProcessing] = useState(false);
 
   const tabsMap = {
     ICON: "Ícones",
@@ -14,6 +15,13 @@ export default function Store() {
     BACKGROUND: "Backgrounds",
     SKIN: "Skins"
   };
+
+  function resolveCosmeticUrl(link) {
+    if (!link) return "/placeholder.png";
+    if (link.startsWith("http")) return link;
+    if (link.startsWith("/")) return link;
+    return `/${link}`;
+  }
 
   useEffect(() => {
     async function load() {
@@ -32,6 +40,26 @@ export default function Store() {
   if (loading) return <div>Carregando Loja...</div>;
 
   const filtered = cosmetics.filter(c => c.type === tab);
+
+  async function handleBuy(c) {
+    if (processing) return;
+
+    try {
+      setProcessing(true);
+      await purchaseCosmetic(c.cosmetic_id);
+
+      alert(`Você comprou: ${c.description}`);
+
+      // Remove localmente o item comprado
+      setCosmetics(prev => prev.filter(x => x.cosmetic_id !== c.cosmetic_id));
+
+    } catch (err) {
+      console.error("[STORE] Erro ao comprar:", err);
+      alert("Erro ao comprar o item.");
+    } finally {
+      setProcessing(false);
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -59,8 +87,8 @@ export default function Store() {
             key={c.cosmetic_id}
             titulo={c.description}
             preco={c.price}
-            imagem={c.link}
-            onComprar={() => alert(`Comprar ${c.description}`)}
+            imagem={resolveCosmeticUrl(c.link)}
+            onComprar={() => handleBuy(c)}
             onImgError={(e) => {
               e.target.onerror = null;
               e.target.src = "/placeholder.png";
