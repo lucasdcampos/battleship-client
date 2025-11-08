@@ -2,11 +2,12 @@
 
 import fc from "../../../../../assets/development/fc.png";
 import styles from "./Cards.module.css";
+import { resolveCosmeticUrl } from "../../../../../utils";
 
 export default function Card({ titulo, preco, imagem, onComprar, onImgError }) {
   return (
     <div className={styles.card}>
-      <img src={imagem} alt={titulo} className={styles.image} onError={onImgError} />
+      <img src={resolveCosmeticUrl(imagem)} alt={titulo} className={styles.image} onError={onImgError} />
 
       <h3 className={styles.title}>{titulo}</h3>
 
