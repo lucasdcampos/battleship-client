@@ -9,6 +9,7 @@ export default function Store() {
   const { user, loading, isAuthenticated, setUserAtt } = useAuth();
   const [actualTab, setActualTab] = useState("icons");
   const [tabs, setTabs] = useState(null);
+  const [actualShipSubCategory, setActualShipSubCategory] = useState("aircraftCarrier");
   const [fatecCoins, setFatecCoins] = useState(0);
   const [inventory, setInventory] = useState(new Set());
 
@@ -155,6 +156,13 @@ export default function Store() {
     return null;
   }
 
+  const shipSubCategories = {
+    aircraftCarrier: "Porta-Aviões",
+    battleship: "Encouraçados",
+    destroyer: "Destroyers",
+    submarine: "Submarinos",
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.Nav_Buttons_Container}>
@@ -216,6 +224,30 @@ export default function Store() {
           </li>
         </ul>
       </div>
+
+      {actualTab === "ships" && (
+        <div className={styles.subCategoryContainer}>
+          <div className={styles.Nav_Buttons_Container}>
+            <ul type="none">
+              {Object.entries(shipSubCategories).map(([key, value]) => (
+                <li
+                  key={key}
+                  style={{
+                    border:
+                      actualShipSubCategory === key
+                        ? "solid 3px var(--tertiary-color)"
+                        : "none",
+                  }}
+                  onClick={() => setActualShipSubCategory(key)}
+                >
+                  {value}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <div className={styles.FC_Container}>
         <h1>
           Fatec Coins:{" "}
@@ -225,9 +257,15 @@ export default function Store() {
       </div>
       <div className={styles.Cards_Container}>
         {(() => {
-          const availableItems =
-            tabs &&
-            tabs[actualTab]?.filter((card) => !inventory.has(card.imagem));
+          let availableItems =
+            tabs && tabs[actualTab]
+              ? tabs[actualTab].filter((card) => !inventory.has(card.imagem))
+              : [];
+
+          if (actualTab === "ships") {
+            const shipCodePrefix = Object.keys(shipSubCategories).find(k => k === actualShipSubCategory)[0].toUpperCase();
+            availableItems = availableItems.filter(card => card.imagem.startsWith(shipCodePrefix));
+          }
 
           if (availableItems && availableItems.length > 0) {
             return availableItems.map((card, index) => (
