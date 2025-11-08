@@ -86,3 +86,19 @@
     padding: 0 15px;
   }
 }
+
+.ownedCard {
+  opacity: 0.5;
+}
+
+.ownedTag {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--tertiary-color);
+  color: black;
+  padding: 4px 8px;
+  font-weight: bold;
+  border-radius: 6px;
+  z-index: 5;
+}
