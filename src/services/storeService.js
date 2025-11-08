@@ -13,6 +13,7 @@ export async function getUserCosmetics() {
   }
   return res.json();
 }
+
 export async function purchaseCosmetic(cosmeticId) {
   const token = getToken();
   const res = await fetch(`${API_URL}/cosmetics/purchase/`, {

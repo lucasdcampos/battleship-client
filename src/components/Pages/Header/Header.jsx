@@ -3,7 +3,7 @@ import Nav_Button from "./elements/Nav_Button";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Perfil_Icon from "../../../assets/cosmetic/icons/E00001.png";
-import { useAuth } from "../../../user/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 
 function Header() {
   const [select, setSelect] = useState(null);
