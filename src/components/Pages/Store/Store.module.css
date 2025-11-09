@@ -102,3 +102,43 @@
   border-radius: 6px;
   z-index: 5;
 }
+
+.CoinPacks {
+  margin-top: 20px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.PackList {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.PackCard {
+  background: #111;
+  border: 2px solid var(--secondary-color);
+  padding: 20px;
+  border-radius: 10px;
+  width: 160px;
+}
+
+.PackCard h3 {
+  margin: 0;
+  color: var(--tertiary-color);
+}
+
+.PackCard p {
+  margin: 5px 0 15px;
+}
+
+.PackCard button {
+  background: var(--primary-color);
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  width: 100%;
+  border-radius: 5px;
+  font-weight: bold;
+}

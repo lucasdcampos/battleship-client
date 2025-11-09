@@ -9,7 +9,7 @@ import Deck from "../../Deck/Deck";
 import TurnIndicator from "../../TurnIndicator/TurnIndicator";
 import Timer from "../../Timer/Timer";
 import PopupComponent from "../Perfil/elements/PopupComponent";
-import { useAuth } from "../../../user/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 
 function Play() {
   const { user, setUserAtt } = useAuth();
@@ -47,7 +47,7 @@ function Play() {
     // Registra o tiro no componente Ships e obtém o ID do navio atingido
     const hitShipId = enemyShipsRef.current.registerHit(x, y);
 
-    if (!!hitShipId) {
+    if (hitShipId) {
       alert(`Acertou em ${coordinate}!`);
     } else {
       alert(`Errou em ${coordinate}!`);
