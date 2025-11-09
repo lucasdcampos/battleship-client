@@ -32,21 +32,23 @@ export default function Header() {
   }, [location]);
 
   // -------------------------
-  // Dados seguros do usuário
+  // Dados do usuário
   // -------------------------
   const username = me?.username ?? "#username";
   const email = me?.email ?? "#email";
 
-  // Cosméticos
-  const userIcon = config?.enabled_icon || Perfil_Icon_Default;
-  const userEffect = config?.enabled_effect || null;
+  // Cosméticos da config (backend retorna objeto)
+  const userIcon = config?.enabled_icon?.link || Perfil_Icon_Default;
+  const userEffect = config?.enabled_effect?.link || null;
 
-  // Resolve path de ícone (cosméticos agora já possuem link absoluto)
-  const resolveIconSrc = (icon) => {
-    if (!icon) return Perfil_Icon_Default;
-    if (icon.startsWith("http") || icon.startsWith("/")) return icon;
-    return Perfil_Icon_Default;
-  };
+  // Resolve ícone (link é sempre relativo ou absoluto)
+  function resolveIconSrc(link) {
+    if (!link || typeof link !== "string") return Perfil_Icon_Default;
+
+    if (link.startsWith("http") || link.startsWith("/")) return link;
+
+    return "/" + link; // backend manda "icons/E00001.png"
+  }
 
   if (loading) {
     return (
@@ -61,14 +63,37 @@ export default function Header() {
   return (
     <nav className={styles.navbar}>
       <div className={styles.navbarLeft}>
-        <Nav_Button id="Play" path="/lobby" label="PLAY" select={active} setSelect={setActive} />
-        <Nav_Button id="Store" path="/Store" label="Market" select={active} setSelect={setActive} />
-        <Nav_Button id="Perfil" path="/Perfil" label="Perfil" select={active} setSelect={setActive} />
+        <Nav_Button
+          id="Play"
+          path="/lobby"
+          label="PLAY"
+          select={active}
+          setSelect={setActive}
+        />
+
+        <Nav_Button
+          id="Store"
+          path="/Store"
+          label="Market"
+          select={active}
+          setSelect={setActive}
+        />
+
+        <Nav_Button
+          id="Perfil"
+          path="/Perfil"
+          label="Perfil"
+          select={active}
+          setSelect={setActive}
+        />
       </div>
 
       <div className={styles.navbarRight}>
-        {/* Perfil resumido no canto */}
-        <div className={styles.Perfil_Container} onClick={() => setOpenProfileMenu(!openProfileMenu)}>
+        {/* Avatar resumido */}
+        <div
+          className={styles.Perfil_Container}
+          onClick={() => setOpenProfileMenu(!openProfileMenu)}
+        >
           <img
             src={resolveIconSrc(userIcon)}
             alt="User_Icon"
@@ -78,10 +103,11 @@ export default function Header() {
             }}
           />
 
+          {/* Efeito */}
           <div className={styles.Effect_Container}>
             {userEffect && (
               <img
-                src={userEffect}
+                src={resolveIconSrc(userEffect)}
                 alt=""
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
@@ -91,16 +117,21 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Popup de opções */}
+        {/* Menu drop-down do perfil */}
         {openProfileMenu && (
           <div className={styles.loggoutPopUP}>
             <div>
-              <div className={styles.Perfil_Container} onClick={() => navigate("/Perfil")}>
+              <div
+                className={styles.Perfil_Container}
+                onClick={() => navigate("/Perfil")}
+              >
                 <img
                   src={resolveIconSrc(userIcon)}
                   alt="User_Icon"
                   className={styles.Perfil_Icon}
-                  onError={(e) => (e.currentTarget.src = Perfil_Icon_Default)}
+                  onError={(e) => {
+                    e.currentTarget.src = Perfil_Icon_Default;
+                  }}
                 />
               </div>
 
