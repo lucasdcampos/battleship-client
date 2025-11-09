@@ -1,50 +1,42 @@
-// src/hooks/useUser.js
-import { useEffect, useState, useCallback } from "react";
-import {
-  getMe,
-  getUserConfig,
-  getUserCosmetics
-} from "../services/userService";
+import { useEffect, useState } from "react";
+import { getMe, getUserConfig, getUserCosmetics } from "../services/userService";
 
 export function useUser() {
   const [me, setMe] = useState(null);
   const [config, setConfig] = useState(null);
-  const [ownedCosmetics, setOwnedCosmetics] = useState(new Set());
+  const [ownedCosmetics, setOwnedCosmetics] = useState([]); // ✅ array
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
+  async function load() {
     try {
-      const meRes = await getMe();
+      const [meRes, configRes, cosmeticsRes] = await Promise.all([
+        getMe(),
+        getUserConfig(),
+        getUserCosmetics()
+      ]);
+
       setMe(meRes);
+      setConfig(configRes);
 
-      const cfg = await getUserConfig();
-      setConfig(cfg);
+      // ✅ A API retorna `{ user_id, cosmetics: [] }`
+      setOwnedCosmetics(cosmeticsRes.cosmetics || []);
 
-      const userCos = await getUserCosmetics();
-      setOwnedCosmetics(
-        new Set((userCos.cosmetics || []).map((c) => c.cosmetic_id))
-      );
     } catch (err) {
-      setError(err);
+      console.error("useUser error:", err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, []);
 
   return {
     me,
     config,
-    ownedCosmetics,
+    ownedCosmetics, // ✅ sempre array plano
     loading,
-    error,
     refresh: load
   };
 }
