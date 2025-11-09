@@ -66,8 +66,29 @@ export async function getUserCosmetics() {
   return res.json();
 }
 
+export async function addCoins(amount) {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/users/coins/`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify({ amount })
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Erro ao adicionar moedas: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+
 export default {
   getMe,
   getUserConfig,
   updateUserConfig,
+  addCoins
 };

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import styles from "./Store.module.css";
 import Card from "./elements/Cards/Cards";
+
 import {
   getCosmetics,
   getUserCosmetics,
   purchaseCosmetic
 } from "../../../services/storeService";
-import { getMe } from "../../../services/userService";
+
+import { getMe, addCoins } from "../../../services/userService";
 
 export default function Store() {
   const [loading, setLoading] = useState(true);
@@ -40,12 +42,7 @@ export default function Store() {
         ]);
 
         setCosmetics(storeRes.cosmetics || []);
-
-        const ownedSet = new Set(
-          userCosRes.cosmetics?.map((c) => c.cosmetic_id) || []
-        );
-        setOwned(ownedSet);
-
+        setOwned(new Set(userCosRes.cosmetics?.map((c) => c.cosmetic_id) || []));
         setCoins(meRes.coins ?? 0);
 
       } catch (err) {
@@ -77,7 +74,6 @@ export default function Store() {
       await purchaseCosmetic(c.cosmetic_id);
 
       alert(`Você comprou: ${c.description}`);
-
       setOwned((prev) => new Set(prev).add(c.cosmetic_id));
       setCoins((prev) => prev - c.price);
 
@@ -98,15 +94,51 @@ export default function Store() {
     }
   }
 
+  // --------------------------
+  // Comprar moedas (real money)
+  // --------------------------
+  const coinPacks = [
+    { id: 1, amount: 500, price: "R$ 4,90" },
+    { id: 2, amount: 1200, price: "R$ 9,90" },
+    { id: 3, amount: 3000, price: "R$ 19,90" }
+  ];
+
+  async function handleBuyCoins(amount) {
+    try {
+      const res = await addCoins(amount);
+      setCoins(res.coins);
+      alert(`Você recebeu ${amount} Fatec Coins.`);
+    } catch {
+      alert("Erro ao adicionar moedas.");
+    }
+  }
+
   return (
     <div className={styles.container}>
-
+      
       {/* Saldo */}
       <div className={styles.FC_Container}>
         <h1>
           Fatec Coins:{" "}
           <span style={{ color: "var(--tertiary-color)" }}>{coins}</span>
         </h1>
+      </div>
+
+      {/* Seção: Comprar Moedas */}
+      <div className={styles.CoinPacks}>
+        <h2>Comprar Moedas</h2>
+
+        <div className={styles.PackList}>
+          {coinPacks.map((p) => (
+            <div key={p.id} className={styles.PackCard}>
+              <h3>{p.amount} FC</h3>
+              <p>{p.price}</p>
+              <button onClick={() => handleBuyCoins(p.amount)}>
+                Comprar
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Tabs */}
@@ -140,9 +172,7 @@ export default function Store() {
               className={isOwned ? styles.ownedCard : ""}
               style={{ position: "relative" }}
             >
-              {isOwned && (
-                <div className={styles.ownedTag}>Adquirido</div>
-              )}
+              {isOwned && <div className={styles.ownedTag}>Adquirido</div>}
 
               <Card
                 titulo={c.description}
