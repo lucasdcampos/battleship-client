@@ -12,6 +12,7 @@ import Perfil from "./components/Pages/Perfil/Perfil";
 import Store from "./components/Pages/Store/Store";
 import Login from "./components/Pages/Login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Settings from "./components/Pages/Settings/Settings.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -30,6 +31,7 @@ function AppContent() {
           <Route path="/Play" element={<Play />} />
           <Route path="/Perfil" element={<Perfil />} />
           <Route path="/Store" element={<Store />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
         {/* 404 not found */}
         <Route path="*" element={<div>404 - Página Não Encontrada</div>} />

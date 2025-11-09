@@ -1,13 +1,13 @@
+// Header.jsx
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import styles from "./Header.module.css";
 import Nav_Button from "./elements/Nav_Button";
 
-import Perfil_Icon_Default from "../../../assets/cosmetic/icons/E00001.png";
-
 import { useAuth } from "../../../hooks/useAuth";
 import { useUser } from "../../../hooks/useUser";
+import { resolveCosmeticUrl } from "../../../utils";
 
 export default function Header() {
   const location = useLocation();
@@ -19,36 +19,13 @@ export default function Header() {
   const [active, setActive] = useState(null);
   const [openProfileMenu, setOpenProfileMenu] = useState(false);
 
-  // -------------------------
-  // Determina aba ativa
-  // -------------------------
   useEffect(() => {
     const path = location.pathname;
-
     if (path.includes("/play") || path.includes("/lobby")) setActive("Play");
     else if (path.includes("/Store")) setActive("Store");
     else if (path.includes("/Perfil")) setActive("Perfil");
     else setActive(null);
   }, [location]);
-
-  // -------------------------
-  // Dados do usuário
-  // -------------------------
-  const username = me?.username ?? "#username";
-  const email = me?.email ?? "#email";
-
-  // Cosméticos da config (backend retorna objeto)
-  const userIcon = config?.enabled_icon?.link || Perfil_Icon_Default;
-  const userEffect = config?.enabled_effect?.link || null;
-
-  // Resolve ícone (link é sempre relativo ou absoluto)
-  function resolveIconSrc(link) {
-    if (!link || typeof link !== "string") return Perfil_Icon_Default;
-
-    if (link.startsWith("http") || link.startsWith("/")) return link;
-
-    return "/" + link; // backend manda "icons/E00001.png"
-  }
 
   if (loading) {
     return (
@@ -60,94 +37,81 @@ export default function Header() {
     );
   }
 
+  const username = me?.username ?? "#username";
+  const email = me?.email ?? "#email";
+
+  const icon = resolveCosmeticUrl(config?.enabled_icon?.link, "/profileicon.png");
+  const effect = config?.enabled_effect?.link
+    ? resolveCosmeticUrl(config.enabled_effect.link)
+    : null;
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.navbarLeft}>
-        <Nav_Button
-          id="Play"
-          path="/lobby"
-          label="PLAY"
-          select={active}
-          setSelect={setActive}
-        />
-
-        <Nav_Button
-          id="Store"
-          path="/Store"
-          label="Market"
-          select={active}
-          setSelect={setActive}
-        />
-
-        <Nav_Button
-          id="Perfil"
-          path="/Perfil"
-          label="Perfil"
-          select={active}
-          setSelect={setActive}
-        />
+        <Nav_Button id="Play" path="/lobby" label="PLAY" select={active} setSelect={setActive} />
+        <Nav_Button id="Store" path="/Store" label="Market" select={active} setSelect={setActive} />
+        <Nav_Button id="Perfil" path="/Perfil" label="Perfil" select={active} setSelect={setActive} />
       </div>
 
       <div className={styles.navbarRight}>
-        {/* Avatar resumido */}
         <div
           className={styles.Perfil_Container}
-          onClick={() => setOpenProfileMenu(!openProfileMenu)}
+          onClick={() => setOpenProfileMenu((v) => !v)}
         >
           <img
-            src={resolveIconSrc(userIcon)}
-            alt="User_Icon"
+            src={icon}
+            alt="User Icon"
             className={styles.Perfil_Icon}
-            onError={(e) => {
-              e.currentTarget.src = Perfil_Icon_Default;
-            }}
+            onError={(e) => (e.currentTarget.src = "/profileicon.png")}
           />
 
-          {/* Efeito */}
-          <div className={styles.Effect_Container}>
-            {userEffect && (
+          {effect && (
+            <div className={styles.Effect_Container}>
               <img
-                src={resolveIconSrc(userEffect)}
-                alt=""
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
+                src={effect}
+                alt="Effect"
+                onError={(e) => (e.currentTarget.style.display = "none")}
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Menu drop-down do perfil */}
         {openProfileMenu && (
-          <div className={styles.loggoutPopUP}>
-            <div>
-              <div
-                className={styles.Perfil_Container}
-                onClick={() => navigate("/Perfil")}
-              >
-                <img
-                  src={resolveIconSrc(userIcon)}
-                  alt="User_Icon"
-                  className={styles.Perfil_Icon}
-                  onError={(e) => {
-                    e.currentTarget.src = Perfil_Icon_Default;
-                  }}
-                />
-              </div>
-
-              <h1>
-                <span>{username}</span>
-              </h1>
-            </div>
-
-            <h2>
-              <span>{email}</span>
-            </h2>
-
-            <button onClick={() => signOut()}>Deslogar</button>
-          </div>
+          <ProfileMenu
+            username={username}
+            email={email}
+            icon={icon}
+            navigate={navigate}
+            signOut={signOut}
+          />
         )}
       </div>
     </nav>
+  );
+}
+
+function ProfileMenu({ username, email, icon, navigate, signOut }) {
+  return (
+    <div className={styles.loggoutPopUP}>
+      <div>
+        <div
+          className={styles.Perfil_Container}
+          onClick={() => navigate("/Perfil")}
+        >
+          <img
+            src={icon}
+            alt="User Icon"
+            className={styles.Perfil_Icon}
+            onError={(e) => (e.currentTarget.src = "/profileicon.png")}
+          />
+        </div>
+
+        <h1><span>{username}</span></h1>
+      </div>
+
+      <h2><span>{email}</span></h2>
+
+      <button onClick={signOut}>Deslogar</button>
+    </div>
   );
 }

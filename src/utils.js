@@ -1,12 +1,11 @@
-export function resolveCosmeticUrl(link) {
-  if (!link) return "/placeholder.png";
+// utils.js
 
-  // URL absoluta
+export function resolveCosmeticUrl(link, fallback = "/placeholder.png") {
+  if (!link || typeof link !== "string") return fallback;
+
   if (link.startsWith("http")) return link;
 
-  // Já é relativo ao /public
   if (link.startsWith("/")) return link;
 
-  // Nome simples → buscar em /public/
   return `/${link}`;
 }
