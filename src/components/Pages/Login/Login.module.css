@@ -83,6 +83,14 @@ body {
   animation: IrPraEsquerda 18s linear infinite;
 }
 
+.logo {
+  position: relative; /* Necessário para que o z-index funcione corretamente */
+  z-index: 3; /* Garante que o logo fique acima dos navios e do formulário */
+  transform: scale(0.7); /* Reduz o tamanho do logo em 30% */
+  margin-bottom: -96px; /* Adiciona um espaço abaixo do logo */
+  margin-top: -96px;
+}
+
 .form_title {
   color: white;
   font-size: 36px;

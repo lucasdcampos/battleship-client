@@ -11,7 +11,9 @@
     "server": "json-server --watch backandSimulation/simulação_backend.json --port 5000"
   },
   "dependencies": {
+    "prop-types": "^15.8.1",
     "react": "^19.1.1",
+    "react-confetti": "^6.4.0",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.3",
     "styled-components": "^6.1.19",
