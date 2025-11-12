@@ -17,6 +17,7 @@ import explosionSound from '../../../sound/sfx/explosion.wav'; // Importa o som 
 import sunkSound from '../../../sound/sfx/sunk.wav'; // Importa o som de navio afundando
 import waterSound from '../../../sound/sfx/water.wav'; // Importa o som de água
 import opponentAvatar from '../../../assets/cosmetic/icons/E00001.png'; // Importa o avatar do oponente
+import { useAuth } from "../../../hooks/useAuth";
 
 function Play({ setIsGameEnding }) { // Recebe setIsGameEnding como prop
   const { user, setUserAtt } = useAuth();
@@ -78,7 +79,7 @@ function Play({ setIsGameEnding }) { // Recebe setIsGameEnding como prop
     // Registra o tiro no componente Ships e obtém o ID do navio atingido
     const hitShipId = enemyShipsRef.current.registerHit(x, y);
 
-    if (!!hitShipId) {
+    if (hitShipId) {
       alert(`Acertou em ${coordinate}!`);
       if (explosionAudioRef.current) explosionAudioRef.current.play(); // Toca o som de explosão
     } else {

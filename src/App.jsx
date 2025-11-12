@@ -17,6 +17,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Exemplo: c:\Projetos\battleship\frontend\src\assets\sound\ost\intro.mp3
 import introMusic from './sound/ost/intro.mp3';
 import battleMusic from './sound/ost/battle.mp3';
+import Settings from "./components/Pages/Settings/Settings.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -110,6 +111,7 @@ function AppContent() {
           <Route path="/Play" element={<Play setIsGameEnding={setIsGameEnding} />} />
           <Route path="/Perfil" element={<Perfil />} />
           <Route path="/Store" element={<Store />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
         {/* 404 not found */}
         <Route path="*" element={<div>404 - Página Não Encontrada</div>} />
