@@ -12,7 +12,6 @@ import Timer from "../../Timer/Timer";
 import PopupComponent from "../Perfil/elements/PopupComponent";
 import EndGameAnimation from "../../EndGameAnimation/EndGameAnimation";
 import OpponentInfoCard from "../../OpponentInfoCard/OpponentInfoCard";
-import { useAuth } from "../../../user/useAuth";
 import explosionSound from '../../../sound/sfx/explosion.wav'; // Importa o som de explosão
 import sunkSound from '../../../sound/sfx/sunk.wav'; // Importa o som de navio afundando
 import waterSound from '../../../sound/sfx/water.wav'; // Importa o som de água
