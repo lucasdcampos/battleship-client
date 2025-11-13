@@ -5,7 +5,7 @@ import styles from "./Lobby.module.css";
 
 export default function Lobby() {
   const navigate = useNavigate();
-  const { matches, loading, searchMatches, newMatch } = useMatch();
+  const { matches, loading, searchMatches, newMatch, joinMatch } = useMatch();
 
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,14 +15,22 @@ export default function Lobby() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState("");
 
-  // Carrega as partidas ao abrir a página
+  const [joinPassword, setJoinPassword] = useState("");
+  const [joinRoomSelected, setJoinRoomSelected] = useState(null);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+
+  // -------------------------------------------------------------------
+  // Carrega salas ao abrir
+  // -------------------------------------------------------------------
   useEffect(() => {
     searchMatches();
   }, [searchMatches]);
 
-  // Filtro + busca
+  // -------------------------------------------------------------------
+  // Filtro e busca
+  // -------------------------------------------------------------------
   const filtered = useMemo(() => {
-    const term = searchTerm.toLowerCase();
+    const t = searchTerm.toLowerCase();
 
     return matches
       .filter((room) => {
@@ -31,16 +39,15 @@ export default function Lobby() {
         return true;
       })
       .filter((room) => {
-        const nameMatch = room.room_name?.toLowerCase().includes(term);
-        const creatorMatch = room.creator?.username
-          ?.toLowerCase()
-          .includes(term);
-
+        const nameMatch = room.room_name?.toLowerCase().includes(t);
+        const creatorMatch = room.creator?.username?.toLowerCase().includes(t);
         return nameMatch || creatorMatch;
       });
   }, [matches, filter, searchTerm]);
 
+  // -------------------------------------------------------------------
   // Criar sala
+  // -------------------------------------------------------------------
   async function handleCreate(e) {
     e.preventDefault();
 
@@ -53,15 +60,55 @@ export default function Lobby() {
     const res = await newMatch(body);
 
     if (res?.match_id) {
+      // Criou → Já entra (join) → Vai para Play
+      await joinMatch(res.match_id);
       navigate(`/play/${res.match_id}`);
     }
   }
 
-  // Entrar na sala (futuro: senha)
+  // -------------------------------------------------------------------
+  // Entrar em sala
+  // -------------------------------------------------------------------
   function joinRoom(room) {
-    navigate(`/play/${room.match_id}`);
+    // Sala privada → pedir senha
+    if (room.is_private) {
+      setJoinRoomSelected(room);
+      setJoinPassword("");
+      setShowJoinModal(true);
+      return;
+    }
+
+    // Sala pública → entra direto
+    enterMatch(room.match_id);
   }
 
+  async function enterMatch(match_id) {
+    try {
+      await joinMatch(match_id);
+      navigate(`/play/${match_id}`);
+    } catch (err) {
+      alert("Erro ao entrar na partida.");
+      console.error(err);
+    }
+  }
+
+  async function handleJoinPrivate(e) {
+    e.preventDefault();
+    if (!joinRoomSelected) return;
+
+    try {
+      await joinMatch(joinRoomSelected.match_id, joinPassword);
+      setShowJoinModal(false);
+      navigate(`/play/${joinRoomSelected.match_id}`);
+    } catch (err) {
+      alert("Senha incorreta ou erro ao entrar.");
+      console.error(err);
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------------
   return (
     <div className={styles.lobbyBackground}>
       <div className={styles.lobbyContainer}>
@@ -189,6 +236,46 @@ export default function Lobby() {
 
                 <button type="submit" className={styles.confirmButton}>
                   Criar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Entrar em sala privada */}
+      {showJoinModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <button
+              className={styles.closeButton}
+              onClick={() => setShowJoinModal(false)}
+            >
+              X
+            </button>
+
+            <h2>Entrar na sala privada</h2>
+
+            <form onSubmit={handleJoinPrivate} className={styles.modalForm}>
+              <input
+                type="password"
+                placeholder="Senha"
+                value={joinPassword}
+                onChange={(e) => setJoinPassword(e.target.value)}
+                required
+              />
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setShowJoinModal(false)}
+                >
+                  Cancelar
+                </button>
+
+                <button type="submit" className={styles.confirmButton}>
+                  Entrar
                 </button>
               </div>
             </form>
