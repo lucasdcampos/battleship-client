@@ -5,7 +5,6 @@ import navio2 from "../../../assets/cosmetic/ships/battleship/G00001.png";
 import navio3 from "../../../assets/cosmetic/ships/aircraftCarrier/H00001.png";
 import navio4 from "../../../assets/cosmetic/ships/submarine/I00001.png";
 import logo from "../../../assets/development/logo.png";
-import { useAuth } from "../../../user/useAuth";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
