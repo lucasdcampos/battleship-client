@@ -191,13 +191,6 @@ function Play({ setIsGameEnding }) { // Recebe setIsGameEnding como prop
 
   return (
     <div className={styles.playContainer}>
-      <OpponentInfoCard
-        name="Computador"
-        level={5}
-        status={isPlacementConfirmed ? "Pronto" : "Posicionando"}
-        isGameStarted={isPlacementConfirmed}
-        avatar={opponentAvatar} // Usa o avatar importado
-      />
       <audio ref={explosionAudioRef} src={explosionSound} preload="auto" /> {/* Elemento de áudio para a explosão */}
       <audio ref={sunkAudioRef} src={sunkSound} preload="auto" /> {/* Elemento de áudio para o navio afundando */}
       <audio ref={waterAudioRef} src={waterSound} preload="auto" /> {/* Elemento de áudio para a água */} 
@@ -216,7 +209,17 @@ function Play({ setIsGameEnding }) { // Recebe setIsGameEnding como prop
           </div>
         </div>
       )}
-      {isPlacementConfirmed && <Placar titulo="Seu Placar" ships={playerShipsState} />}
+      {isPlacementConfirmed && (
+        <div className={styles.playerInfoContainer}>
+          <Placar titulo="Seu Placar" ships={playerShipsState} />
+          <OpponentInfoCard
+            name={user?.data?.username || user?.username || "Jogador"}
+            level={user?.data?.level || 1}
+            status="Pronto"
+            avatar={user?.data?.active_avatar?.image_url || opponentAvatar}
+          />
+        </div>
+      )}
       
       <div className={styles.mainGameArea}>
         {!isPlacementConfirmed && (
@@ -262,15 +265,29 @@ function Play({ setIsGameEnding }) { // Recebe setIsGameEnding como prop
           )}
         </div>
         {isPlacementConfirmed && (
-          <>
+          <div className={styles.bottomControlsContainer}>
             <EmojiAnimation
               emoji={activeEmoji}
               onAnimationEnd={handleAnimationEnd}
-            /><EmojiBox onEmojiSelect={handleEmojiSelect} /><Deck />
-          </>
+            />
+            <EmojiBox onEmojiSelect={handleEmojiSelect} />
+            <div className={styles.gameDeckContainer}>
+              <Deck />
+            </div>
+          </div>
         )}
       </div>
-      {isPlacementConfirmed && <Placar titulo="Placar Inimigo" ships={enemyShipsState} />}
+      <div className={styles.opponentInfoContainer}>
+        {isPlacementConfirmed && (
+          <Placar titulo="Placar Inimigo" ships={enemyShipsState} />
+        )}
+        <OpponentInfoCard
+          name="Computador"
+          level={5}
+          status={isPlacementConfirmed ? "Pronto" : "Posicionando"}
+          avatar={opponentAvatar}
+        />
+      </div>
       <PopupComponent
         isOpen={isDeckPopupOpen}
         onClose={() => setIsDeckPopupOpen(false)}

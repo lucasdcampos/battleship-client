@@ -1,14 +1,14 @@
 import React from 'react';
-import styles from './OpponentInfoCard.module.css';
+import styles from './InfoCard.module.css';
 
-const OpponentInfoCard = ({ name, level, status, avatar }) => {
+const InfoCard = ({ name, level, status, avatar, altText = "Avatar" }) => {
   // Define a classe CSS com base no status para mudar a cor
   const statusClass = status === 'Pronto' ? styles.statusReady : styles.statusPositioning;
 
   return (
     <div className={styles.card}>
       {avatar && (
-        <img src={avatar} alt="Avatar do Oponente" className={styles.avatar} />
+        <img src={avatar} alt={altText} className={styles.avatar} />
       )}
       <span className={styles.name}>{name}</span>
       <span className={styles.level}>Nível {level}</span>
@@ -19,4 +19,4 @@ const OpponentInfoCard = ({ name, level, status, avatar }) => {
   );
 };
 
-export default OpponentInfoCard;
+export default InfoCard;
