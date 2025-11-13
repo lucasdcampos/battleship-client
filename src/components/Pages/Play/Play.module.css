@@ -18,11 +18,26 @@
     gap: 40px;
 }
 
+.placementTimerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -32px; /* Remove o espaçamento para o conteúdo abaixo */
+}
+
+.placementTimerLabel {
+  color: var(--font-color, #f0f0f0);
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
 .gameStatusContainer {
     display: flex;
     justify-content: center;
     gap: 32px;
     align-items: center;
+    margin-bottom: -32px; /* Reduz o espaço entre este contêiner e os tabuleiros abaixo */
 }
 
 .boardsContainer {
@@ -93,4 +108,70 @@
     flex-direction: column;
     align-items: center;
     cursor: pointer;
+}
+
+/* Estilos para o Popup Pós-Jogo */
+.postGamePopupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Garante que fique acima de tudo */
+}
+
+.postGamePopup {
+  background-color: var(--secondary-color);
+  padding: 30px 40px;
+  border-radius: 10px;
+  border: 3px solid var(--tertiary-color);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  color: var(--font-color);
+}
+
+.postGamePopup h3 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 1.8em;
+  color: var(--tertiary-color);
+}
+
+.postGameButtons {
+  display: flex;
+  min-width: 360px;
+  gap: 20px;
+}
+
+.opponentInfoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* Altera de 'center' para 'stretch' */
+  gap: 16px; /* Adiciona o espaçamento de 32px entre o placar e o card */
+  width: 250px; /* Define uma largura para o contêiner */
+}
+
+.playerInfoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  width: 250px;
+}
+
+.bottomControlsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px; /* Mantém um espaço entre o EmojiBox e o Deck */
+  margin-top: -32px; /* Anula parte do gap do contêiner pai */
+}
+
+.gameDeckContainer {
+  transform: scale(0.9); /* Reduz o tamanho do deck em 10% */
+  margin-top: -16px;
 }

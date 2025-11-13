@@ -4,6 +4,7 @@ import navio1 from "../../../assets/cosmetic/ships/destroyer/F00001.png";
 import navio2 from "../../../assets/cosmetic/ships/battleship/G00001.png";
 import navio3 from "../../../assets/cosmetic/ships/aircraftCarrier/H00001.png";
 import navio4 from "../../../assets/cosmetic/ships/submarine/I00001.png";
+import logo from "../../../assets/development/logo.png";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -110,6 +111,7 @@ function LoginForm() {
       <img src={navio2} alt="navio2" className={styles.navio2} />
       <img src={navio3} alt="navio3" className={styles.navio3} />
       <img src={navio4} alt="navio4" className={styles.navio4} />
+      <img src={logo} alt="Logo do Jogo" className={styles.logo} />
 
       <h2 className={styles.form_title}>Acesse sua conta</h2>
       <div className={styles.login_container}>

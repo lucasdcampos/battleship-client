@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import styles from "./Store.module.css";
 import Card from "./elements/Cards/Cards";
 
@@ -17,6 +17,8 @@ export default function Store() {
   const [coins, setCoins] = useState(0);
   const [tab, setTab] = useState("ICON");
   const [processing, setProcessing] = useState(false);
+
+  const carouselRef = useRef(null); // Ref direta no wrapper do carrossel
 
   const tabsMap = {
     ICON: "Ícones",
@@ -42,27 +44,30 @@ export default function Store() {
         ]);
 
         setCosmetics(storeRes.cosmetics || []);
-        setOwned(new Set(userCosRes.cosmetics?.map((c) => c.cosmetic_id) || []));
+        setOwned(new Set(userCosRes.cosmetics?.map(c => c.cosmetic_id) || []));
         setCoins(meRes.coins ?? 0);
-
       } catch (err) {
-        console.error("[STORE] erro:", err);
+        console.error("[STORE] Erro ao carregar:", err);
+        alert("Erro ao carregar a loja. Tente novamente.");
       } finally {
         setLoading(false);
       }
     }
-
     load();
   }, []);
 
-  if (loading) return <div>Carregando Loja...</div>;
+  if (loading) {
+    return (
+      <div className={styles.container} style={{ minHeight: "60vh", justifyContent: "center" }}>
+        <p>Carregando Loja...</p>
+      </div>
+    );
+  }
 
-  const filtered = cosmetics.filter((c) => c.type === tab);
+  const filtered = cosmetics.filter(c => c.type === tab);
 
-  async function handleBuy(c) {
-    if (processing) return;
-    if (owned.has(c.cosmetic_id)) return;
-
+  const handleBuy = async (c) => {
+    if (processing || owned.has(c.cosmetic_id)) return;
     if (coins < c.price) {
       alert("Você não possui Fatec Coins suficientes.");
       return;
@@ -70,71 +75,71 @@ export default function Store() {
 
     try {
       setProcessing(true);
-
       await purchaseCosmetic(c.cosmetic_id);
-
       alert(`Você comprou: ${c.description}`);
-      setOwned((prev) => new Set(prev).add(c.cosmetic_id));
-      setCoins((prev) => prev - c.price);
-
+      setOwned(prev => new Set(prev).add(c.cosmetic_id));
+      setCoins(prev => prev - c.price);
     } catch (err) {
-      const alreadyOwned =
-        err.message.includes("already") ||
-        err.message.includes("409");
-
-      if (alreadyOwned) {
-        setOwned((prev) => new Set(prev).add(c.cosmetic_id));
+      const msg = err.message?.toLowerCase() || "";
+      if (msg.includes("already") || msg.includes("409") || err.status === 409) {
+        setOwned(prev => new Set(prev).add(c.cosmetic_id));
         alert("Você já possui este cosmético.");
       } else {
-        alert("Erro ao comprar o item.");
+        alert("Erro ao comprar o item. Tente novamente.");
       }
-
     } finally {
       setProcessing(false);
     }
-  }
+  };
 
-  // --------------------------
-  // Comprar moedas (real money)
-  // --------------------------
   const coinPacks = [
     { id: 1, amount: 500, price: "R$ 4,90" },
     { id: 2, amount: 1200, price: "R$ 9,90" },
     { id: 3, amount: 3000, price: "R$ 19,90" }
   ];
 
-  async function handleBuyCoins(amount) {
+  const handleBuyCoins = async (amount) => {
+    if (processing) return;
     try {
+      setProcessing(true);
       const res = await addCoins(amount);
       setCoins(res.coins);
       alert(`Você recebeu ${amount} Fatec Coins.`);
     } catch {
-      alert("Erro ao adicionar moedas.");
+      alert("Erro ao comprar moedas.");
+    } finally {
+      setProcessing(false);
     }
-  }
+  };
+
+  const scrollByAmount = (delta) => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({
+        left: delta,
+        behavior: "smooth"
+      });
+    }
+  };
 
   return (
     <div className={styles.container}>
-      
       {/* Saldo */}
       <div className={styles.FC_Container}>
-        <h1>
-          Fatec Coins:{" "}
-          <span style={{ color: "var(--tertiary-color)" }}>{coins}</span>
-        </h1>
+        ⚓ Fatec Coins: <span style={{ color: "var(--tertiary-color)" }}>{coins}</span>
       </div>
 
-      {/* Seção: Comprar Moedas */}
+      {/* Comprar Moedas */}
       <div className={styles.CoinPacks}>
-        <h2>Comprar Moedas</h2>
-
         <div className={styles.PackList}>
-          {coinPacks.map((p) => (
+          {coinPacks.map(p => (
             <div key={p.id} className={styles.PackCard}>
               <h3>{p.amount} FC</h3>
               <p>{p.price}</p>
-              <button onClick={() => handleBuyCoins(p.amount)}>
-                Comprar
+              <button
+                onClick={() => handleBuyCoins(p.amount)}
+                disabled={processing}
+              >
+                {processing ? "⋯" : "Comprar"}
               </button>
             </div>
           ))}
@@ -143,15 +148,12 @@ export default function Store() {
 
       {/* Tabs */}
       <div className={styles.Nav_Buttons_Container}>
-        <ul type="none">
+        <ul>
           {Object.entries(tabsMap).map(([key, label]) => (
             <li
               key={key}
-              style={{
-                border:
-                  tab === key ? "solid 3px var(--tertiary-color)" : "none"
-              }}
-              onClick={() => setTab(key)}
+              aria-selected={tab === key}
+              onClick={() => !processing && setTab(key)}
             >
               {label}
             </li>
@@ -159,34 +161,60 @@ export default function Store() {
         </ul>
       </div>
 
-      {/* Cards */}
-      <div className={styles.Cards_Container}>
-        {filtered.length === 0 && <p>Não há itens nessa categoria</p>}
+      {/* Carrossel */}
+      <div className={styles.Carousel_Container}>
+        <button
+          className={`${styles.Carousel_Button} ${styles.prev}`}
+          onClick={() => scrollByAmount(-240)}
+          aria-label="Anterior"
+          disabled={processing}
+        >
+          ‹
+        </button>
 
-        {filtered.map((c) => {
-          const isOwned = owned.has(c.cosmetic_id);
-
-          return (
-            <div
-              key={c.cosmetic_id}
-              className={isOwned ? styles.ownedCard : ""}
-              style={{ position: "relative" }}
-            >
-              {isOwned && <div className={styles.ownedTag}>Adquirido</div>}
-
-              <Card
-                titulo={c.description}
-                preco={c.price}
-                imagem={resolveUrl(c.link)}
-                onComprar={() => handleBuy(c)}
-                onImgError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/placeholder.png";
-                }}
-              />
+        <div ref={carouselRef} className={styles.Carousel_Wrapper}>
+          {filtered.length === 0 ? (
+            <div style={{
+              padding: "30px 20px",
+              color: "#aaa",
+              textAlign: "center",
+              minWidth: "100%"
+            }}>
+              Nenhum item disponível nesta categoria.
             </div>
-          );
-        })}
+          ) : (
+            filtered.map(c => {
+              const isOwned = owned.has(c.cosmetic_id);
+              return (
+                <div
+                  key={c.cosmetic_id}
+                  className={`${styles.Card_Wrapper} ${isOwned ? styles.ownedCard : ""}`}
+                >
+                  {isOwned && <div className={styles.ownedTag}>Adquirido</div>}
+                  <Card
+                    titulo={c.description}
+                    preco={c.price}
+                    imagem={resolveUrl(c.link)}
+                    onComprar={() => handleBuy(c)}
+                    onImgError={e => {
+                      e.target.onerror = null;
+                      e.target.src = "/placeholder.png";
+                    }}
+                  />
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <button
+          className={`${styles.Carousel_Button} ${styles.next}`}
+          onClick={() => scrollByAmount(240)}
+          aria-label="Próximo"
+          disabled={processing}
+        >
+          ›
+        </button>
       </div>
     </div>
   );
