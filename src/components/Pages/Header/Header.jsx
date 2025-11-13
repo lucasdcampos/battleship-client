@@ -19,10 +19,8 @@ export default function Header() {
   const [active, setActive] = useState(null);
   const [openProfileMenu, setOpenProfileMenu] = useState(false);
 
-  // Identifica rota selecionada
   useEffect(() => {
     const path = location.pathname;
-
     if (path.includes("/play") || path.includes("/lobby")) setActive("Play");
     else if (path.includes("/Store")) setActive("Store");
     else if (path.includes("/Perfil")) setActive("Perfil");
@@ -39,26 +37,10 @@ export default function Header() {
     );
   }
 
-  // Segurança extra — evita erro de "object is not a valid child"
-  const username =
-    typeof me?.username === "string"
-      ? me.username
-      : typeof me?.user?.username === "string"
-      ? me.user.username
-      : "#username";
+  const username = me?.username ?? "#username";
+  const email = me?.email ?? "#email";
 
-  const email =
-    typeof me?.email === "string"
-      ? me.email
-      : typeof me?.user?.email === "string"
-      ? me.user.email
-      : "#email";
-
-  const icon = resolveCosmeticUrl(
-    config?.enabled_icon?.link,
-    "/profileicon.png"
-  );
-
+  const icon = resolveCosmeticUrl(config?.enabled_icon?.link, "/profileicon.png");
   const effect = config?.enabled_effect?.link
     ? resolveCosmeticUrl(config.enabled_effect.link)
     : null;
@@ -72,7 +54,6 @@ export default function Header() {
       </div>
 
       <div className={styles.navbarRight}>
-        {/* Perfil mínimo */}
         <div
           className={styles.Perfil_Container}
           onClick={() => setOpenProfileMenu((v) => !v)}
