@@ -28,7 +28,7 @@ function AppContent() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Navigate to="/lobby" />} />
           <Route path="/lobby" element={<Lobby />} />
-          <Route path="/Play" element={<Play />} />
+          <Route path="/play/:match_id" element={<Play />} />
           <Route path="/Perfil" element={<Perfil />} />
           <Route path="/Store" element={<Store />} />
           <Route path="/settings" element={<Settings />} />

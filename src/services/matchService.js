@@ -31,7 +31,7 @@ async function apiFetch(path, options = {}) {
   return res.json().catch(() => null);
 }
 
-/* ✅ GET /match/ */
+/* GET /match/ */
 export function getMatches(usernameOrRoom) {
   const query = usernameOrRoom
     ? `?username_or_room_name=${encodeURIComponent(usernameOrRoom)}`
@@ -40,7 +40,7 @@ export function getMatches(usernameOrRoom) {
   return apiFetch(`/match/${query}`, { method: "GET" });
 }
 
-/* ✅ POST /match/ */
+/* POST /match/ */
 export function createMatch({ room_name, password, is_private }) {
   return apiFetch("/match/", {
     method: "POST",
@@ -52,13 +52,47 @@ export function createMatch({ room_name, password, is_private }) {
   });
 }
 
-/* ✅ GET /match/{id}/ */
+/* GET /match/{id}/ */
 export function getMatchById(id) {
   return apiFetch(`/match/${id}/`, { method: "GET" });
 }
+
+/* GET /match/definitions/ships/ */
+export function getShipDefinitions() {
+  return apiFetch("/match/definitions/ships/", { method: "GET" });
+}
+
+/* POST /match/{id}/place_fleet/ */
+export async function placeFleet(matchId, fleet) {
+  if (!matchId) throw new Error("placeFleet: matchId required");
+  return apiFetch(`/match/${encodeURIComponent(matchId)}/place_fleet/`, {
+    method: "POST",
+    body: JSON.stringify({ fleet }),
+  });
+}
+
+/* PUT /match/join/ */
+export function joinMatch(matchId) {
+  return apiFetch("/match/join/", {
+    method: "PUT",
+    body: JSON.stringify({ match_id: matchId })
+  });
+}
+
+/* PATCH /match/{id}/start/ */
+export function startMatch(matchId) {
+  return apiFetch(`/match/${encodeURIComponent(matchId)}/start/`, {
+    method: "PATCH"
+  });
+}
+
 
 export default {
   getMatches,
   createMatch,
   getMatchById,
+  getShipDefinitions,
+  placeFleet,
+  joinMatch,
+  startMatch,
 };
